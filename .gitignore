@@ -1,0 +1,187 @@
+# ============================
+# Java
+# ============================
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# ============================
+# Maven
+# ============================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ============================
+# IntelliJ IDEA
+# ============================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+*.swp
+*.swo
+
+# ============================
+# Eclipse
+# ============================
+.metadata
+.classpath
+.project
+.settings/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+.externalToolBuilders/
+.cproject
+.factorypath
+.buildpath
+.target
+.tern-project
+.texlipse
+.springBeans
+.settings/org.eclipse.jdt.core.prefs
+
+# ============================
+# VS Code
+# ============================
+.vscode/
+*.code-workspace
+.history/
+
+# ============================
+# NetBeans
+# ============================
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ============================
+# Spring Boot
+# ============================
+**/application-local.properties
+**/application-dev.properties
+**/application-prod.properties
+!**/application.properties
+spring-boot-devtools.properties
+
+# ============================
+# Logs
+# ============================
+*.log
+logs/
+log/
+
+# ============================
+# Docker
+# ============================
+.env
+.env.local
+.env.*.local
+docker-compose.override.yml
+
+# ============================
+# Database
+# ============================
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+*.h2.db
+*.mv.db
+*.trace.db
+
+# ============================
+# OS Files
+# ============================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+.fuse_hidden*
+
+# ============================
+# Temporary Files
+# ============================
+*.tmp
+*.temp
+*.cache
+*.pid
+*.seed
+*.pid.lock
+
+# ============================
+# Security & Secrets
+# ============================
+*.key
+*.pem
+*.p12
+*.jks
+secrets/
+credentials/
+.secrets
+
+# ============================
+# Build Tools
+# ============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ============================
+# Testing
+# ============================
+coverage/
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# ============================
+# Other
+# ============================
+*.orig
+*.rej
+*-swp
+
