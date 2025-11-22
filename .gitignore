@@ -111,7 +111,8 @@ docker-compose.override.yml
 *.db
 *.sqlite
 *.sqlite3
-*.sql
+# *.sql  # Commenté pour permettre les migrations Flyway
+!**/db/migration/**/*.sql  # Autoriser les migrations Flyway
 *.h2.db
 *.mv.db
 *.trace.db
