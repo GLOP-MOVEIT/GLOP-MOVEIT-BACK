@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationLevelRepository notificationLevelRepository;
     private final NotificationMapper notificationMapper;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
@@ -56,10 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification savedNotification = notificationRepository.save(notification);
         NotificationResponse response = notificationMapper.toResponse(savedNotification);
 
-        // Envoi en temps réel via WebSocket
-        sendNotificationViaWebSocket(response);
-
-        log.info("Notification {} created and sent to user {}", savedNotification.getId(), request.getUserId());
+        log.info("Notification {} created for user {}", savedNotification.getId(), request.getUserId());
         return response;
     }
 
@@ -144,27 +139,5 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public long countUnreadNotifications(Long userId) {
         return notificationRepository.countByUserIdAndReadFalse(userId);
-    }
-
-    /**
-     * Envoie une notification en temps réel via WebSocket.
-     *
-     * @param notification La notification à envoyer
-     */
-    private void sendNotificationViaWebSocket(NotificationResponse notification) {
-        try {
-            // Envoi à l'utilisateur spécifique via WebSocket
-            // Destination: /user/{userId}/queue/notifications
-            messagingTemplate.convertAndSendToUser(
-                    notification.getUserId().toString(),
-                    "/queue/notifications",
-                    notification
-            );
-            log.debug("Notification sent via WebSocket to user {}", notification.getUserId());
-        } catch (Exception e) {
-            log.error("Failed to send notification via WebSocket to user {}: {}",
-                    notification.getUserId(), e.getMessage());
-            // Ne pas faire échouer la création de notification si WebSocket échoue
-        }
     }
 }
