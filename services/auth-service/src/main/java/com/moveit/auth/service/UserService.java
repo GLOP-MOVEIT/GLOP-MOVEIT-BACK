@@ -29,9 +29,9 @@ public class UserService {
      */
     @PostConstruct
     void init(){
-        RegisterUserDto userDto = new RegisterUserDto("super.admin@email.com","123456","Super Admin");
+        RegisterUserDto userDto = new RegisterUserDto("admin@email.com","123456","Admin");
 
-        Optional<Role> optionalRole = roleService.findByName(RoleEnum.SUPER_ADMIN);
+        Optional<Role> optionalRole = roleService.findByName(RoleEnum.ADMIN);
         Optional<User> optionalUser = userRepository.findByEmail(userDto.email());
 
         if (optionalRole.isEmpty() || optionalUser.isPresent()) {

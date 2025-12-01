@@ -39,7 +39,7 @@ public class UserController {
      * Endpoint pour récupérer la liste de tous les utilisateurs.
      */
     @GetMapping()
-    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMMISSIONER')")
     public List<User> allUsers() {
         return userService.allUsers();
     }
@@ -48,7 +48,7 @@ public class UserController {
      * Endpoint pour créer un nouvel administrateur.
      */
     @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public User createAdministrator(@RequestBody RegisterUserDto registerUserDto) {
         return userService.createAdministrator(registerUserDto);
     }
