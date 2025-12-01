@@ -1,7 +1,8 @@
 package com.moveit.auth.entity;
 
 public enum RoleEnum {
-    USER,
-    ADMIN,
-    SUPER_ADMIN
+    SPECTATOR,
+    VOLUNTEER,
+    COMMISSIONER,
+    ADMIN
 }

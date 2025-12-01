@@ -27,9 +27,10 @@ public class RoleService {
     @PostConstruct
     void init() {
         Map<RoleEnum, String> roleDescriptionMap = Map.of(
-                RoleEnum.USER, "Default user role",
-                RoleEnum.ADMIN, "Administrator role",
-                RoleEnum.SUPER_ADMIN, "Super Administrator role"
+                RoleEnum.SPECTATOR, "Default user role",
+                RoleEnum.VOLUNTEER, "Volunteer role",
+                RoleEnum.COMMISSIONER, "Commissioner role",
+                RoleEnum.ADMIN, "Administrator role"
         );
 
         roleDescriptionMap.forEach((roleName, description) ->
