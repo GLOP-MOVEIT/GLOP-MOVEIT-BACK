@@ -5,6 +5,7 @@ public record RegisterUserDto(
         String password,
         String firstName,
         String surname,
+        String phoneNumber,
         boolean acceptsNotifications,
         boolean acceptsLocation
 ) {}

@@ -39,6 +39,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -173,6 +176,15 @@ public class User implements UserDetails {
 
     public User setAcceptsLocation(boolean acceptsLocation) {
         this.acceptsLocation = acceptsLocation;
+        return this;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public User setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
         return this;
     }
 }

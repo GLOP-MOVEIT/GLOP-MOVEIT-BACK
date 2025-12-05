@@ -43,6 +43,7 @@ public class AuthenticationService {
                 .setSurname(input.surname())
                 .setEmail(input.email())
                 .setPassword(passwordEncoder.encode(input.password()))
+                .setPhoneNumber(input.phoneNumber())
                 .setRole(optionalRole.get())
                 .setAcceptsNotifications(input.acceptsNotifications())
                 .setAcceptsLocation(input.acceptsLocation());

@@ -29,7 +29,7 @@ public class UserService {
      */
     @PostConstruct
     void init(){
-        RegisterUserDto userDto = new RegisterUserDto("admin@email.com","123456","Admin","User", true, true);
+        RegisterUserDto userDto = new RegisterUserDto("admin@email.com","123456","Admin","User", null, false, false);
 
         Optional<Role> optionalRole = roleService.findByName(RoleEnum.ADMIN);
         Optional<User> optionalUser = userRepository.findByEmail(userDto.email());
@@ -72,6 +72,7 @@ public class UserService {
                 .setSurname(input.surname())
                 .setEmail(input.email())
                 .setPassword(passwordEncoder.encode(input.password()))
+                .setPhoneNumber(input.phoneNumber())
                 .setRole(optionalRole.get())
                 .setAcceptsNotifications(input.acceptsNotifications())
                 .setAcceptsLocation(input.acceptsLocation());
