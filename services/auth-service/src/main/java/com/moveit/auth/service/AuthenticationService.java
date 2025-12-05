@@ -39,10 +39,13 @@ public class AuthenticationService {
         }
 
         var user = new User()
-                .setFullName(input.fullName())
+                .setFirstName(input.firstName())
+                .setSurname(input.surname())
                 .setEmail(input.email())
                 .setPassword(passwordEncoder.encode(input.password()))
-                .setRole(optionalRole.get());
+                .setRole(optionalRole.get())
+                .setAcceptsNotifications(input.acceptsNotifications())
+                .setAcceptsLocation(input.acceptsLocation());
 
         return userRepository.save(user);
     }

@@ -27,8 +27,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Integer id;
 
-    @Column(nullable = false)
-    private String fullName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "surname", nullable = false)
+    private String surname;
 
     @Column(unique = true, length = 100, nullable = false)
     private String email;
@@ -47,6 +50,12 @@ public class User implements UserDetails {
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
+
+    @Column(name = "accepts_notifications", nullable = false)
+    private boolean acceptsNotifications = false;
+
+    @Column(name = "accepts_location", nullable = false)
+    private boolean acceptsLocation = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -91,12 +100,21 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public User setFullName(String fullName) {
-        this.fullName = fullName;
+    public User setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public User setSurname(String surname) {
+        this.surname = surname;
         return this;
     }
 
@@ -137,6 +155,24 @@ public class User implements UserDetails {
     public User setRole(Role role) {
         this.role = role;
 
+        return this;
+    }
+
+    public boolean isAcceptsNotifications() {
+        return acceptsNotifications;
+    }
+
+    public User setAcceptsNotifications(boolean acceptsNotifications) {
+        this.acceptsNotifications = acceptsNotifications;
+        return this;
+    }
+
+    public boolean isAcceptsLocation() {
+        return acceptsLocation;
+    }
+
+    public User setAcceptsLocation(boolean acceptsLocation) {
+        this.acceptsLocation = acceptsLocation;
         return this;
     }
 }

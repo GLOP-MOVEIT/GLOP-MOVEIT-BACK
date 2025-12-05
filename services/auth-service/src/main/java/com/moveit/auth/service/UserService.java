@@ -29,7 +29,7 @@ public class UserService {
      */
     @PostConstruct
     void init(){
-        RegisterUserDto userDto = new RegisterUserDto("admin@email.com","123456","Admin");
+        RegisterUserDto userDto = new RegisterUserDto("admin@email.com","123456","Admin","User", true, true);
 
         Optional<Role> optionalRole = roleService.findByName(RoleEnum.ADMIN);
         Optional<User> optionalUser = userRepository.findByEmail(userDto.email());
@@ -39,10 +39,13 @@ public class UserService {
         }
 
         var user = new User()
-                .setFullName(userDto.fullName())
+                .setFirstName(userDto.firstName())
+                .setSurname(userDto.surname())
                 .setEmail(userDto.email())
                 .setPassword(passwordEncoder.encode(userDto.password()))
-                .setRole(optionalRole.get());
+                .setRole(optionalRole.get())
+                .setAcceptsNotifications(userDto.acceptsNotifications())
+                .setAcceptsLocation(userDto.acceptsLocation());
 
         userRepository.save(user);
     }
@@ -65,10 +68,13 @@ public class UserService {
         }
 
         var user = new User()
-                .setFullName(input.fullName())
+                .setFirstName(input.firstName())
+                .setSurname(input.surname())
                 .setEmail(input.email())
                 .setPassword(passwordEncoder.encode(input.password()))
-                .setRole(optionalRole.get());
+                .setRole(optionalRole.get())
+                .setAcceptsNotifications(input.acceptsNotifications())
+                .setAcceptsLocation(input.acceptsLocation());
 
         return userRepository.save(user);
     }
