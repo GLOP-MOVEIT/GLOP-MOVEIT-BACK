@@ -1,16 +1,17 @@
 package com.moveit.auth.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecurityException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +85,7 @@ public class JwtService {
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignInKey())
                 .compact();
     }
 
@@ -95,8 +96,10 @@ public class JwtService {
         try {
             final String username = extractUsername(token);
             return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-        } catch (RuntimeException e) {
-            return false; // Token mal formé, signature invalide, expiré, etc.
+        } catch (ExpiredJwtException e) {
+            return false; // token expiré
+        } catch (JwtException | IllegalArgumentException e) {
+            return false; // token mal formé, signature invalide, etc.
         }
     }
 
@@ -121,13 +124,13 @@ public class JwtService {
         try {
             return Jwts
                     .parser()
-                    .setSigningKey(getSignInKey())
+                    .verifyWith(getSignInKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-        } catch (SecurityException e) {
-            throw new RuntimeException("Signature JWT invalide", e);
-        } catch (Exception e) {
+        } catch (ExpiredJwtException e) {
+            throw e; // laisser remonter pour pouvoir gérer l'expiration si besoin
+        } catch (JwtException | IllegalArgumentException e) {
             throw new RuntimeException("Impossible de parser le token JWT", e);
         }
     }
@@ -135,9 +138,14 @@ public class JwtService {
     /**
      * Récupère la clé de signature pour les tokens JWT.
      */
-    private Key getSignInKey() {
-        // On suppose que la secretKey est Base64; si ce n'est pas le cas, remplacer par secretKey.getBytes(StandardCharsets.UTF_8)
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private SecretKey getSignInKey() {
+        try {
+            byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (IllegalArgumentException ex) {
+            // fallback: la clé n'était pas en Base64, on prend les octets UTF-8
+            byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+            return Keys.hmacShaKeyFor(keyBytes);
+        }
     }
 }
