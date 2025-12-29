@@ -1,0 +1,22 @@
+meta {
+  name: Me
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/auth/users/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "email": "test@test.fr",
+    "password": "password"
+  }
+}

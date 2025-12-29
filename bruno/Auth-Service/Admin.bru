@@ -1,0 +1,27 @@
+meta {
+  name: Admin
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{URL}}/auth/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "email": "admin@mail.fr",
+    "password": "password",
+    "firstName": "Joe",
+    "surname": "Dalton",
+    "phoneNumber": "0776846532",
+    "acceptsNotifications": true,
+    "acceptsLocation": true
+  }
+}
