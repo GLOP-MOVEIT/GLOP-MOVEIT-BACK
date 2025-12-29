@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
+@Tag(name = "Authentification", description = "API de gestion de l'authentification")
 public class AuthController {
 
     private final JwtService jwtService;
@@ -29,9 +31,9 @@ public class AuthController {
     @Operation(summary = "Inscription d'un utilisateur")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Utilisateur inscrit avec succès", content = @Content(schema = @Schema(implementation = User.class))),
-            @ApiResponse(responseCode = "400", description = "Données d'inscription invalides"),
-            @ApiResponse(responseCode = "409", description = "L'utilisateur existe déjà"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+            @ApiResponse(responseCode = "400", description = "Données d'inscription invalides", content = @Content()),
+            @ApiResponse(responseCode = "409", description = "L'utilisateur existe déjà", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
@@ -42,8 +44,8 @@ public class AuthController {
     @Operation(summary = "Authentification d'un utilisateur")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Utilisateur authentifié avec succès", content = @Content(schema = @Schema(implementation = User.class))),
-            @ApiResponse(responseCode = "401", description = "Échec de l'authentification"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+            @ApiResponse(responseCode = "401", description = "Échec de l'authentification", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {

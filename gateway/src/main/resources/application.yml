@@ -10,6 +10,20 @@ security:
     secret-key: bW92ZWl0U2VjcmV0S2V5Rm9ySlNPTldlYlRva2VuU2lnbmluZ0FuZEF1dGhlbnRpY2F0aW9u
     expiration-time: 86400000
 
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: Auth Service
+        url: /auth/v3/api-docs
+    operations-sorter: alpha
+    tags-sorter: alpha
+    display-request-duration: true
+
 management:
   endpoints:
     web:

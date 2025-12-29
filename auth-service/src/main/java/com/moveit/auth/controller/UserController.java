@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
+@Tag(name = "Utilisateurs", description = "API de gestion des utilisateurs")
 public class UserController {
 
     private final UserService userService;
@@ -30,8 +32,8 @@ public class UserController {
     @Operation(summary = "Récupération de l'utilisateur authentifié")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Récupération de l'utilisateur authentifié avec succès", content = @Content(schema = @Schema(implementation = User.class))),
-            @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+            @ApiResponse(responseCode = "401", description = "Utilisateur non authentifié", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -43,8 +45,8 @@ public class UserController {
     @Operation(summary = "Récupération de tous les utilisateurs")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Récupération de tous les utilisateurs avec succès", content = @Content(schema = @Schema(implementation = User.class))),
-            @ApiResponse(responseCode = "403", description = "Accès refusé"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+            @ApiResponse(responseCode = "403", description = "Accès refusé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping()
     @PreAuthorize("hasAnyRole('ADMIN', 'COMMISSIONER')")
@@ -55,9 +57,9 @@ public class UserController {
     @Operation(summary = "Création d'un administrateur")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Administrateur créé avec succès", content = @Content(schema = @Schema(implementation = User.class))),
-            @ApiResponse(responseCode = "400", description = "Données d'inscription invalides"),
-            @ApiResponse(responseCode = "409", description = "L'utilisateur existe déjà"),
-            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+            @ApiResponse(responseCode = "400", description = "Données d'inscription invalides", content = @Content()),
+            @ApiResponse(responseCode = "409", description = "L'utilisateur existe déjà", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
