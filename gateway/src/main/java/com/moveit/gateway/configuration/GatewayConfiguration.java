@@ -1,5 +1,6 @@
 package com.moveit.gateway.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -10,18 +11,17 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFunctions.uri;
 import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates.path;
 
-/**
- * Configuration des routes du Gateway.
- * Définit le routage des requêtes vers les différents microservices.
- */
 @Configuration
 public class GatewayConfiguration {
+
+    @Value("${AUTH_SERVICE_URL:http://localhost:8082}")
+    private String authServiceUrl;
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
         return route("auth-service")
                 .route(path("/auth/**"), http())
-                .before(uri("http://localhost:8082"))
+                .before(uri(authServiceUrl))
                 .build();
     }
 
