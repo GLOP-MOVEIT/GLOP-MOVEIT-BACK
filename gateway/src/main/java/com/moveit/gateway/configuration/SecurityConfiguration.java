@@ -53,7 +53,8 @@ public class SecurityConfiguration {
                 "http://localhost:3000",
                 "http://localhost:4200",
                 "http://localhost:5173",
-                "http://174.138.13.182"
+                "http://174.138.13.182",
+                "http://174.138.13.182:80"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
