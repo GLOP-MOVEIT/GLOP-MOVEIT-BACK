@@ -2,6 +2,7 @@ package com.moveit.auth.configuration.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +29,13 @@ public class ExceptionResolver extends ResponseEntityExceptionHandler {
             case AccessDeniedException e -> createProblemDetail(403, e.getMessage(), "You are not authorized to access this resource");
             case SignatureException e -> createProblemDetail(403, e.getMessage(), "The JWT signature is invalid");
             case ExpiredJwtException e -> createProblemDetail(403, e.getMessage(), "The JWT token has expired");
+            case DataIntegrityViolationException e -> {
+                String message = e.getMessage();
+                if (message != null && message.contains("email")) {
+                    yield createProblemDetail(409, "Email already exists", "An account with this email address already exists");
+                }
+                yield createProblemDetail(409, "Data integrity violation", "The provided data conflicts with existing records");
+            }
             default -> createProblemDetail(500, exception.getMessage(), "Unknown internal server error.");
         };
     }
