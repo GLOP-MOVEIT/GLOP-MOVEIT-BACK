@@ -12,6 +12,7 @@
 
     <modules>
         <module>auth-service</module>
+        <module>championship-service</module>
         <module>gateway</module>
     </modules>
 
