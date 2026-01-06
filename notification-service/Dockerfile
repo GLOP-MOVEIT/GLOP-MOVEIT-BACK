@@ -23,7 +23,7 @@ RUN apk add --no-cache wget
 COPY --from=build /workspace/notification-service/target/*.jar app.jar
 
 # Expose port
-EXPOSE 8084
+EXPOSE 8088
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
