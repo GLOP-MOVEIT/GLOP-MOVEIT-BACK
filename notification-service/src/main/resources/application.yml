@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: notification-service
+
+server:
+  port: 8084
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /notification/v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /notification/swagger-ui.html
+
+# Actuator endpoints pour le monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+logging:
+  level:
+    com.moveit.notification: INFO
+    org.springframework: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
