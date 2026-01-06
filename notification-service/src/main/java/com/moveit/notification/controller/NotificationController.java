@@ -1,0 +1,55 @@
+package com.moveit.notification.controller;
+
+import com.moveit.notification.dto.NotificationCreateDTO;
+import com.moveit.notification.dto.NotificationUpdateDTO;
+import com.moveit.notification.entity.Notification;
+import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.service.NotificationService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/notification/notifications")
+@RequiredArgsConstructor
+public class NotificationController {
+
+    private final NotificationService notificationService;
+
+    @GetMapping
+    public ResponseEntity<List<Notification>> getNotifications(
+            @RequestParam(required = false) NotificationType type,
+            @RequestParam(required = false) Long incidentId,
+            @RequestParam(required = false) Long eventId) {
+        return ResponseEntity.ok(notificationService.getNotifications(type, incidentId, eventId));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Notification> getNotificationById(@PathVariable Long id) {
+        return notificationService.getNotificationById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Notification> createNotification(@Valid @RequestBody NotificationCreateDTO dto) {
+        Notification saved = notificationService.createNotification(dto);
+        return ResponseEntity.ok(saved);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Notification> updateNotification(@PathVariable Long id, @Valid @RequestBody NotificationUpdateDTO dto) {
+        return notificationService.updateNotification(id, dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return ResponseEntity.noContent().build();
+    }
+}
