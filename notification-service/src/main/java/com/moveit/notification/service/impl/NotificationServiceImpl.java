@@ -7,6 +7,8 @@ import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.repository.NotificationRepository;
 import com.moveit.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
 
     @Override
-    public List<Notification> getNotifications(NotificationType type, Long incidentId, Long eventId) {
+    public Page<Notification> getNotifications(NotificationType type, Long incidentId, Long eventId, Pageable pageable) {
         // Si aucun filtre, retourner toutes les notifications
         if (type == null && incidentId == null && eventId == null) {
             return notificationRepository.findAll();
@@ -82,6 +84,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void deleteNotification(Long id) {
+        if (!notificationRepository.existsById(id)) {
+            throw new jakarta.persistence.EntityNotFoundException("Notification non trouvée avec l'id: " + id);
+        }
         notificationRepository.deleteById(id);
     }
 

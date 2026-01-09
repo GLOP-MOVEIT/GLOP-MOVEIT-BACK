@@ -7,6 +7,10 @@ import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +24,19 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    public ResponseEntity<List<Notification>> getNotifications(
+    public ResponseEntity<Page<Notification>> getNotifications(
             @RequestParam(required = false) NotificationType type,
             @RequestParam(required = false) Long incidentId,
-            @RequestParam(required = false) Long eventId) {
-        return ResponseEntity.ok(notificationService.getNotifications(type, incidentId, eventId));
+            @RequestParam(required = false) Long eventId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String direction) {
+        
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+        
+        return ResponseEntity.ok(notificationService.getNotifications(type, incidentId, eventId, pageable));
     }
 
     @GetMapping("/{id}")

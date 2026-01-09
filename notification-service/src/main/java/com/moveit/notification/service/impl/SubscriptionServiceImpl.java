@@ -71,6 +71,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public void deleteSubscription(Long id) {
+        if (!subscriptionRepository.existsById(id)) {
+            throw new jakarta.persistence.EntityNotFoundException("Subscription non trouvée avec l'id: " + id);
+        }
         subscriptionRepository.deleteById(id);
     }
 
