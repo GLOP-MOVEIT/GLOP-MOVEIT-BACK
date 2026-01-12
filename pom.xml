@@ -29,7 +29,7 @@
         <prometheus.version>1.16.1</prometheus.version>
         <loki.version>1.6.0</loki.version>
         <springdoc.version>3.0.0</springdoc.version>
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <sonar.version>3.11.0.3922</sonar.version>
     </properties>
 
