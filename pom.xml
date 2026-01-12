@@ -30,7 +30,7 @@
         <loki.version>1.6.0</loki.version>
         <springdoc.version>3.0.0</springdoc.version>
         <jacoco.version>0.8.12</jacoco.version>
-        <sonar.version>5.1.0.4882</sonar.version>
+        <sonar.version>3.11.0.3922</sonar.version>
 
         <!-- SonarQube Properties -->
         <sonar.host.url>http://localhost:9000</sonar.host.url>
