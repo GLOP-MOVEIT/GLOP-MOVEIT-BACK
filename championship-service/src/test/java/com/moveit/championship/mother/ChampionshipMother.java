@@ -20,7 +20,7 @@ public class ChampionshipMother {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Builder {
-        private Integer id = 1;
+        private int id = 1;
         private List<Competition> competitions = List.of();
         private String name = "Championship Name";
         private String description = "Championship Description";

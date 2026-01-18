@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,7 +61,7 @@ public class ChampionshipController {
     })
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Championship> createChampionship(@RequestBody Championship championship) {
+    public ResponseEntity<Championship> createChampionship(@Valid @RequestBody Championship championship) {
         Championship createdChampionship = championshipService.createChampionship(championship);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdChampionship);
     }
@@ -75,7 +76,7 @@ public class ChampionshipController {
     })
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Championship> updateChampionship(@PathVariable Integer id, @RequestBody Championship championship) {
+    public ResponseEntity<Championship> updateChampionship(@PathVariable Integer id, @Valid @RequestBody Championship championship) {
         Championship updatedChampionship = championshipService.updateChampionship(id, championship);
         if (updatedChampionship == null) {
             throw new ChampionshipNotFoundException(id);

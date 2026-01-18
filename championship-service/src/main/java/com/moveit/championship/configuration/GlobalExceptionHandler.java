@@ -8,18 +8,16 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Map;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(ChampionshipNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleChampionshipNotFound() {
+    public ResponseEntity<Void> handleChampionshipNotFound() {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDeniedException() {
+    public ResponseEntity<Void> handleAccessDeniedException() {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 }

@@ -8,7 +8,7 @@
         </http>
         <format>
             <label>
-                <pattern>app=auth-service,host=${HOSTNAME},level=%level</pattern>
+                <pattern>app=championship-service,host=${HOSTNAME},level=%level</pattern>
             </label>
             <message>
                 <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>

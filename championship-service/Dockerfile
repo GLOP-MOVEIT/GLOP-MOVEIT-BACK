@@ -23,7 +23,7 @@ RUN apk add --no-cache wget
 COPY --from=build /workspace/championship-service/target/*.jar app.jar
 
 # Expose port
-EXPOSE 8082
+EXPOSE 8083
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
