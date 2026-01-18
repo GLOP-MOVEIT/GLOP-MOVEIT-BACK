@@ -1,6 +1,16 @@
 spring:
   application:
     name: gateway
+  cloud:
+    gateway:
+      routes:
+        # Championship Service Routes
+        - id: championship-service
+          uri: http://championship-service:8082
+          predicates:
+            - Path=/championships/**
+          filters:
+            - RewritePath=/championships(?<segment>/?.*), /championships$\{segment}
 
 server:
   port: 8080
