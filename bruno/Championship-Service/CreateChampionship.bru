@@ -1,0 +1,24 @@
+meta {
+  name: CreateChampionship
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/championships
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "name": "Championnat 2024",
+    "description": "Description du championnat",
+    "status": "UPCOMING"
+  }
+}
+
