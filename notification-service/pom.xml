@@ -7,6 +7,7 @@
 		<groupId>com.moveit</groupId>
 		<artifactId>moveit-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<properties>
@@ -20,13 +21,6 @@
 	<description>Notification service with monitoring</description>
 
 	<dependencies>
-		<!-- Common library -->
-		<dependency>
-			<groupId>com.moveit</groupId>
-			<artifactId>common</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
 		<!-- Spring Boot Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -68,11 +62,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		

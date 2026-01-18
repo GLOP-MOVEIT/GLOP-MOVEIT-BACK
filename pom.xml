@@ -13,6 +13,7 @@
     <modules>
         <module>auth-service</module>
         <module>gateway</module>
+        <module>notification-service</module>
     </modules>
 
     <properties>
