@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -54,6 +55,7 @@ public class ChampionshipControllerTest {
 
     @Test
     @DisplayName("Should retrieve all championships successfully.")
+    @WithMockUser
     void testGetAllChampionships_Success() throws Exception {
         when(championshipService.getAllChampionships()).thenReturn(List.of(championship1, championship2));
 
@@ -71,6 +73,7 @@ public class ChampionshipControllerTest {
 
     @Test
     @DisplayName("Should retrieve empty list when no championships exist.")
+    @WithMockUser
     void testGetAllChampionships_Empty() throws Exception {
         when(championshipService.getAllChampionships()).thenReturn(new ArrayList<>());
 
@@ -84,6 +87,7 @@ public class ChampionshipControllerTest {
 
     @Test
     @DisplayName("Should retrieve championship by ID successfully.")
+    @WithMockUser
     void testGetChampionshipById_Success() throws Exception {
         when(championshipService.getChampionshipById(championship1.getId())).thenReturn(championship1);
 
@@ -93,13 +97,14 @@ public class ChampionshipControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(championship1.getId())))
                 .andExpect(jsonPath("$.name", equalTo(championship1.getName())))
                 .andExpect(jsonPath("$.description", equalTo(championship1.getDescription())))
-                .andExpect(jsonPath("$.status", equalTo(championship1.getStatus())));
+                .andExpect(jsonPath("$.status", equalTo(championship1.getStatus().name())));
 
         verify(championshipService, times(1)).getChampionshipById(1);
     }
 
     @Test
     @DisplayName("Should return 404 when championship by ID not found.")
+    @WithMockUser
     void testGetChampionshipById_NotFound() throws Exception {
         when(championshipService.getChampionshipById(999)).thenReturn(null);
 
@@ -112,28 +117,29 @@ public class ChampionshipControllerTest {
 
     @Test
     @DisplayName("Should create championship successfully.")
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = "ADMIN")
     void testCreateChampionship_Success() throws Exception {
         when(championshipService.createChampionship(any(Championship.class)))
                 .thenReturn(championship1);
 
         mockMvc.perform(post("/championships")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(championship2)))
+                        .content(objectMapper.writeValueAsString(championship1)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", equalTo(championship2.getId())))
-                .andExpect(jsonPath("$.name", equalTo(championship2.getName())));
+                .andExpect(jsonPath("$.id", equalTo(championship1.getId())))
+                .andExpect(jsonPath("$.name", equalTo(championship1.getName())));
 
         verify(championshipService, times(1)).createChampionship(any(Championship.class));
     }
 
     @Test
-    @DisplayName("Should return 401 Unauthorized when creating championship without authentication.")
+    @DisplayName("Should return 403 Forbidden when creating championship without authentication.")
+    @WithAnonymousUser
     void testCreateChampionship_Unauthorized() throws Exception {
         mockMvc.perform(post("/championships")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(championship1)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
 
         verify(championshipService, never()).createChampionship(any());
     }
@@ -152,7 +158,7 @@ public class ChampionshipControllerTest {
 
     @Test
     @DisplayName("Should update championship successfully.")
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = "ADMIN")
     void testUpdateChampionship_Success() throws Exception {
         var updatedChampionship = ChampionshipMother.championship()
                 .withName("Championnat 2024 - Modifié")
@@ -169,14 +175,14 @@ public class ChampionshipControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(updatedChampionship.getId())))
                 .andExpect(jsonPath("$.name", equalTo(updatedChampionship.getName())))
-                .andExpect(jsonPath("$.status", equalTo(updatedChampionship.getStatus())));
+                .andExpect(jsonPath("$.status", equalTo(updatedChampionship.getStatus().name())));
 
         verify(championshipService, times(1)).updateChampionship(eq(1), any(Championship.class));
     }
 
     @Test
     @DisplayName("Should return 404 when updating non-existent championship.")
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = "ADMIN")
     void testUpdateChampionship_NotFound() throws Exception {
         var updatedChampionship = ChampionshipMother.championship().withId(999).build();
 
@@ -191,13 +197,14 @@ public class ChampionshipControllerTest {
         verify(championshipService, times(1)).updateChampionship(eq(updatedChampionship.getId()), any(Championship.class));
     }
 
-    @DisplayName("Should return 401 Unauthorized when updating championship without authentication.")
+    @DisplayName("Should return 403 Forbidden when updating championship without authentication.")
     @Test
+    @WithAnonymousUser
     void testUpdateChampionship_Unauthorized() throws Exception {
         mockMvc.perform(put("/championships/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(championship1)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
 
         verify(championshipService, never()).updateChampionship(any(), any());
     }
@@ -216,7 +223,7 @@ public class ChampionshipControllerTest {
 
     @Test
     @DisplayName("Should delete championship successfully.")
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = "ADMIN")
     void testDeleteChampionship_Success() throws Exception {
         when(championshipService.getChampionshipById(1)).thenReturn(championship1);
         doNothing().when(championshipService).deleteChampionship(1);
@@ -231,7 +238,7 @@ public class ChampionshipControllerTest {
 
     @Test
     @DisplayName("Should return 404 when deleting non-existent championship.")
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = "ADMIN")
     void testDeleteChampionship_NotFound() throws Exception {
         when(championshipService.getChampionshipById(999)).thenReturn(null);
 
@@ -244,11 +251,12 @@ public class ChampionshipControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 401 Unauthorized when deleting championship without authentication.")
+    @DisplayName("Should return 403 Forbidden when deleting championship without authentication.")
+    @WithAnonymousUser
     void testDeleteChampionship_Unauthorized() throws Exception {
         mockMvc.perform(delete("/championships/1")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
 
         verify(championshipService, never()).deleteChampionship(any());
     }
