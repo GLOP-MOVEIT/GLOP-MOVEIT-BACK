@@ -61,7 +61,7 @@ public class ChampionshipServiceTest {
 
         assertThatThrownBy(() -> championshipService.getChampionshipById(championshipId))
                 .isInstanceOf(ChampionshipNotFoundException.class)
-                .hasMessageContaining("Championship not found with id: " + championshipId);
+                .hasMessageContaining("Championship with id " + championshipId + " not found");
     }
 
     @Test
@@ -108,7 +108,7 @@ public class ChampionshipServiceTest {
 
         assertThatThrownBy(() -> championshipService.updateChampionship(championshipId, championship))
                 .isInstanceOf(ChampionshipNotFoundException.class)
-                .hasMessageContaining("Championship not found with id: " + championshipId);
+                .hasMessageContaining("Championship with id " + championshipId + " not found");
 
         verify(championshipRepository, never()).save(any(Championship.class));
     }
@@ -137,7 +137,7 @@ public class ChampionshipServiceTest {
 
         assertThatThrownBy(() -> championshipService.deleteChampionship(championshipId))
                 .isInstanceOf(ChampionshipNotFoundException.class)
-                .hasMessageContaining("Championship not found with id: " + championshipId);
+                .hasMessageContaining("Championship with id " + championshipId + " not found");
 
         verify(championshipRepository, never()).deleteById(championshipId);
     }
