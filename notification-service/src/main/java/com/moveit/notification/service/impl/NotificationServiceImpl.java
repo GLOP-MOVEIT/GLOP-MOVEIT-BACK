@@ -5,6 +5,7 @@ import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.repository.NotificationRepository;
+import com.moveit.notification.service.NotificationDispatcherService;
 import com.moveit.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final NotificationDispatcherService dispatcherService;
 
     @Override
     public Page<Notification> getNotifications(NotificationType type, Long incidentId, Long eventId, Pageable pageable) {
@@ -83,7 +85,14 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setNotificationType(dto.getNotificationType());
         notification.setIncidentIds(dto.getIncidentIds());
         notification.setEventIds(dto.getEventIds());
-        return notificationRepository.save(notification);
+        
+        // Save to database
+        Notification savedNotification = notificationRepository.save(notification);
+        
+        // Dispatch notification to subscribed users via WebSocket
+        dispatcherService.dispatch(savedNotification);
+        
+        return savedNotification;
     }
 
     @Override
