@@ -6,6 +6,7 @@ import com.moveit.notification.repository.SubscriptionRepository;
 import com.moveit.notification.service.NotificationDispatcherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class NotificationDispatcherServiceImpl implements NotificationDispatcher
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
+    @Async
     public void dispatch(Notification notification) {
         // Find all active subscriptions for this notification type
         List<Subscription> subscriptions = subscriptionRepository
