@@ -11,8 +11,8 @@
     <description>MoveIt parent</description>
 
     <modules>
-        <module>gateway</module>
         <module>auth-service</module>
+        <module>gateway</module>
     </modules>
 
     <properties>
@@ -29,9 +29,9 @@
         <prometheus.version>1.16.1</prometheus.version>
         <loki.version>1.6.0</loki.version>
         <springdoc.version>3.0.0</springdoc.version>
-        <jacoco.version>0.8.13</jacoco.version>
-        <sonar.version>3.11.0.3922</sonar.version>
-        <maven-surefire.version>3.5.2</maven-surefire.version>
+        <jacoco.version>0.8.14</jacoco.version>
+        <sonar.version>5.5.0.6356</sonar.version>
+        <maven-surefire.version>3.5.4</maven-surefire.version>
     </properties>
 
     <dependencyManagement>
@@ -150,27 +150,6 @@
                             <goals>
                                 <goal>report</goal>
                             </goals>
-                        </execution>
-                        <execution>
-                            <id>jacoco-check</id>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                            <configuration>
-                                <skip>true</skip>
-                                <rules>
-                                    <rule>
-                                        <element>PACKAGE</element>
-                                        <limits>
-                                            <limit>
-                                                <counter>LINE</counter>
-                                                <value>COVEREDRATIO</value>
-                                                <minimum>0.50</minimum>
-                                            </limit>
-                                        </limits>
-                                    </rule>
-                                </rules>
-                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
