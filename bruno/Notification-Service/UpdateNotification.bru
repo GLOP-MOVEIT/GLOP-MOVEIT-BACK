@@ -1,0 +1,21 @@
+meta {
+  name: UpdateNotification
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{URL}}/notifications/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{TOKEN}}
+}
+
+body:json {
+  {
+    "message": "Updated notification Bruno"
+  }
+}
