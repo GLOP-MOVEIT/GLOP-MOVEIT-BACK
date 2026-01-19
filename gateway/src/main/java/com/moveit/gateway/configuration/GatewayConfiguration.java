@@ -17,6 +17,9 @@ public class GatewayConfiguration {
     @Value("${AUTH_SERVICE_URL:http://localhost:8082}")
     private String authServiceUrl;
 
+    @Value("${CHAMPIONSHIP_SERVICE_URL:http://localhost:8083}")
+    private String championshipServiceUrl;
+
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
         return route("auth-service")
@@ -25,12 +28,11 @@ public class GatewayConfiguration {
                 .build();
     }
 
-    // Exemple pour rajouter de nouvelles routes:
-    // @Bean
-    // public RouterFunction<ServerResponse> userServiceRoute() {
-    //     return route("user-service")
-    //             .route(path("/users/**"), http())
-    //             .before(uri("http://localhost:8083"))
-    //             .build();
-    // }
+    @Bean
+    public RouterFunction<ServerResponse> championshipServiceRoute() {
+        return route("championship-service")
+                .route(path("/championships/**"), http())
+                .before(uri(championshipServiceUrl))
+                .build();
+    }
 }

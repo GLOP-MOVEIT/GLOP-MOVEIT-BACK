@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -60,7 +59,6 @@ public class ChampionshipController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Championship> createChampionship(@Valid @RequestBody Championship championship) {
         Championship createdChampionship = championshipService.createChampionship(championship);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdChampionship);
@@ -75,7 +73,6 @@ public class ChampionshipController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Championship> updateChampionship(@PathVariable Integer id, @Valid @RequestBody Championship championship) {
         Championship updatedChampionship = championshipService.updateChampionship(id, championship);
         if (updatedChampionship == null) {
@@ -92,7 +89,6 @@ public class ChampionshipController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteChampionship(@PathVariable Integer id) {
         Championship championship = championshipService.getChampionshipById(id);
         if (championship == null) {
