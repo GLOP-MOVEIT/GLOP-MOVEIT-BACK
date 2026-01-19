@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ChampionshipController.class)
 @Import(ObjectMapper.class)
-public class ChampionshipControllerTest {
+class ChampionshipControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
