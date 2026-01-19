@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/notification/types")
+@RequestMapping("/notification-types")
 public class NotificationTypeController {
 
     @GetMapping
