@@ -54,7 +54,4 @@ logging:
     org.springframework: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+
