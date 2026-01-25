@@ -33,4 +33,15 @@ public class GatewayConfiguration {
     //             .before(uri("http://localhost:8083"))
     //             .build();
     // }
+
+    @Value("${LOCALIZATION_SERVICE_URL:http://localization-service:8085}")
+    private String localizationServiceUrl;
+
+    @Bean
+    public RouterFunction<ServerResponse> localizationServiceRoute() {
+        return route("localization-service")
+                .route(path("/api/location/**"), http())
+                .before(uri(localizationServiceUrl))
+                .build();
+    }
 }
