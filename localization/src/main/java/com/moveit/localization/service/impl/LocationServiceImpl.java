@@ -125,4 +125,21 @@ public class LocationServiceImpl implements LocationService {
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_ATHLETE") || role.equals("ATHLETE"));
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<LocationHistoryResponse> getLocationHistory(Integer userId, int days) {
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+        List<LocationHistory> history = locationHistoryRepository.findByUserIdAndTimestampAfterOrderByTimestampDesc(userId, since);
+        return history.stream()
+                .map(h -> LocationHistoryResponse.builder()
+                        .id(h.getId())
+                        .userId(h.getUserId())
+                        .latitude(h.getLatitude())
+                        .longitude(h.getLongitude())
+                        .timestamp(h.getTimestamp())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 }

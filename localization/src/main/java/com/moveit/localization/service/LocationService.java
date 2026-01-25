@@ -6,4 +6,5 @@ public interface LocationService {
     LocationResponse updateLocation(Integer userId, LocationUpdateRequest request);
     LocationResponse getLocation(Integer userId);
     List<LocationResponse> getNearbyUsers(Integer requesterId, LocationUpdateRequest request);
+    List<LocationHistoryResponse> getLocationHistory(Integer userId, int days);
 }
