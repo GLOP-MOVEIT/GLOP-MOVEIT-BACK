@@ -110,9 +110,35 @@ services:
     networks:
       - moveit-network
 
+  localization-service:
+    build:
+      context: .
+      dockerfile: localization/Dockerfile
+    container_name: moveit-localization-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_localization
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - LOKI_URL=http://loki:3100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    networks:
+      - moveit-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8085/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    # Pas de ports exposés volontairement
+
 networks:
   moveit-network:
-    driver: external
+    external: true
     name: moveit-network
 
 volumes:
