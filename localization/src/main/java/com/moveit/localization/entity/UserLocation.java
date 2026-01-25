@@ -35,12 +35,8 @@ public class UserLocation {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
