@@ -39,13 +39,10 @@ public class LocationController {
     @Operation(summary = "Find nearby users", description = "Find users near a specific location")
     public ResponseEntity<List<LocationResponse>> getNearbyUsers(
             @RequestHeader("X-User-Id") Integer requesterId,
-            @Valid @RequestBody NearbyUsersRequest request) {
+            @Valid @RequestBody LocationUpdateRequest request) {
         List<LocationResponse> response = locationService.getNearbyUsers(requesterId, request);
         return ResponseEntity.ok(response);
     }
-
-    @GetMapping("/active")
-    @Operation(summary = "Get active user locations", description = "Get all users with active tracking")
 
     @GetMapping("/history/{userId}")
     @Operation(summary = "Get location history", description = "Get location history for a athlete (commissaire only)")

@@ -130,7 +130,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public List<LocationHistoryResponse> getLocationHistory(Integer userId, int days) {
         LocalDateTime since = LocalDateTime.now().minusDays(days);
-        List<LocationHistory> history = locationHistoryRepository.findByUserIdAndTimestampAfterOrderByTimestampDesc(userId, since);
+        List<LocationHistory> history = locationHistoryRepository.findRecentHistory(userId, since);
         return history.stream()
                 .map(h -> LocationHistoryResponse.builder()
                         .id(h.getId())

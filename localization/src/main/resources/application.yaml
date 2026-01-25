@@ -24,7 +24,7 @@ spring:
       timeout: 60000
 
 server:
-  port: 8084
+  port: 8085
 
 springdoc:
   api-docs:
