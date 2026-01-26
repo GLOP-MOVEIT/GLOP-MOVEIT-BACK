@@ -1,0 +1,42 @@
+meta {
+  name: UpdateCompetition
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{URL}}/championships/competitions/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "competitionSport": "Football",
+    "competitionName": "Coupe Nationale - Mise à jour",
+    "competitionStartDate": "2024-03-01",
+    "competitionEndDate": "2024-05-15",
+    "competitionDescription": "Phase finale mise à jour",
+    "competitionStatus": "ONGOING",
+    "nbManches": 4,
+    "championship": {
+      "id": 1
+    },
+    "events": [
+      {
+        "eventName": "Match 1",
+        "eventDate": "2024-03-05",
+        "eventDescription": "Ouverture"
+      },
+      {
+        "eventName": "Match 2",
+        "eventDate": "2024-03-12",
+        "eventDescription": "Quart de finale"
+      }
+    ]
+  }
+}

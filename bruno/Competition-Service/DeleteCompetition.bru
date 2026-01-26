@@ -1,0 +1,14 @@
+meta {
+  name: DeleteCompetition
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{URL}}/championships/competitions/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
