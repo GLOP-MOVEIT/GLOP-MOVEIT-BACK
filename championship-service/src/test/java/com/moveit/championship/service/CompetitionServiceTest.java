@@ -1,8 +1,12 @@
 package com.moveit.championship.service;
 
+import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.exception.CompetitionNotFoundException;
+import com.moveit.championship.mother.ChampionshipMother;
 import com.moveit.championship.mother.CompetitionMother;
+import com.moveit.championship.repository.ChampionshipRepository;
 import com.moveit.championship.repository.CompetitionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +32,9 @@ class CompetitionServiceTest {
 
     @Mock
     private CompetitionRepository competitionRepository;
+
+    @Mock
+    private ChampionshipRepository championshipRepository;
 
     @Test
     @DisplayName("Should retrieve all competitions.")
@@ -70,12 +78,15 @@ class CompetitionServiceTest {
     @DisplayName("Should create competition.")
     void shouldCreateCompetition() {
         Competition competition = CompetitionMother.competition().build();
+        Championship championship = competition.getChampionship();
 
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
         when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
 
         var result = competitionService.createCompetition(competition);
 
         assertThat(result).isEqualTo(competition);
+        verify(championshipRepository, times(1)).findById(championship.getId());
         verify(competitionRepository, times(1)).save(competition);
     }
 
@@ -86,14 +97,17 @@ class CompetitionServiceTest {
         Competition updated = CompetitionMother.competition()
                 .withCompetitionName("Updated Competition")
                 .build();
+        Championship championship = updated.getChampionship();
 
         when(competitionRepository.findById(existing.getCompetitionId()))
                 .thenReturn(Optional.of(existing));
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
         when(competitionRepository.save(any(Competition.class))).thenReturn(updated);
 
         var result = competitionService.updateCompetition(existing.getCompetitionId(), updated);
 
         assertThat(result).isEqualTo(updated);
+        verify(championshipRepository, times(1)).findById(championship.getId());
         verify(competitionRepository, times(1)).save(any(Competition.class));
     }
 
@@ -136,5 +150,191 @@ class CompetitionServiceTest {
                 .hasMessageContaining("Competition with id " + id + " not found");
 
         verify(competitionRepository, never()).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when creating competition without championship ID.")
+    void shouldThrowExceptionWhenCreatingCompetitionWithoutChampionshipId() {
+        Competition competition = CompetitionMother.competition()
+                .withChampionship(null)
+                .build();
+
+        assertThatThrownBy(() -> competitionService.createCompetition(competition))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Championship ID is required");
+
+        verify(competitionRepository, never()).save(any(Competition.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when creating competition with non-existent championship.")
+    void shouldThrowExceptionWhenCreatingCompetitionWithNonExistentChampionship() {
+        Competition competition = CompetitionMother.competition().build();
+        Championship championship = competition.getChampionship();
+
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> competitionService.createCompetition(competition))
+                .isInstanceOf(ChampionshipNotFoundException.class)
+                .hasMessageContaining("Championship with id " + championship.getId() + " not found");
+
+        verify(competitionRepository, never()).save(any(Competition.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when competition start date is before championship start date.")
+    void shouldThrowExceptionWhenCompetitionStartDateIsBeforeChampionshipStartDate() {
+        Calendar champStartCal = Calendar.getInstance();
+        champStartCal.set(2026, Calendar.FEBRUARY, 1, 0, 0, 0);
+        champStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar champEndCal = Calendar.getInstance();
+        champEndCal.set(2026, Calendar.DECEMBER, 31, 0, 0, 0);
+        champEndCal.set(Calendar.MILLISECOND, 0);
+
+        Championship championship = ChampionshipMother.championship()
+                .withStartDate(champStartCal.getTime())
+                .withEndDate(champEndCal.getTime())
+                .build();
+
+        Calendar compStartCal = Calendar.getInstance();
+        compStartCal.set(2026, Calendar.JANUARY, 15, 0, 0, 0); // Avant le championship (février)
+        compStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar compEndCal = Calendar.getInstance();
+        compEndCal.set(2026, Calendar.MARCH, 15, 0, 0, 0);
+        compEndCal.set(Calendar.MILLISECOND, 0);
+
+        Competition competition = CompetitionMother.competition()
+                .withChampionship(championship)
+                .withCompetitionStartDate(compStartCal.getTime())
+                .withCompetitionEndDate(compEndCal.getTime())
+                .build();
+
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
+
+        assertThatThrownBy(() -> competitionService.createCompetition(competition))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La date de début de la compétition doit être après ou égale à la date de début du championnat");
+
+        verify(competitionRepository, never()).save(any(Competition.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when competition end date is after championship end date.")
+    void shouldThrowExceptionWhenCompetitionEndDateIsAfterChampionshipEndDate() {
+        Calendar champStartCal = Calendar.getInstance();
+        champStartCal.set(2026, Calendar.JANUARY, 1, 0, 0, 0);
+        champStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar champEndCal = Calendar.getInstance();
+        champEndCal.set(2026, Calendar.APRIL, 30, 0, 0, 0);
+        champEndCal.set(Calendar.MILLISECOND, 0);
+
+        Championship championship = ChampionshipMother.championship()
+                .withStartDate(champStartCal.getTime())
+                .withEndDate(champEndCal.getTime())
+                .build();
+
+        Calendar compStartCal = Calendar.getInstance();
+        compStartCal.set(2026, Calendar.FEBRUARY, 1, 0, 0, 0);
+        compStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar compEndCal = Calendar.getInstance();
+        compEndCal.set(2026, Calendar.MAY, 31, 0, 0, 0); // Après le championship (avril)
+        compEndCal.set(Calendar.MILLISECOND, 0);
+
+        Competition competition = CompetitionMother.competition()
+                .withChampionship(championship)
+                .withCompetitionStartDate(compStartCal.getTime())
+                .withCompetitionEndDate(compEndCal.getTime())
+                .build();
+
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
+
+        assertThatThrownBy(() -> competitionService.createCompetition(competition))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La date de fin de la compétition doit être avant ou égale à la date de fin du championnat");
+
+        verify(competitionRepository, never()).save(any(Competition.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when competition start date is after competition end date.")
+    void shouldThrowExceptionWhenCompetitionStartDateIsAfterEndDate() {
+        Calendar champStartCal = Calendar.getInstance();
+        champStartCal.set(2026, Calendar.JANUARY, 1, 0, 0, 0);
+        champStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar champEndCal = Calendar.getInstance();
+        champEndCal.set(2026, Calendar.DECEMBER, 31, 0, 0, 0);
+        champEndCal.set(Calendar.MILLISECOND, 0);
+
+        Championship championship = ChampionshipMother.championship()
+                .withStartDate(champStartCal.getTime())
+                .withEndDate(champEndCal.getTime())
+                .build();
+
+        Calendar compStartCal = Calendar.getInstance();
+        compStartCal.set(2026, Calendar.JUNE, 1, 0, 0, 0);
+        compStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar compEndCal = Calendar.getInstance();
+        compEndCal.set(2026, Calendar.MARCH, 1, 0, 0, 0); // Avant la date de début
+        compEndCal.set(Calendar.MILLISECOND, 0);
+
+        Competition competition = CompetitionMother.competition()
+                .withChampionship(championship)
+                .withCompetitionStartDate(compStartCal.getTime())
+                .withCompetitionEndDate(compEndCal.getTime())
+                .build();
+
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
+
+        assertThatThrownBy(() -> competitionService.createCompetition(competition))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La date de début de la compétition doit être avant la date de fin");
+
+        verify(competitionRepository, never()).save(any(Competition.class));
+    }
+
+    @Test
+    @DisplayName("Should create competition when dates are valid and within championship date range.")
+    void shouldCreateCompetitionWhenDatesAreValid() {
+        Calendar champStartCal = Calendar.getInstance();
+        champStartCal.set(2026, Calendar.JANUARY, 1, 0, 0, 0);
+        champStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar champEndCal = Calendar.getInstance();
+        champEndCal.set(2026, Calendar.DECEMBER, 31, 0, 0, 0);
+        champEndCal.set(Calendar.MILLISECOND, 0);
+
+        Championship championship = ChampionshipMother.championship()
+                .withStartDate(champStartCal.getTime())
+                .withEndDate(champEndCal.getTime())
+                .build();
+
+        Calendar compStartCal = Calendar.getInstance();
+        compStartCal.set(2026, Calendar.MARCH, 1, 0, 0, 0);
+        compStartCal.set(Calendar.MILLISECOND, 0);
+
+        Calendar compEndCal = Calendar.getInstance();
+        compEndCal.set(2026, Calendar.JUNE, 30, 0, 0, 0);
+        compEndCal.set(Calendar.MILLISECOND, 0);
+
+        Competition competition = CompetitionMother.competition()
+                .withChampionship(championship)
+                .withCompetitionStartDate(compStartCal.getTime())
+                .withCompetitionEndDate(compEndCal.getTime())
+                .build();
+
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
+        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
+
+        var result = competitionService.createCompetition(competition);
+
+        assertThat(result).isEqualTo(competition);
+        verify(championshipRepository, times(1)).findById(championship.getId());
+        verify(competitionRepository, times(1)).save(competition);
     }
 }

@@ -1,6 +1,5 @@
 package com.moveit.championship.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,12 +18,11 @@ import java.util.List;
 @AllArgsConstructor
 public class Championship {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Integer id;
 
     @OneToMany(mappedBy = "championship", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "championship-competition")
     private List<Competition> competitions = new ArrayList<>();
 
     @NotBlank(message = "Le nom du championnat est obligatoire")
