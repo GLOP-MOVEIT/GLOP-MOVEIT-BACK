@@ -1,9 +1,9 @@
 package com.moveit.auth.service;
 
+import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.Role;
 import com.moveit.auth.entity.RoleEnum;
 import com.moveit.auth.entity.User;
-import com.moveit.auth.model.RegisterUserDto;
 import com.moveit.auth.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
