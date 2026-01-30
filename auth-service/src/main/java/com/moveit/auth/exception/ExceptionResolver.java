@@ -1,4 +1,4 @@
-package com.moveit.auth.configuration.exception;
+package com.moveit.auth.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -12,15 +12,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-/**
- * Gestionnaire global des exceptions de l'application.
- */
 @ControllerAdvice
 public class ExceptionResolver extends ResponseEntityExceptionHandler {
 
-    /**
-     * Gère les exceptions de sécurité et les transforme en réponses HTTP.
-     */
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleSecurityException(Exception exception) {
         return switch (exception) {
@@ -31,8 +25,8 @@ public class ExceptionResolver extends ResponseEntityExceptionHandler {
             case ExpiredJwtException e -> createProblemDetail(403, e.getMessage(), "The JWT token has expired");
             case DataIntegrityViolationException e -> {
                 String message = e.getMessage();
-                if (message != null && message.contains("email")) {
-                    yield createProblemDetail(409, "Email already exists", "An account with this email address already exists");
+                if (message != null && message.contains("nickname")) {
+                    yield createProblemDetail(409, "Nickname already exists", "An account with this nickname already exists");
                 }
                 yield createProblemDetail(409, "Data integrity violation", "The provided data conflicts with existing records");
             }
@@ -40,9 +34,6 @@ public class ExceptionResolver extends ResponseEntityExceptionHandler {
         };
     }
 
-    /**
-     * Crée un objet ProblemDetail pour une réponse d'erreur HTTP.
-     */
     private ProblemDetail createProblemDetail(int status, String message, String description) {
         ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(status), message);
         detail.setProperty("description", description);
