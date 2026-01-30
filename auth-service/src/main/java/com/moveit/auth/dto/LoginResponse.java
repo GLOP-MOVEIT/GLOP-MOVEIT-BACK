@@ -1,6 +1,5 @@
-package com.moveit.auth.model;
+package com.moveit.auth.dto;
 
-import com.moveit.auth.dto.UserDto;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

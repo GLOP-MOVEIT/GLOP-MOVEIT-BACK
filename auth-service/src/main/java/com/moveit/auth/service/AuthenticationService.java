@@ -1,10 +1,10 @@
 package com.moveit.auth.service;
 
+import com.moveit.auth.dto.LoginUserDto;
+import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.Role;
 import com.moveit.auth.entity.RoleEnum;
 import com.moveit.auth.entity.User;
-import com.moveit.auth.model.LoginUserDto;
-import com.moveit.auth.model.RegisterUserDto;
 import com.moveit.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;

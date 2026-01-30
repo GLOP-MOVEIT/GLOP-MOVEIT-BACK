@@ -1,11 +1,11 @@
 package com.moveit.auth.controller;
 
+import com.moveit.auth.dto.LoginResponse;
+import com.moveit.auth.dto.LoginUserDto;
+import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.dto.UserDto;
 import com.moveit.auth.entity.User;
 import com.moveit.auth.mapper.UserMapper;
-import com.moveit.auth.model.LoginResponse;
-import com.moveit.auth.model.LoginUserDto;
-import com.moveit.auth.model.RegisterUserDto;
 import com.moveit.auth.service.AuthenticationService;
 import com.moveit.auth.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
