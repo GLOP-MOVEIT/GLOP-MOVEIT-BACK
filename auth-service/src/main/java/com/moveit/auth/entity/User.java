@@ -9,7 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,60 +22,41 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-@Table(name = "users")
 @Entity
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@Accessors(chain = true)
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Integer id;
 
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
-
-    @Column(name = "surname", nullable = false)
-    private String surname;
-
-    @Column(unique = true, length = 100, nullable = false)
-    private String email;
+    @Column(unique = true, length = 50, nullable = false)
+    private String nickname;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "phone_number", length = 20)
-    private String phoneNumber;
-
-    @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
-    private Date createdAt;
-
     @UpdateTimestamp
-    @Column(name = "updated_at")
-    private Date updatedAt;
+    @Column(name = "last_connection_date")
+    private Date lastConnectionDate;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
 
-    @Column(name = "accepts_notifications", nullable = false)
-    private boolean acceptsNotifications = false;
-
-    @Column(name = "accepts_location", nullable = false)
-    private boolean acceptsLocation = false;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
-        return List.of(authority);
-    }
-
-    public String getPassword() {
-        return password;
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName().toString()));
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return nickname;
     }
 
     @Override
@@ -93,98 +77,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public User setFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public User setSurname(String surname) {
-        this.surname = surname;
-        return this;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public User setEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
-    public User setPassword(String password) {
-        this.password = password;
-        return this;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public User setRole(Role role) {
-        this.role = role;
-
-        return this;
-    }
-
-    public boolean isAcceptsNotifications() {
-        return acceptsNotifications;
-    }
-
-    public User setAcceptsNotifications(boolean acceptsNotifications) {
-        this.acceptsNotifications = acceptsNotifications;
-        return this;
-    }
-
-    public boolean isAcceptsLocation() {
-        return acceptsLocation;
-    }
-
-    public User setAcceptsLocation(boolean acceptsLocation) {
-        this.acceptsLocation = acceptsLocation;
-        return this;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public User setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-        return this;
     }
 }

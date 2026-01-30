@@ -11,9 +11,6 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Service de gestion des rôles utilisateurs.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,13 +18,11 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
 
-    /**
-     * Initialise les rôles par défaut au démarrage de l'application.
-     */
     @PostConstruct
     void init() {
         Map<RoleEnum, String> roleDescriptionMap = Map.of(
                 RoleEnum.SPECTATOR, "Default user role",
+                RoleEnum.ATHLETE, "Athlete role",
                 RoleEnum.VOLUNTEER, "Volunteer role",
                 RoleEnum.COMMISSIONER, "Commissioner role",
                 RoleEnum.ADMIN, "Administrator role"
@@ -47,9 +42,6 @@ public class RoleService {
         );
     }
 
-    /**
-     * Recherche un rôle par son nom.
-     */
     public Optional<Role> findByName(RoleEnum name) {
         return roleRepository.findByName(name);
     }
