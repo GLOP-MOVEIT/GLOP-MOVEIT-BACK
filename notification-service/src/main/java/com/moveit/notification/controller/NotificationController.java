@@ -4,6 +4,7 @@ import com.moveit.notification.dto.NotificationCreateDTO;
 import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.exception.InvalidSortFieldException;
 import com.moveit.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/notifications")
@@ -22,6 +24,11 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    
+    // Whitelist des champs autorisés pour le tri (sécurité contre injection SQL)
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+        "id", "title", "notificationType", "createdAt"
+    );
 
     @GetMapping
     public ResponseEntity<Page<Notification>> getNotifications(
@@ -32,6 +39,13 @@ public class NotificationController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String direction) {
+        
+        // Validation du champ de tri (Point 7 - Sécurité)
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            throw new InvalidSortFieldException(
+                "Invalid sort field: '" + sortBy + "'. Allowed fields: " + ALLOWED_SORT_FIELDS
+            );
+        }
         
         Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
