@@ -1,21 +1,21 @@
 package com.moveit.notification.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.notification.dto.NotificationCreateDTO;
-import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.service.NotificationService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -23,163 +23,175 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayName("NotificationController Unit Tests")
+@WebMvcTest(controllers = NotificationController.class)
+@Import(ObjectMapper.class)
+@DisplayName("NotificationController ")
 class NotificationControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
     private NotificationService notificationService;
 
-    @InjectMocks
-    private NotificationController notificationController;
-
-    private Notification notification;
-    private NotificationCreateDTO createDTO;
-
-    @BeforeEach
-    void setUp() {
-        notification = new Notification();
+    @Test
+    @DisplayName("GET /notifications should return paginated notifications")
+    void testGetNotifications() throws Exception {
+        Notification notification = new Notification();
         notification.setId(1L);
         notification.setTitle("Test Notification");
         notification.setContent("Test Content");
         notification.setNotificationType(NotificationType.INCIDENT);
-        notification.setIncidentIds(new HashSet<>(Set.of(100L)));
         notification.setCreatedAt(LocalDateTime.now());
 
-        createDTO = new NotificationCreateDTO();
-        createDTO.setTitle("New Notification");
-        createDTO.setContent("New Content");
-        createDTO.setNotificationType(NotificationType.EVENT);
-        createDTO.setEventIds(new HashSet<>(Set.of(200L)));
-    }
-
-    @Test
-    @DisplayName("getNotifications should return paginated notifications")
-    void testGetNotifications() {
         Page<Notification> page = new PageImpl<>(Arrays.asList(notification), PageRequest.of(0, 10), 1);
         when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn(page);
 
-        ResponseEntity<Page<Notification>> response = notificationController.getNotifications(
-                null, null, null, 0, 10, "createdAt", "DESC");
+        mockMvc.perform(get("/notifications")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Test Notification"))
+                .andExpect(jsonPath("$.content[0].content").value("Test Content"));
 
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().getContent().size());
-        assertEquals("Test Notification", response.getBody().getContent().get(0).getTitle());
         verify(notificationService, times(1)).getNotifications(any(), any(), any(), any());
     }
 
     @Test
-    @DisplayName("getNotifications with filters should apply filters")
-    void testGetNotificationsWithFilters() {
+    @DisplayName("GET /notifications with filters should apply filters")
+    void testGetNotificationsWithFilters() throws Exception {
+        Notification notification = new Notification();
+        notification.setId(1L);
+        notification.setTitle("Incident Notification");
+        notification.setNotificationType(NotificationType.INCIDENT);
+        notification.setIncidentIds(new HashSet<>(Set.of(100L)));
+
         Page<Notification> page = new PageImpl<>(Arrays.asList(notification), PageRequest.of(0, 10), 1);
         when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn(page);
 
-        ResponseEntity<Page<Notification>> response = notificationController.getNotifications(
-                NotificationType.INCIDENT, 100L, null, 0, 10, "createdAt", "DESC");
+        mockMvc.perform(get("/notifications")
+                        .param("type", "INCIDENT")
+                        .param("incidentId", "100")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].notificationType").value("INCIDENT"));
 
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
         verify(notificationService, times(1)).getNotifications(any(), any(), any(), any());
     }
 
     @Test
-    @DisplayName("getNotificationById should return notification when found")
-    void testGetNotificationById_Found() {
+    @DisplayName("GET /notifications/{id} should return notification when found")
+    void testGetNotificationById() throws Exception {
+        Notification notification = new Notification();
+        notification.setId(1L);
+        notification.setTitle("Test Notification");
+        notification.setContent("Test Content");
+        notification.setNotificationType(NotificationType.INCIDENT);
+
         when(notificationService.getNotificationById(1L)).thenReturn(Optional.of(notification));
 
-        ResponseEntity<Notification> response = notificationController.getNotificationById(1L);
+        mockMvc.perform(get("/notifications/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("Test Notification"))
+                .andExpect(jsonPath("$.content").value("Test Content"));
 
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(1L, response.getBody().getId());
-        assertEquals("Test Notification", response.getBody().getTitle());
         verify(notificationService, times(1)).getNotificationById(1L);
     }
 
     @Test
-    @DisplayName("getNotificationById should return 404 when not found")
-    void testGetNotificationById_NotFound() {
+    @DisplayName("GET /notifications/{id} should return 404 when not found")
+    void testGetNotificationById_NotFound() throws Exception {
         when(notificationService.getNotificationById(999L)).thenReturn(Optional.empty());
 
-        ResponseEntity<Notification> response = notificationController.getNotificationById(999L);
+        mockMvc.perform(get("/notifications/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
 
-        assertNotNull(response);
-        assertEquals(404, response.getStatusCode().value());
         verify(notificationService, times(1)).getNotificationById(999L);
     }
 
     @Test
-    @DisplayName("createNotification should create and return notification")
-    void testCreateNotification() {
+    @DisplayName("POST /notifications should create notification")
+    void testCreateNotification() throws Exception {
+        Notification notification = new Notification();
+        notification.setId(1L);
+        notification.setTitle("New Notification");
+        notification.setContent("New Content");
+        notification.setNotificationType(NotificationType.EVENT);
+
+        NotificationCreateDTO createDTO = new NotificationCreateDTO();
+        createDTO.setTitle("New Notification");
+        createDTO.setContent("New Content");
+        createDTO.setNotificationType(NotificationType.EVENT);
+
         when(notificationService.createNotification(any(NotificationCreateDTO.class))).thenReturn(notification);
 
-        ResponseEntity<Notification> response = notificationController.createNotification(createDTO);
+        mockMvc.perform(post("/notifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("New Notification"));
 
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals("Test Notification", response.getBody().getTitle());
         verify(notificationService, times(1)).createNotification(any(NotificationCreateDTO.class));
     }
 
     @Test
-    @DisplayName("updateNotification should update notification when found")
-    void testUpdateNotification_Found() {
-        NotificationUpdateDTO updateDTO = new NotificationUpdateDTO();
-        updateDTO.setTitle("Updated Title");
-        updateDTO.setContent("Updated Content");
+    @DisplayName("PUT /notifications/{id} should update notification when found")
+    void testUpdateNotification() throws Exception {
+        Notification updatedNotification = new Notification();
+        updatedNotification.setId(1L);
+        updatedNotification.setTitle("Updated Title");
+        updatedNotification.setContent("Updated Content");
+        updatedNotification.setNotificationType(NotificationType.INCIDENT);
 
-        Notification updated = new Notification();
-        updated.setId(1L);
-        updated.setTitle("Updated Title");
-        updated.setContent("Updated Content");
-        updated.setNotificationType(NotificationType.INCIDENT);
+        when(notificationService.updateNotification(eq(1L), any())).thenReturn(Optional.of(updatedNotification));
 
-        when(notificationService.updateNotification(eq(1L), any(NotificationUpdateDTO.class)))
-                .thenReturn(Optional.of(updated));
+        mockMvc.perform(put("/notifications/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Updated Title\",\"content\":\"Updated Content\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.content").value("Updated Content"));
 
-        ResponseEntity<Notification> response = notificationController.updateNotification(1L, updateDTO);
-
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals("Updated Title", response.getBody().getTitle());
-        verify(notificationService, times(1)).updateNotification(eq(1L), any(NotificationUpdateDTO.class));
+        verify(notificationService, times(1)).updateNotification(eq(1L), any());
     }
 
     @Test
-    @DisplayName("updateNotification should return 404 when not found")
-    void testUpdateNotification_NotFound() {
-        NotificationUpdateDTO updateDTO = new NotificationUpdateDTO();
-        updateDTO.setTitle("Updated Title");
+    @DisplayName("PUT /notifications/{id} should return 404 when not found")
+    void testUpdateNotification_NotFound() throws Exception {
+        when(notificationService.updateNotification(eq(999L), any())).thenReturn(Optional.empty());
 
-        when(notificationService.updateNotification(eq(999L), any(NotificationUpdateDTO.class)))
-                .thenReturn(Optional.empty());
+        mockMvc.perform(put("/notifications/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Updated Title\"}"))
+                .andExpect(status().isNotFound());
 
-        ResponseEntity<Notification> response = notificationController.updateNotification(999L, updateDTO);
-
-        assertNotNull(response);
-        assertEquals(404, response.getStatusCode().value());
-        verify(notificationService, times(1)).updateNotification(eq(999L), any(NotificationUpdateDTO.class));
+        verify(notificationService, times(1)).updateNotification(eq(999L), any());
     }
 
     @Test
-    @DisplayName("deleteNotification should delete notification")
-    void testDeleteNotification() {
+    @DisplayName("DELETE /notifications/{id} should delete notification")
+    void testDeleteNotification() throws Exception {
         doNothing().when(notificationService).deleteNotification(1L);
 
-        ResponseEntity<Void> response = notificationController.deleteNotification(1L);
+        mockMvc.perform(delete("/notifications/1"))
+                .andExpect(status().isNoContent());
 
-        assertNotNull(response);
-        assertEquals(204, response.getStatusCode().value());
         verify(notificationService, times(1)).deleteNotification(1L);
     }
 }

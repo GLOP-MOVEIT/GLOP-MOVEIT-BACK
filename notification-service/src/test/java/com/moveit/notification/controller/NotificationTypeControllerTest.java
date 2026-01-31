@@ -1,48 +1,47 @@
 package com.moveit.notification.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.notification.entity.NotificationType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.List;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@ExtendWith(MockitoExtension.class)
-@DisplayName("NotificationTypeController Unit Tests")
+@WebMvcTest(controllers = NotificationTypeController.class)
+@Import(ObjectMapper.class)
+@DisplayName("NotificationTypeController WebMvc Tests")
 class NotificationTypeControllerTest {
 
-    @InjectMocks
-    private NotificationTypeController notificationTypeController;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
-    @DisplayName("getAllTypes should return all notification types")
-    void testGetAllTypes() {
-        ResponseEntity<List<NotificationType>> response = notificationTypeController.getAllTypes();
-
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(5, response.getBody().size());
-        assertTrue(response.getBody().contains(NotificationType.INCIDENT));
-        assertTrue(response.getBody().contains(NotificationType.EVENT));
-        assertTrue(response.getBody().contains(NotificationType.SYSTEM));
-        assertTrue(response.getBody().contains(NotificationType.MAINTENANCE));
-        assertTrue(response.getBody().contains(NotificationType.ALERT));
+    @DisplayName("GET /notification-types should return all notification types")
+    void testGetAllTypes() throws Exception {
+        mockMvc.perform(get("/notification-types")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(5)))
+                .andExpect(jsonPath("$[0]").value("INCIDENT"))
+                .andExpect(jsonPath("$[1]").value("EVENT"))
+                .andExpect(jsonPath("$[2]").value("SYSTEM"))
+                .andExpect(jsonPath("$[3]").value("MAINTENANCE"))
+                .andExpect(jsonPath("$[4]").value("ALERT"));
     }
 
     @Test
-    @DisplayName("getAllTypes should return all enum values in order")
-    void testGetAllTypesOrder() {
-        ResponseEntity<List<NotificationType>> response = notificationTypeController.getAllTypes();
-
-        assertNotNull(response.getBody());
-        List<NotificationType> expected = Arrays.asList(NotificationType.values());
-        assertEquals(expected, response.getBody());
+    @DisplayName("GET /notification-types/{type} should return specific type")
+    void testGetType() throws Exception {
+        mockMvc.perform(get("/notification-types/INCIDENT")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value("INCIDENT"));
     }
 }
