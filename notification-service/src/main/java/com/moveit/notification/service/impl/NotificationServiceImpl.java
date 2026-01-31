@@ -24,52 +24,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Page<Notification> getNotifications(NotificationType type, Long incidentId, Long eventId, Pageable pageable) {
-        // Si aucun filtre, retourner toutes les notifications paginées
-        if (type == null && incidentId == null && eventId == null) {
-            return notificationRepository.findAll(pageable);
-        }
-
-        // Si filtre par type uniquement
-        if (type != null && incidentId == null && eventId == null) {
-            return notificationRepository.findByNotificationType(type, pageable);
-        }
-
-        // Si filtre par incident uniquement
-        if (incidentId != null && type == null && eventId == null) {
-            return notificationRepository.findByIncidentIdsContaining(incidentId, pageable);
-        }
-
-        // Si filtre par event uniquement
-        if (eventId != null && type == null && incidentId == null) {
-            return notificationRepository.findByEventIdsContaining(eventId, pageable);
-        }
-
-        // Combinaisons multiples : on filtre manuellement puis on page
-        List<Notification> results = notificationRepository.findAll();
-
-        if (type != null) {
-            results = results.stream()
-                    .filter(n -> n.getNotificationType() == type)
-                    .toList();
-        }
-
-        if (incidentId != null) {
-            results = results.stream()
-                    .filter(n -> n.getIncidentIds().contains(incidentId))
-                    .toList();
-        }
-
-        if (eventId != null) {
-            results = results.stream()
-                    .filter(n -> n.getEventIds().contains(eventId))
-                    .toList();
-        }
-
-        // Manual pagination
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), results.size());
-        List<Notification> pageContent = results.subList(start, end);
-        return new org.springframework.data.domain.PageImpl<>(pageContent, pageable, results.size());
+        // Utilise la query optimisée qui gère tous les cas de filtrage en SQL
+        // Évite de charger toutes les notifications en mémoire
+        return notificationRepository.findByFilters(type, incidentId, eventId, pageable);
     }
 
     @Override

@@ -158,7 +158,7 @@ class NotificationServiceImplTest {
         List<Notification> notifList = List.of(notif);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(notifList, pageable, 1);
-        when(notificationRepository.findAll(pageable)).thenReturn(page);
+        when(notificationRepository.findByFilters(null, null, null, pageable)).thenReturn(page);
 
         // When
         Page<Notification> result = notificationService.getNotifications(null, null, null, pageable);
@@ -166,7 +166,7 @@ class NotificationServiceImplTest {
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getId()).isEqualTo(3L);
-        verify(notificationRepository, times(1)).findAll(pageable);
+        verify(notificationRepository, times(1)).findByFilters(null, null, null, pageable);
     }
 
     @Test
@@ -178,7 +178,7 @@ class NotificationServiceImplTest {
         List<Notification> notifList = List.of(notif);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(notifList, pageable, 1);
-        when(notificationRepository.findByNotificationType(NotificationType.ALERT, pageable)).thenReturn(page);
+        when(notificationRepository.findByFilters(NotificationType.ALERT, null, null, pageable)).thenReturn(page);
 
         // When
         Page<Notification> result = notificationService.getNotifications(NotificationType.ALERT, null, null, pageable);
@@ -186,7 +186,7 @@ class NotificationServiceImplTest {
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getNotificationType()).isEqualTo(NotificationType.ALERT);
-        verify(notificationRepository, times(1)).findByNotificationType(NotificationType.ALERT, pageable);
+        verify(notificationRepository, times(1)).findByFilters(NotificationType.ALERT, null, null, pageable);
     }
 
     @Test
@@ -198,7 +198,7 @@ class NotificationServiceImplTest {
         List<Notification> notifList = List.of(notif);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(notifList, pageable, 1);
-        when(notificationRepository.findByIncidentIdsContaining(100L, pageable)).thenReturn(page);
+        when(notificationRepository.findByFilters(null, 100L, null, pageable)).thenReturn(page);
 
         // When
         Page<Notification> result = notificationService.getNotifications(null, 100L, null, pageable);
@@ -206,7 +206,7 @@ class NotificationServiceImplTest {
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getIncidentIds()).contains(100L);
-        verify(notificationRepository, times(1)).findByIncidentIdsContaining(100L, pageable);
+        verify(notificationRepository, times(1)).findByFilters(null, 100L, null, pageable);
     }
 
     @Test
@@ -218,7 +218,7 @@ class NotificationServiceImplTest {
         List<Notification> notifList = List.of(notif);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(notifList, pageable, 1);
-        when(notificationRepository.findByEventIdsContaining(200L, pageable)).thenReturn(page);
+        when(notificationRepository.findByFilters(null, null, 200L, pageable)).thenReturn(page);
 
         // When
         Page<Notification> result = notificationService.getNotifications(null, null, 200L, pageable);
@@ -226,7 +226,7 @@ class NotificationServiceImplTest {
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getEventIds()).contains(200L);
-        verify(notificationRepository, times(1)).findByEventIdsContaining(200L, pageable);
+        verify(notificationRepository, times(1)).findByFilters(null, null, 200L, pageable);
     }
 
     @Test
@@ -237,14 +237,10 @@ class NotificationServiceImplTest {
         notif1.setNotificationType(NotificationType.INCIDENT);
         notif1.setIncidentIds(Set.of(100L));
         
-        Notification notif2 = new Notification();
-        notif2.setId(8L);
-        notif2.setNotificationType(NotificationType.SYSTEM);
-        notif2.setIncidentIds(Set.of(100L));
-        
-        List<Notification> allNotifs = List.of(notif1, notif2);
+        List<Notification> filteredNotifs = List.of(notif1);
         Pageable pageable = PageRequest.of(0, 10);
-        when(notificationRepository.findAll()).thenReturn(allNotifs);
+        Page<Notification> page = new PageImpl<>(filteredNotifs, pageable, 1);
+        when(notificationRepository.findByFilters(NotificationType.INCIDENT, 100L, null, pageable)).thenReturn(page);
 
         // When
         Page<Notification> result = notificationService.getNotifications(NotificationType.INCIDENT, 100L, null, pageable);
@@ -253,7 +249,7 @@ class NotificationServiceImplTest {
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getId()).isEqualTo(7L);
         assertThat(result.getContent().get(0).getNotificationType()).isEqualTo(NotificationType.INCIDENT);
-        verify(notificationRepository, times(1)).findAll();
+        verify(notificationRepository, times(1)).findByFilters(NotificationType.INCIDENT, 100L, null, pageable);
     }
 
     @Test
