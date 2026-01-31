@@ -24,7 +24,7 @@ public class PaginationConfig {
     }
 
     public void setDefaultPageSize(int defaultPageSize) {
-        this.defaultPageSize = Math.max(1, Math.min(defaultPageSize, maxPageSize));
+        this.defaultPageSize = Math.clamp(defaultPageSize, minPageSize, maxPageSize);
     }
 
     public int getMaxPageSize() {

@@ -39,13 +39,4 @@ public class GatewayConfiguration {
                 .before(uri(notificationServiceUrl))
                 .build();
     }
-
-    // Exemple pour rajouter de nouvelles routes:
-    // @Bean
-    // public RouterFunction<ServerResponse> userServiceRoute() {
-    //     return route("user-service")
-    //             .route(path("/users/**"), http())
-    //             .before(uri("http://localhost:8083"))
-    //             .build();
-    // }
 }

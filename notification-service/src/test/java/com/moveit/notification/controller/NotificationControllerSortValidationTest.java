@@ -1,11 +1,12 @@
 package com.moveit.notification.controller;
 
 import com.moveit.notification.config.PaginationConfig;
-import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -37,50 +38,15 @@ class NotificationControllerSortValidationTest {
     @MockitoBean
     private NotificationMapper notificationMapper;
 
-    @Test
-    @DisplayName("GET /notifications with valid sortBy 'createdAt' should succeed")
-    void testGetNotifications_ValidSortByCreatedAt() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"createdAt", "id", "title", "notificationType"})
+    @DisplayName("GET /notifications with valid sortBy should succeed")
+    void testGetNotifications_ValidSortFields(String sortField) throws Exception {
         Page<Object> emptyPage = new PageImpl<>(Collections.emptyList());
         when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn((Page) emptyPage);
 
         mockMvc.perform(get("/notifications")
-                        .param("sortBy", "createdAt")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("GET /notifications with valid sortBy 'id' should succeed")
-    void testGetNotifications_ValidSortById() throws Exception {
-        Page<Object> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn((Page) emptyPage);
-
-        mockMvc.perform(get("/notifications")
-                        .param("sortBy", "id")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("GET /notifications with valid sortBy 'title' should succeed")
-    void testGetNotifications_ValidSortByTitle() throws Exception {
-        Page<Object> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn((Page) emptyPage);
-
-        mockMvc.perform(get("/notifications")
-                        .param("sortBy", "title")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("GET /notifications with valid sortBy 'notificationType' should succeed")
-    void testGetNotifications_ValidSortByNotificationType() throws Exception {
-        Page<Object> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn((Page) emptyPage);
-
-        mockMvc.perform(get("/notifications")
-                        .param("sortBy", "notificationType")
+                        .param("sortBy", sortField)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

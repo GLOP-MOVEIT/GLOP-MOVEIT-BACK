@@ -60,8 +60,9 @@ class SubscriptionServiceImplTest {
         List<Subscription> result = subscriptionService.getSubscriptions("user1", null);
 
         // Then
-        assertThat(result).hasSize(2);
-        assertThat(result).allMatch(s -> s.getUserId().equals("user1"));
+        assertThat(result)
+                .hasSize(2)
+                .allMatch(s -> s.getUserId().equals("user1"));
         verify(subscriptionRepository, times(1)).findByUserId("user1");
     }
 
@@ -77,8 +78,9 @@ class SubscriptionServiceImplTest {
         List<Subscription> result = subscriptionService.getSubscriptions(null, NotificationType.INCIDENT);
 
         // Then
-        assertThat(result).hasSize(2);
-        assertThat(result).allMatch(s -> s.getNotificationType() == NotificationType.INCIDENT);
+        assertThat(result)
+                .hasSize(2)
+                .allMatch(s -> s.getNotificationType() == NotificationType.INCIDENT);
         verify(subscriptionRepository, times(1)).findByNotificationType(NotificationType.INCIDENT);
     }
 
@@ -93,9 +95,11 @@ class SubscriptionServiceImplTest {
         List<Subscription> result = subscriptionService.getSubscriptions("user1", NotificationType.INCIDENT);
 
         // Then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getUserId()).isEqualTo("user1");
-        assertThat(result.get(0).getNotificationType()).isEqualTo(NotificationType.INCIDENT);
+        assertThat(result)
+                .hasSize(1);
+        assertThat(result.get(0))
+                .extracting(Subscription::getUserId, Subscription::getNotificationType)
+                .containsExactly("user1", NotificationType.INCIDENT);
         verify(subscriptionRepository, times(1)).findByUserId("user1");
     }
 
@@ -109,9 +113,11 @@ class SubscriptionServiceImplTest {
         Optional<Subscription> result = subscriptionService.getSubscriptionById(10L);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(10L);
-        assertThat(result.get().getUserId()).isEqualTo("user1");
+        assertThat(result)
+                .isPresent()
+                .get()
+                .extracting(Subscription::getId, Subscription::getUserId)
+                .containsExactly(10L, "user1");
         verify(subscriptionRepository, times(1)).findById(10L);
     }
 
@@ -142,10 +148,9 @@ class SubscriptionServiceImplTest {
         Subscription result = subscriptionService.createSubscription(dto);
 
         // Then
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getUserId()).isEqualTo("user1");
-        assertThat(result.getNotificationType()).isEqualTo(NotificationType.INCIDENT);
-        assertThat(result.getActive()).isTrue();
+        assertThat(result)
+                .extracting(Subscription::getId, Subscription::getUserId, Subscription::getNotificationType, Subscription::getActive)
+                .containsExactly(1L, "user1", NotificationType.INCIDENT, true);
         verify(subscriptionRepository, times(1)).findByUserIdAndNotificationType("user1", NotificationType.INCIDENT);
         verify(subscriptionRepository, times(1)).save(any(Subscription.class));
     }
@@ -165,8 +170,9 @@ class SubscriptionServiceImplTest {
         Subscription result = subscriptionService.createSubscription(dto);
 
         // Then
-        assertThat(result.getId()).isEqualTo(5L);
-        assertThat(result.getActive()).isTrue();
+        assertThat(result)
+                .extracting(Subscription::getId, Subscription::getActive)
+                .containsExactly(5L, true);
         verify(subscriptionRepository, times(1)).findByUserIdAndNotificationType("user2", NotificationType.ALERT);
         verify(subscriptionRepository, times(1)).save(existingSub);
     }
@@ -185,8 +191,9 @@ class SubscriptionServiceImplTest {
         Subscription result = subscriptionService.createSubscription(dto);
 
         // Then
-        assertThat(result.getId()).isEqualTo(10L);
-        assertThat(result.getActive()).isTrue();
+        assertThat(result)
+                .extracting(Subscription::getId, Subscription::getActive)
+                .containsExactly(10L, true);
         verify(subscriptionRepository, times(1)).save(existingSub);
     }
 
@@ -201,8 +208,11 @@ class SubscriptionServiceImplTest {
         Optional<Subscription> result = subscriptionService.toggleSubscription(20L);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get().getActive()).isFalse();
+        assertThat(result)
+                .isPresent()
+                .get()
+                .extracting(Subscription::getActive)
+                .isEqualTo(false);
         verify(subscriptionRepository, times(1)).findById(20L);
         verify(subscriptionRepository, times(1)).save(any(Subscription.class));
     }
@@ -218,8 +228,11 @@ class SubscriptionServiceImplTest {
         Optional<Subscription> result = subscriptionService.toggleSubscription(21L);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get().getActive()).isTrue();
+        assertThat(result)
+                .isPresent()
+                .get()
+                .extracting(Subscription::getActive)
+                .isEqualTo(true);
         verify(subscriptionRepository, times(1)).findById(21L);
         verify(subscriptionRepository, times(1)).save(any(Subscription.class));
     }

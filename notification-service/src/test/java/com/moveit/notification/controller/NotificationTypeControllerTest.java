@@ -1,7 +1,6 @@
 package com.moveit.notification.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moveit.notification.entity.NotificationType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
