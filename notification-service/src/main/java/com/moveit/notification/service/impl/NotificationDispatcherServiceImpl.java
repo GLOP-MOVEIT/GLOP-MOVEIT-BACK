@@ -1,18 +1,28 @@
 package com.moveit.notification.service.impl;
 
 import com.moveit.notification.entity.Notification;
-import com.moveit.notification.entity.Subscription;
 import com.moveit.notification.repository.SubscriptionRepository;
 import com.moveit.notification.service.NotificationDispatcherService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service de dispatch des notifications via WebSocket.
+ * 
+ * P0 - Sécurité : Utilise convertAndSendToUser() pour isoler les queues par utilisateur.
+ *      Chaque user ne reçoit que SES notifications, pas celles des autres.
+ * 
+ * P1 - Performance : Utilise une query optimisée qui retourne directement les userIds
+ *      au lieu de charger toutes les entités Subscription en mémoire.
+ */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationDispatcherServiceImpl implements NotificationDispatcherService {
 
     private final SubscriptionRepository subscriptionRepository;
@@ -21,51 +31,36 @@ public class NotificationDispatcherServiceImpl implements NotificationDispatcher
     @Override
     @Async
     public void dispatch(Notification notification) {
-        // Find all active subscriptions for this notification type
-        List<Subscription> subscriptions = subscriptionRepository
-                .findByNotificationType(notification.getNotificationType())
-                .stream()
-                .filter(Subscription::getActive)
-                .toList();
+        // P1 - Query optimisée : récupère directement les userIds actifs (pas les entités complètes)
+        List<String> activeUserIds = subscriptionRepository
+                .findActiveUserIdsByNotificationType(notification.getNotificationType());
 
-        // Send to each subscribed user
-        for (Subscription subscription : subscriptions) {
-            String userId = subscription.getUserId();
-            
-            try {
-                // Send via WebSocket (real-time push to connected clients)
-                sendViaWebSocket(userId, notification);
-                
-            } catch (Exception e) {
-                // Silent fail
-            }
-        }
+        log.debug("Dispatching notification {} to {} users", notification.getId(), activeUserIds.size());
 
-        // Also broadcast to general topic for all connected clients
-        broadcastToAll(notification);
-    }
-
-    private void sendViaWebSocket(String userId, Notification notification) {
-        try {
-            // Send to specific user's queue
-            messagingTemplate.convertAndSend(
-                    "/queue/notifications/" + userId,
-                    notification
-            );
-        } catch (Exception e) {
-            // Silent fail
+        // P0 - Isolation : envoie à chaque user sur sa queue privée
+        for (String userId : activeUserIds) {
+            sendToUser(userId, notification);
         }
     }
 
-    private void broadcastToAll(Notification notification) {
+    /**
+     * P0 - Envoie la notification sur la queue privée de l'utilisateur.
+     * Utilise convertAndSendToUser() qui route vers /user/{userId}/queue/notifications
+     * 
+     * Le client doit s'abonner à : /user/queue/notifications
+     * Spring ajoute automatiquement le préfixe /user/{sessionId} ou /user/{userId}
+     */
+    private void sendToUser(String userId, Notification notification) {
         try {
-            // Broadcast to all connected clients on the topic
-            messagingTemplate.convertAndSend(
-                    "/topic/notifications",
+            messagingTemplate.convertAndSendToUser(
+                    userId,
+                    "/queue/notifications",
                     notification
             );
+            log.trace("Notification {} sent to user {}", notification.getId(), userId);
         } catch (Exception e) {
-            // Silent fail
+            log.warn("Failed to send notification {} to user {}: {}", 
+                    notification.getId(), userId, e.getMessage());
         }
     }
 }
