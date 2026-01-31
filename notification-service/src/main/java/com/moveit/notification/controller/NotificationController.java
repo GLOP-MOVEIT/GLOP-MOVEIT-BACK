@@ -1,10 +1,12 @@
 package com.moveit.notification.controller;
 
 import com.moveit.notification.dto.NotificationCreateDTO;
+import com.moveit.notification.dto.NotificationResponseDTO;
 import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.exception.InvalidSortFieldException;
+import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.Set;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final NotificationMapper notificationMapper;
     
     // Whitelist des champs autorisés pour le tri (sécurité contre injection SQL)
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
@@ -31,7 +34,7 @@ public class NotificationController {
     );
 
     @GetMapping
-    public ResponseEntity<Page<Notification>> getNotifications(
+    public ResponseEntity<Page<NotificationResponseDTO>> getNotifications(
             @RequestParam(required = false) NotificationType type,
             @RequestParam(required = false) Long incidentId,
             @RequestParam(required = false) Long eventId,
@@ -50,25 +53,30 @@ public class NotificationController {
         Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
         
-        return ResponseEntity.ok(notificationService.getNotifications(type, incidentId, eventId, pageable));
+        Page<Notification> notifications = notificationService.getNotifications(type, incidentId, eventId, pageable);
+        Page<NotificationResponseDTO> response = notifications.map(notificationMapper::toResponseDTO);
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Notification> getNotificationById(@PathVariable Long id) {
+    public ResponseEntity<NotificationResponseDTO> getNotificationById(@PathVariable Long id) {
         return notificationService.getNotificationById(id)
+                .map(notificationMapper::toResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Notification> createNotification(@Valid @RequestBody NotificationCreateDTO dto) {
+    public ResponseEntity<NotificationResponseDTO> createNotification(@Valid @RequestBody NotificationCreateDTO dto) {
         Notification saved = notificationService.createNotification(dto);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(notificationMapper.toResponseDTO(saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Notification> updateNotification(@PathVariable Long id, @Valid @RequestBody NotificationUpdateDTO dto) {
+    public ResponseEntity<NotificationResponseDTO> updateNotification(@PathVariable Long id, @Valid @RequestBody NotificationUpdateDTO dto) {
         return notificationService.updateNotification(id, dto)
+                .map(notificationMapper::toResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

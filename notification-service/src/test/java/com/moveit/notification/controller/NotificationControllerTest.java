@@ -2,8 +2,10 @@ package com.moveit.notification.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.notification.dto.NotificationCreateDTO;
+import com.moveit.notification.dto.NotificationResponseDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,9 @@ class NotificationControllerTest {
 
     @MockitoBean
     private NotificationService notificationService;
+    
+    @MockitoBean
+    private NotificationMapper notificationMapper;
 
     @Test
     @DisplayName("GET /notifications should return paginated notifications")
@@ -52,8 +57,16 @@ class NotificationControllerTest {
         notification.setNotificationType(NotificationType.INCIDENT);
         notification.setCreatedAt(LocalDateTime.now());
 
+        NotificationResponseDTO dto = new NotificationResponseDTO();
+        dto.setId(1L);
+        dto.setTitle("Test Notification");
+        dto.setContent("Test Content");
+        dto.setNotificationType(NotificationType.INCIDENT);
+        dto.setCreatedAt(LocalDateTime.now());
+
         Page<Notification> page = new PageImpl<>(Arrays.asList(notification), PageRequest.of(0, 10), 1);
         when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn(page);
+        when(notificationMapper.toResponseDTO(notification)).thenReturn(dto);
 
         mockMvc.perform(get("/notifications")
                         .param("page", "0")
@@ -76,8 +89,15 @@ class NotificationControllerTest {
         notification.setNotificationType(NotificationType.INCIDENT);
         notification.setIncidentIds(new HashSet<>(Set.of(100L)));
 
+        NotificationResponseDTO dto = new NotificationResponseDTO();
+        dto.setId(1L);
+        dto.setTitle("Incident Notification");
+        dto.setNotificationType(NotificationType.INCIDENT);
+        dto.setIncidentIds(new HashSet<>(Set.of(100L)));
+
         Page<Notification> page = new PageImpl<>(Arrays.asList(notification), PageRequest.of(0, 10), 1);
         when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn(page);
+        when(notificationMapper.toResponseDTO(notification)).thenReturn(dto);
 
         mockMvc.perform(get("/notifications")
                         .param("type", "INCIDENT")
@@ -100,7 +120,13 @@ class NotificationControllerTest {
         notification.setContent("Test Content");
         notification.setNotificationType(NotificationType.INCIDENT);
 
+        NotificationResponseDTO dto = new NotificationResponseDTO();
+        dto.setId(1L);
+        dto.setTitle("Test Notification");
+        dto.setContent("Test Content");
+
         when(notificationService.getNotificationById(1L)).thenReturn(Optional.of(notification));
+        when(notificationMapper.toResponseDTO(notification)).thenReturn(dto);
 
         mockMvc.perform(get("/notifications/1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -133,12 +159,17 @@ class NotificationControllerTest {
         notification.setContent("New Content");
         notification.setNotificationType(NotificationType.EVENT);
 
+        NotificationResponseDTO dto = new NotificationResponseDTO();
+        dto.setId(1L);
+        dto.setTitle("New Notification");
+
         NotificationCreateDTO createDTO = new NotificationCreateDTO();
         createDTO.setTitle("New Notification");
         createDTO.setContent("New Content");
         createDTO.setNotificationType(NotificationType.EVENT);
 
         when(notificationService.createNotification(any(NotificationCreateDTO.class))).thenReturn(notification);
+        when(notificationMapper.toResponseDTO(notification)).thenReturn(dto);
 
         mockMvc.perform(post("/notifications")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -159,7 +190,13 @@ class NotificationControllerTest {
         updatedNotification.setContent("Updated Content");
         updatedNotification.setNotificationType(NotificationType.INCIDENT);
 
+        NotificationResponseDTO dto = new NotificationResponseDTO();
+        dto.setId(1L);
+        dto.setTitle("Updated Title");
+        dto.setContent("Updated Content");
+
         when(notificationService.updateNotification(eq(1L), any())).thenReturn(Optional.of(updatedNotification));
+        when(notificationMapper.toResponseDTO(updatedNotification)).thenReturn(dto);
 
         mockMvc.perform(put("/notifications/1")
                         .contentType(MediaType.APPLICATION_JSON)

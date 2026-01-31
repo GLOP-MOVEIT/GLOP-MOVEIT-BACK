@@ -1,6 +1,7 @@
 package com.moveit.notification.controller;
 
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,9 @@ class NotificationControllerSortValidationTest {
 
     @MockitoBean
     private NotificationService notificationService;
+    
+    @MockitoBean
+    private NotificationMapper notificationMapper;
 
     @Test
     @DisplayName("GET /notifications with valid sortBy 'createdAt' should succeed")
