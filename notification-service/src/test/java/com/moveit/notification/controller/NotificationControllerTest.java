@@ -232,4 +232,78 @@ class NotificationControllerTest {
 
         verify(notificationService, times(1)).deleteNotification(1L);
     }
+
+    // ============ Point 5 - Input Validation Tests ============
+
+    @Test
+    @DisplayName("POST with blank title should return 400 validation error")
+    void testCreateNotification_BlankTitle() throws Exception {
+        NotificationCreateDTO dto = new NotificationCreateDTO(
+            "   ",
+            "Valid content",
+            NotificationType.INCIDENT,
+            new HashSet<>(),
+            new HashSet<>()
+        );
+
+        mockMvc.perform(post("/notifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"));
+    }
+
+    @Test
+    @DisplayName("POST with title too short (< 3 chars) should return 400")
+    void testCreateNotification_TitleTooShort() throws Exception {
+        NotificationCreateDTO dto = new NotificationCreateDTO(
+            "AB",
+            "Valid content",
+            NotificationType.INCIDENT,
+            new HashSet<>(),
+            new HashSet<>()
+        );
+
+        mockMvc.perform(post("/notifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation Error"));
+    }
+
+    @Test
+    @DisplayName("POST with title exceeding max (> 255 chars) should return 400")
+    void testCreateNotification_TitleTooLong() throws Exception {
+        String longTitle = "A".repeat(256);
+        NotificationCreateDTO dto = new NotificationCreateDTO(
+            longTitle,
+            "Valid content",
+            NotificationType.INCIDENT,
+            new HashSet<>(),
+            new HashSet<>()
+        );
+
+        mockMvc.perform(post("/notifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST with content exceeding max (> 5000 chars) should return 400")
+    void testCreateNotification_ContentTooLong() throws Exception {
+        String longContent = "A".repeat(5001);
+        NotificationCreateDTO dto = new NotificationCreateDTO(
+            "Valid Title",
+            longContent,
+            NotificationType.INCIDENT,
+            new HashSet<>(),
+            new HashSet<>()
+        );
+
+        mockMvc.perform(post("/notifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+    }
 }
