@@ -48,6 +48,11 @@ management:
       percentiles-histogram:
         http.server.requests: true
 
+# Point 10 - Configuration de la pagination
+pagination:
+  default-page-size: 10
+  max-page-size: 100
+  min-page-size: 1
 logging:
   level:
     com.moveit.notification: INFO

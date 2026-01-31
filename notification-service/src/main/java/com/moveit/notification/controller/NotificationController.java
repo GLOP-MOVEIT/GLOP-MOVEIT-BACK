@@ -1,10 +1,12 @@
 package com.moveit.notification.controller;
 
+import com.moveit.notification.config.PaginationConfig;
 import com.moveit.notification.dto.NotificationCreateDTO;
 import com.moveit.notification.dto.NotificationResponseDTO;
 import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.exception.InvalidPaginationException;
 import com.moveit.notification.exception.InvalidSortFieldException;
 import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
@@ -27,6 +29,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
+    private final PaginationConfig paginationConfig;
     
     // Whitelist des champs autorisés pour le tri (sécurité contre injection SQL)
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
@@ -50,6 +53,9 @@ public class NotificationController {
             );
         }
         
+        // Validation de la pagination (Point 10 - Limites)
+        validatePagination(page, size);
+        
         Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
         
@@ -57,6 +63,24 @@ public class NotificationController {
         Page<NotificationResponseDTO> response = notifications.map(notificationMapper::toResponseDTO);
         
         return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Valide les paramètres de pagination.
+     * Point 10 - Évite les requêtes massives en limitant la taille des pages.
+     */
+    private void validatePagination(int page, int size) {
+        if (page < 0) {
+            throw new InvalidPaginationException("Page number must be >= 0, got: " + page);
+        }
+        
+        if (size < paginationConfig.getMinPageSize() || size > paginationConfig.getMaxPageSize()) {
+            throw new InvalidPaginationException(
+                "Page size must be between " + paginationConfig.getMinPageSize() + 
+                " and " + paginationConfig.getMaxPageSize() + 
+                ", got: " + size
+            );
+        }
     }
 
     @GetMapping("/{id}")

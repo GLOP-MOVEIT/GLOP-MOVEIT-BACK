@@ -1,6 +1,7 @@
 package com.moveit.notification.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.notification.config.PaginationConfig;
 import com.moveit.notification.dto.NotificationCreateDTO;
 import com.moveit.notification.dto.NotificationResponseDTO;
 import com.moveit.notification.entity.Notification;
@@ -31,7 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = NotificationController.class)
-@Import(ObjectMapper.class)
+@Import({ObjectMapper.class, PaginationConfig.class})
 @DisplayName("NotificationController ")
 class NotificationControllerTest {
 
