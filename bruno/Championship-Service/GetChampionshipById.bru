@@ -1,0 +1,15 @@
+meta {
+  name: GetChampionshipById
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{URL}}/championships/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
