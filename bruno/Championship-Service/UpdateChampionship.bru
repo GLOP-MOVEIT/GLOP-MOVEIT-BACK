@@ -1,0 +1,26 @@
+meta {
+  name: UpdateChampionship
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{URL}}/championships/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "name": "Championship 2024 - Updated",
+    "description": "Description mise à jour",
+    "status": "ONGOING",
+    "startDate": "2024-06-01",
+    "endDate": "2024-12-31"
+  }
+}
+
