@@ -30,7 +30,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         
         // Si filtre par type uniquement
-        if (type != null && userId == null) {
+        if (type != null) {
             return subscriptionRepository.findByNotificationType(type);
         }
         
