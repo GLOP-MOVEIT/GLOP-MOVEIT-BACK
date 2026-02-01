@@ -1,7 +1,5 @@
 package com.moveit.auth.service;
 
-import com.moveit.auth.entity.Role;
-import com.moveit.auth.entity.RoleEnum;
 import com.moveit.auth.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,16 +21,10 @@ class JwtServiceTest {
     void setUp() {
         jwtService = new JwtService(SECRET_KEY, EXPIRATION_TIME);
 
-        Role role = new Role()
-                .setId(1)
-                .setName(RoleEnum.SPECTATOR)
-                .setDescription("Default user role");
-
         testUser = new User()
                 .setId(1)
                 .setNickname("testuser")
-                .setPassword("encodedPassword")
-                .setRole(role);
+                .setPassword("encodedPassword");
     }
 
     @Test
@@ -88,8 +80,7 @@ class JwtServiceTest {
         User differentUser = new User()
                 .setId(2)
                 .setNickname("differentuser")
-                .setPassword("pass")
-                .setRole(testUser.getRole());
+                .setPassword("pass");
 
         boolean isValid = jwtService.isTokenValid(token, differentUser);
 
