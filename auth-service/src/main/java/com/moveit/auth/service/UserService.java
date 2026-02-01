@@ -1,7 +1,7 @@
 package com.moveit.auth.service;
 
 import com.moveit.auth.dto.RegisterUserDto;
-import com.moveit.auth.entity.User;
+import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,21 +23,21 @@ public class UserService {
             return;
         }
 
-        User admin = new User()
+        UserAuth admin = new UserAuth()
                 .setNickname("admin")
                 .setPassword(passwordEncoder.encode("123456"));
         userRepository.save(admin);
     }
 
-    public List<User> allUsers() {
+    public List<UserAuth> allUsers() {
         return userRepository.findAll();
     }
 
-    public User createUser(RegisterUserDto input) {
-        User user = new User()
+    public UserAuth createUser(RegisterUserDto input) {
+        UserAuth userAuth = new UserAuth()
                 .setNickname(input.nickname())
                 .setPassword(passwordEncoder.encode(input.password()));
 
-        return userRepository.save(user);
+        return userRepository.save(userAuth);
     }
 }

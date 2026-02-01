@@ -2,7 +2,7 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
-import com.moveit.auth.entity.User;
+import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,11 +38,11 @@ class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
-    private User testUser;
+    private UserAuth testUserAuth;
 
     @BeforeEach
     void setUp() {
-        testUser = new User()
+        testUserAuth = new UserAuth()
                 .setId(1)
                 .setNickname("testuser")
                 .setPassword("encodedPassword");
@@ -53,13 +53,13 @@ class AuthenticationServiceTest {
         RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
 
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);
 
-        User result = authenticationService.signup(registerDto);
+        UserAuth result = authenticationService.signup(registerDto);
 
         assertThat(result).isNotNull();
         assertThat(result.getNickname()).isEqualTo("testuser");
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).save(any(UserAuth.class));
     }
 
 
@@ -67,15 +67,15 @@ class AuthenticationServiceTest {
     void authenticate_ShouldReturnUser_WhenCredentialsValid() {
         LoginUserDto loginDto = new LoginUserDto("testuser", "password123");
 
-        when(userRepository.findByNickname("testuser")).thenReturn(Optional.of(testUser));
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userRepository.findByNickname("testuser")).thenReturn(Optional.of(testUserAuth));
+        when(userRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);
 
-        User result = authenticationService.authenticate(loginDto);
+        UserAuth result = authenticationService.authenticate(loginDto);
 
         assertThat(result).isNotNull();
         assertThat(result.getNickname()).isEqualTo("testuser");
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(userRepository).save(any(User.class));
+        verify(userRepository).save(any(UserAuth.class));
     }
 
     @Test

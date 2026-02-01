@@ -19,12 +19,12 @@ import java.util.Collections;
 import java.util.Date;
 
 @Entity
-@Table(name = "users")
+@Table(name = "userAuth")
 @Getter
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class User implements UserDetails {
+public class UserAuth implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
