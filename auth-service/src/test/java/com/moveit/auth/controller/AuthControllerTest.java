@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.dto.UserDto;
-import com.moveit.auth.entity.Role;
-import com.moveit.auth.entity.RoleEnum;
 import com.moveit.auth.entity.User;
 import com.moveit.auth.mapper.UserMapper;
 import com.moveit.auth.service.AuthenticationService;
@@ -53,29 +51,21 @@ class AuthControllerTest {
     private ObjectMapper objectMapper;
     private User testUser;
     private UserDto testUserDto;
-    private Role testRole;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
         objectMapper = new ObjectMapper();
 
-        testRole = new Role()
-                .setId(1)
-                .setName(RoleEnum.SPECTATOR)
-                .setDescription("Default user role");
-
         testUser = new User()
                 .setId(1)
                 .setNickname("testuser")
                 .setPassword("encodedPassword")
-                .setRole(testRole)
                 .setLastConnectionDate(new Date());
 
         testUserDto = new UserDto();
         testUserDto.setId(1);
         testUserDto.setNickname("testuser");
-        testUserDto.setRole(RoleEnum.SPECTATOR);
         testUserDto.setLastConnectionDate(new Date());
     }
 
@@ -91,8 +81,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(registerDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.nickname").value("testuser"))
-                .andExpect(jsonPath("$.role").value("SPECTATOR"));
+                .andExpect(jsonPath("$.nickname").value("testuser"));
     }
 
     @Test

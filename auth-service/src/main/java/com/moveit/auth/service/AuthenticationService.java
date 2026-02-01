@@ -2,8 +2,6 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
-import com.moveit.auth.entity.Role;
-import com.moveit.auth.entity.RoleEnum;
 import com.moveit.auth.entity.User;
 import com.moveit.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +17,13 @@ import java.util.Date;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
-    private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
     public User signup(RegisterUserDto input) {
-        Role role = roleService.findByName(RoleEnum.SPECTATOR)
-                .orElseThrow(() -> new IllegalStateException("Default role not found"));
-
         User user = new User()
                 .setNickname(input.nickname())
-                .setPassword(passwordEncoder.encode(input.password()))
-                .setRole(role);
+                .setPassword(passwordEncoder.encode(input.password()));
 
         return userRepository.save(user);
     }

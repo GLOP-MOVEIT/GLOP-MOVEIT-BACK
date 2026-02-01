@@ -2,8 +2,6 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
-import com.moveit.auth.entity.Role;
-import com.moveit.auth.entity.RoleEnum;
 import com.moveit.auth.entity.User;
 import com.moveit.auth.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +30,6 @@ class AuthenticationServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private RoleService roleService;
-
-    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -43,28 +38,20 @@ class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
-    private Role spectatorRole;
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        spectatorRole = new Role()
-                .setId(1)
-                .setName(RoleEnum.SPECTATOR)
-                .setDescription("Default user role");
-
         testUser = new User()
                 .setId(1)
                 .setNickname("testuser")
-                .setPassword("encodedPassword")
-                .setRole(spectatorRole);
+                .setPassword("encodedPassword");
     }
 
     @Test
-    void signup_ShouldCreateUser_WhenRoleExists() {
+    void signup_ShouldCreateUser() {
         RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
 
-        when(roleService.findByName(RoleEnum.SPECTATOR)).thenReturn(Optional.of(spectatorRole));
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
@@ -72,20 +59,9 @@ class AuthenticationServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getNickname()).isEqualTo("testuser");
-        assertThat(result.getRole()).isEqualTo(spectatorRole);
         verify(userRepository).save(any(User.class));
     }
 
-    @Test
-    void signup_ShouldThrowException_WhenRoleNotFound() {
-        RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
-
-        when(roleService.findByName(RoleEnum.SPECTATOR)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> authenticationService.signup(registerDto))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Default role not found");
-    }
 
     @Test
     void authenticate_ShouldReturnUser_WhenCredentialsValid() {

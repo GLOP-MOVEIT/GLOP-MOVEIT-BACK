@@ -1,8 +1,6 @@
 package com.moveit.auth.service;
 
 import com.moveit.auth.dto.RegisterUserDto;
-import com.moveit.auth.entity.Role;
-import com.moveit.auth.entity.RoleEnum;
 import com.moveit.auth.entity.User;
 import com.moveit.auth.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
@@ -17,7 +15,6 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
@@ -26,27 +23,20 @@ public class UserService {
             return;
         }
 
-        roleService.findByName(RoleEnum.ADMIN).ifPresent(role -> {
-            User admin = new User()
-                    .setNickname("admin")
-                    .setPassword(passwordEncoder.encode("123456"))
-                    .setRole(role);
-            userRepository.save(admin);
-        });
+        User admin = new User()
+                .setNickname("admin")
+                .setPassword(passwordEncoder.encode("123456"));
+        userRepository.save(admin);
     }
 
     public List<User> allUsers() {
         return userRepository.findAll();
     }
 
-    public User createAdministrator(RegisterUserDto input) {
-        Role role = roleService.findByName(RoleEnum.ADMIN)
-                .orElseThrow(() -> new IllegalStateException("Admin role not found"));
-
+    public User createUser(RegisterUserDto input) {
         User user = new User()
                 .setNickname(input.nickname())
-                .setPassword(passwordEncoder.encode(input.password()))
-                .setRole(role);
+                .setPassword(passwordEncoder.encode(input.password()));
 
         return userRepository.save(user);
     }
