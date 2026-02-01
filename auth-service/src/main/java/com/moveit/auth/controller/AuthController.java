@@ -4,7 +4,7 @@ import com.moveit.auth.dto.LoginResponse;
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.dto.UserDto;
-import com.moveit.auth.entity.User;
+import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.mapper.UserMapper;
 import com.moveit.auth.service.AuthenticationService;
 import com.moveit.auth.service.JwtService;
@@ -44,8 +44,8 @@ public class AuthController {
     })
     @PostMapping("/signup")
     public ResponseEntity<UserDto> register(@RequestBody RegisterUserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
-        return ResponseEntity.ok(userMapper.toDto(registeredUser));
+        UserAuth registeredUserAuth = authenticationService.signup(registerUserDto);
+        return ResponseEntity.ok(userMapper.toDto(registeredUserAuth));
     }
 
     @Operation(summary = "Authentification d'un utilisateur")
@@ -56,12 +56,12 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+        UserAuth authenticatedUserAuth = authenticationService.authenticate(loginUserDto);
+        String jwtToken = jwtService.generateToken(authenticatedUserAuth);
         LoginResponse loginResponse = new LoginResponse()
                 .setToken(jwtToken)
                 .setExpiresIn(jwtService.getExpirationTime())
-                .setUser(userMapper.toDto(authenticatedUser));
+                .setUser(userMapper.toDto(authenticatedUserAuth));
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -75,7 +75,7 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDto> authenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(userMapper.toDto(user));
+        UserAuth userAuth = (UserAuth) authentication.getPrincipal();
+        return ResponseEntity.ok(userMapper.toDto(userAuth));
     }
 }

@@ -1,6 +1,6 @@
 package com.moveit.auth.service;
 
-import com.moveit.auth.entity.User;
+import com.moveit.auth.entity.UserAuth;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class JwtServiceTest {
 
     private JwtService jwtService;
-    private User testUser;
+    private UserAuth testUserAuth;
     private static final String SECRET_KEY = "dGhpc2lzYXZlcnlsb25nc2VjcmV0a2V5Zm9ydGVzdGluZ3B1cnBvc2VzYW5kaXRzaG91bGRiZWF0bGVhc3QyNTZiaXRz";
     private static final long EXPIRATION_TIME = 3600000L;
 
@@ -21,7 +21,7 @@ class JwtServiceTest {
     void setUp() {
         jwtService = new JwtService(SECRET_KEY, EXPIRATION_TIME);
 
-        testUser = new User()
+        testUserAuth = new UserAuth()
                 .setId(1)
                 .setNickname("testuser")
                 .setPassword("encodedPassword");
@@ -29,7 +29,7 @@ class JwtServiceTest {
 
     @Test
     void generateToken_ShouldReturnValidToken() {
-        String token = jwtService.generateToken(testUser);
+        String token = jwtService.generateToken(testUserAuth);
 
         assertThat(token).isNotNull();
         assertThat(token).isNotEmpty();
@@ -41,7 +41,7 @@ class JwtServiceTest {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", "SPECTATOR");
 
-        String token = jwtService.generateToken(extraClaims, testUser);
+        String token = jwtService.generateToken(extraClaims, testUserAuth);
 
         assertThat(token).isNotNull();
         assertThat(token).isNotEmpty();
@@ -49,7 +49,7 @@ class JwtServiceTest {
 
     @Test
     void generateToken_WithNullExtraClaims_ShouldReturnValidToken() {
-        String token = jwtService.generateToken(null, testUser);
+        String token = jwtService.generateToken(null, testUserAuth);
 
         assertThat(token).isNotNull();
         assertThat(token).isNotEmpty();
@@ -57,7 +57,7 @@ class JwtServiceTest {
 
     @Test
     void extractUsername_ShouldReturnCorrectUsername() {
-        String token = jwtService.generateToken(testUser);
+        String token = jwtService.generateToken(testUserAuth);
 
         String username = jwtService.extractUsername(token);
 
@@ -66,23 +66,23 @@ class JwtServiceTest {
 
     @Test
     void isTokenValid_ShouldReturnTrue_WhenTokenIsValid() {
-        String token = jwtService.generateToken(testUser);
+        String token = jwtService.generateToken(testUserAuth);
 
-        boolean isValid = jwtService.isTokenValid(token, testUser);
+        boolean isValid = jwtService.isTokenValid(token, testUserAuth);
 
         assertThat(isValid).isTrue();
     }
 
     @Test
     void isTokenValid_ShouldReturnFalse_WhenUsernameMismatch() {
-        String token = jwtService.generateToken(testUser);
+        String token = jwtService.generateToken(testUserAuth);
 
-        User differentUser = new User()
+        UserAuth differentUserAuth = new UserAuth()
                 .setId(2)
                 .setNickname("differentuser")
                 .setPassword("pass");
 
-        boolean isValid = jwtService.isTokenValid(token, differentUser);
+        boolean isValid = jwtService.isTokenValid(token, differentUserAuth);
 
         assertThat(isValid).isFalse();
     }
@@ -91,14 +91,14 @@ class JwtServiceTest {
     void isTokenValid_ShouldReturnFalse_WhenTokenIsInvalid() {
         String invalidToken = "invalid.token.here";
 
-        assertThatThrownBy(() -> jwtService.isTokenValid(invalidToken, testUser))
+        assertThatThrownBy(() -> jwtService.isTokenValid(invalidToken, testUserAuth))
                 .isInstanceOf(RuntimeException.class);
     }
 
     @Test
     void isTokenValid_ShouldReturnFalse_WhenTokenIsExpired() {
         JwtService shortExpirationService = new JwtService(SECRET_KEY, 1L);
-        String token = shortExpirationService.generateToken(testUser);
+        String token = shortExpirationService.generateToken(testUserAuth);
 
         try {
             Thread.sleep(10);
@@ -106,7 +106,7 @@ class JwtServiceTest {
             Thread.currentThread().interrupt();
         }
 
-        boolean isValid = shortExpirationService.isTokenValid(token, testUser);
+        boolean isValid = shortExpirationService.isTokenValid(token, testUserAuth);
 
         assertThat(isValid).isFalse();
     }

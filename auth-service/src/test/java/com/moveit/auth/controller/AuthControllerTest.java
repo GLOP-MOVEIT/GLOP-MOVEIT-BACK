@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.dto.UserDto;
-import com.moveit.auth.entity.User;
+import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.mapper.UserMapper;
 import com.moveit.auth.service.AuthenticationService;
 import com.moveit.auth.service.JwtService;
@@ -49,7 +49,7 @@ class AuthControllerTest {
     private AuthController authController;
 
     private ObjectMapper objectMapper;
-    private User testUser;
+    private UserAuth testUserAuth;
     private UserDto testUserDto;
 
     @BeforeEach
@@ -57,7 +57,7 @@ class AuthControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
         objectMapper = new ObjectMapper();
 
-        testUser = new User()
+        testUserAuth = new UserAuth()
                 .setId(1)
                 .setNickname("testuser")
                 .setPassword("encodedPassword")
@@ -73,8 +73,8 @@ class AuthControllerTest {
     void register_ShouldReturnUserDto_WhenValidInput() throws Exception {
         RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
 
-        when(authenticationService.signup(any(RegisterUserDto.class))).thenReturn(testUser);
-        when(userMapper.toDto(testUser)).thenReturn(testUserDto);
+        when(authenticationService.signup(any(RegisterUserDto.class))).thenReturn(testUserAuth);
+        when(userMapper.toDto(testUserAuth)).thenReturn(testUserDto);
 
         mockMvc.perform(post("/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,10 +90,10 @@ class AuthControllerTest {
         String token = "jwt.token.here";
         long expirationTime = 3600000L;
 
-        when(authenticationService.authenticate(any(LoginUserDto.class))).thenReturn(testUser);
-        when(jwtService.generateToken(testUser)).thenReturn(token);
+        when(authenticationService.authenticate(any(LoginUserDto.class))).thenReturn(testUserAuth);
+        when(jwtService.generateToken(testUserAuth)).thenReturn(token);
         when(jwtService.getExpirationTime()).thenReturn(expirationTime);
-        when(userMapper.toDto(testUser)).thenReturn(testUserDto);
+        when(userMapper.toDto(testUserAuth)).thenReturn(testUserDto);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,10 +110,10 @@ class AuthControllerTest {
         SecurityContext securityContext = mock(SecurityContext.class);
 
         when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(testUser);
+        when(authentication.getPrincipal()).thenReturn(testUserAuth);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userMapper.toDto(testUser)).thenReturn(testUserDto);
+        when(userMapper.toDto(testUserAuth)).thenReturn(testUserDto);
 
         mockMvc.perform(get("/auth/me"))
                 .andExpect(status().isOk())
