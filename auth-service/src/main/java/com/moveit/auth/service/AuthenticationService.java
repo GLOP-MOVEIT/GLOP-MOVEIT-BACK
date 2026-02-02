@@ -3,7 +3,7 @@ package com.moveit.auth.service;
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.UserAuth;
-import com.moveit.auth.repository.UserRepository;
+import com.moveit.auth.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +16,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserRepository userRepository;
+    private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
@@ -25,7 +25,7 @@ public class AuthenticationService {
                 .setNickname(input.nickname())
                 .setPassword(passwordEncoder.encode(input.password()));
 
-        return userRepository.save(userAuth);
+        return userAuthRepository.save(userAuth);
     }
 
     public UserAuth authenticate(LoginUserDto input) {
@@ -33,8 +33,8 @@ public class AuthenticationService {
                 new UsernamePasswordAuthenticationToken(input.nickname(), input.password())
         );
 
-        UserAuth userAuth = userRepository.findByNickname(input.nickname()).orElseThrow();
+        UserAuth userAuth = userAuthRepository.findByNickname(input.nickname()).orElseThrow();
         userAuth.setLastConnectionDate(new Date());
-        return userRepository.save(userAuth);
+        return userAuthRepository.save(userAuth);
     }
 }

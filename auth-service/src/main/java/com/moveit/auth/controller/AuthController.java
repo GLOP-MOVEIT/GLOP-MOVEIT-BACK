@@ -5,7 +5,7 @@ import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.dto.UserDto;
 import com.moveit.auth.entity.UserAuth;
-import com.moveit.auth.mapper.UserMapper;
+import com.moveit.auth.mapper.UserAuthMapper;
 import com.moveit.auth.service.AuthenticationService;
 import com.moveit.auth.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +33,7 @@ public class AuthController {
 
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
-    private final UserMapper userMapper;
+    private final UserAuthMapper userAuthMapper;
 
     @Operation(summary = "Inscription d'un utilisateur")
     @ApiResponses(value = {
@@ -45,7 +45,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<UserDto> register(@RequestBody RegisterUserDto registerUserDto) {
         UserAuth registeredUserAuth = authenticationService.signup(registerUserDto);
-        return ResponseEntity.ok(userMapper.toDto(registeredUserAuth));
+        return ResponseEntity.ok(userAuthMapper.toDto(registeredUserAuth));
     }
 
     @Operation(summary = "Authentification d'un utilisateur")
@@ -61,7 +61,7 @@ public class AuthController {
         LoginResponse loginResponse = new LoginResponse()
                 .setToken(jwtToken)
                 .setExpiresIn(jwtService.getExpirationTime())
-                .setUser(userMapper.toDto(authenticatedUserAuth));
+                .setUser(userAuthMapper.toDto(authenticatedUserAuth));
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -76,6 +76,6 @@ public class AuthController {
     public ResponseEntity<UserDto> authenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserAuth userAuth = (UserAuth) authentication.getPrincipal();
-        return ResponseEntity.ok(userMapper.toDto(userAuth));
+        return ResponseEntity.ok(userAuthMapper.toDto(userAuth));
     }
 }

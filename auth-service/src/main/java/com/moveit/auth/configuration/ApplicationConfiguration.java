@@ -1,6 +1,6 @@
 package com.moveit.auth.configuration;
 
-import com.moveit.auth.repository.UserRepository;
+import com.moveit.auth.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,11 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
 
-    private final UserRepository userRepository;
+    private final UserAuthRepository userAuthRepository;
 
     @Bean
     UserDetailsService userDetailsService() {
-        return username -> userRepository.findByNickname(username)
+        return username -> userAuthRepository.findByNickname(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 

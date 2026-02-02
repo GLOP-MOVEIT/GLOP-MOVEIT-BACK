@@ -3,7 +3,7 @@ package com.moveit.auth.service;
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.UserAuth;
-import com.moveit.auth.repository.UserRepository;
+import com.moveit.auth.repository.UserAuthRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class AuthenticationServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserAuthRepository userAuthRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -53,13 +53,13 @@ class AuthenticationServiceTest {
         RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
 
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-        when(userRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);
+        when(userAuthRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);
 
         UserAuth result = authenticationService.signup(registerDto);
 
         assertThat(result).isNotNull();
         assertThat(result.getNickname()).isEqualTo("testuser");
-        verify(userRepository).save(any(UserAuth.class));
+        verify(userAuthRepository).save(any(UserAuth.class));
     }
 
 
@@ -67,22 +67,22 @@ class AuthenticationServiceTest {
     void authenticate_ShouldReturnUser_WhenCredentialsValid() {
         LoginUserDto loginDto = new LoginUserDto("testuser", "password123");
 
-        when(userRepository.findByNickname("testuser")).thenReturn(Optional.of(testUserAuth));
-        when(userRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);
+        when(userAuthRepository.findByNickname("testuser")).thenReturn(Optional.of(testUserAuth));
+        when(userAuthRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);
 
         UserAuth result = authenticationService.authenticate(loginDto);
 
         assertThat(result).isNotNull();
         assertThat(result.getNickname()).isEqualTo("testuser");
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(userRepository).save(any(UserAuth.class));
+        verify(userAuthRepository).save(any(UserAuth.class));
     }
 
     @Test
     void authenticate_ShouldThrowException_WhenUserNotFound() {
         LoginUserDto loginDto = new LoginUserDto("unknownuser", "password123");
 
-        when(userRepository.findByNickname("unknownuser")).thenReturn(Optional.empty());
+        when(userAuthRepository.findByNickname("unknownuser")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authenticationService.authenticate(loginDto))
                 .isInstanceOf(NoSuchElementException.class);
