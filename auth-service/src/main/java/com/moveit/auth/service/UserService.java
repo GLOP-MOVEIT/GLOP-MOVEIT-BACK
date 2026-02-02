@@ -2,7 +2,7 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.UserAuth;
-import com.moveit.auth.repository.UserRepository;
+import com.moveit.auth.repository.UserAuthRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,23 +14,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
 
     @PostConstruct
     void init() {
-        if (userRepository.findByNickname("admin").isPresent()) {
+        if (userAuthRepository.findByNickname("admin").isPresent()) {
             return;
         }
 
         UserAuth admin = new UserAuth()
                 .setNickname("admin")
                 .setPassword(passwordEncoder.encode("123456"));
-        userRepository.save(admin);
+        userAuthRepository.save(admin);
     }
 
     public List<UserAuth> allUsers() {
-        return userRepository.findAll();
+        return userAuthRepository.findAll();
     }
 
     public UserAuth createUser(RegisterUserDto input) {
@@ -38,6 +38,6 @@ public class UserService {
                 .setNickname(input.nickname())
                 .setPassword(passwordEncoder.encode(input.password()));
 
-        return userRepository.save(userAuth);
+        return userAuthRepository.save(userAuth);
     }
 }

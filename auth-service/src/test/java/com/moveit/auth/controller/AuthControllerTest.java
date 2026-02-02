@@ -5,7 +5,7 @@ import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.dto.UserDto;
 import com.moveit.auth.entity.UserAuth;
-import com.moveit.auth.mapper.UserMapper;
+import com.moveit.auth.mapper.UserAuthMapper;
 import com.moveit.auth.service.AuthenticationService;
 import com.moveit.auth.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ class AuthControllerTest {
     private AuthenticationService authenticationService;
 
     @Mock
-    private UserMapper userMapper;
+    private UserAuthMapper userAuthMapper;
 
     @InjectMocks
     private AuthController authController;
@@ -74,7 +74,7 @@ class AuthControllerTest {
         RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
 
         when(authenticationService.signup(any(RegisterUserDto.class))).thenReturn(testUserAuth);
-        when(userMapper.toDto(testUserAuth)).thenReturn(testUserDto);
+        when(userAuthMapper.toDto(testUserAuth)).thenReturn(testUserDto);
 
         mockMvc.perform(post("/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ class AuthControllerTest {
         when(authenticationService.authenticate(any(LoginUserDto.class))).thenReturn(testUserAuth);
         when(jwtService.generateToken(testUserAuth)).thenReturn(token);
         when(jwtService.getExpirationTime()).thenReturn(expirationTime);
-        when(userMapper.toDto(testUserAuth)).thenReturn(testUserDto);
+        when(userAuthMapper.toDto(testUserAuth)).thenReturn(testUserDto);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -113,7 +113,7 @@ class AuthControllerTest {
         when(authentication.getPrincipal()).thenReturn(testUserAuth);
         SecurityContextHolder.setContext(securityContext);
 
-        when(userMapper.toDto(testUserAuth)).thenReturn(testUserDto);
+        when(userAuthMapper.toDto(testUserAuth)).thenReturn(testUserDto);
 
         mockMvc.perform(get("/auth/me"))
                 .andExpect(status().isOk())

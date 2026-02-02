@@ -2,7 +2,7 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.UserAuth;
-import com.moveit.auth.repository.UserRepository;
+import com.moveit.auth.repository.UserAuthRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class UserAuthServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserAuthRepository userAuthRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -35,7 +35,7 @@ class UserAuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, passwordEncoder);
+        userService = new UserService(userAuthRepository, passwordEncoder);
 
         adminUserAuth = new UserAuth()
                 .setId(1)
@@ -49,7 +49,7 @@ class UserAuthServiceTest {
         UserAuth userAuth2 = new UserAuth().setId(2).setNickname("user2");
         List<UserAuth> userAuths = Arrays.asList(userAuth1, userAuth2);
 
-        when(userRepository.findAll()).thenReturn(userAuths);
+        when(userAuthRepository.findAll()).thenReturn(userAuths);
 
         List<UserAuth> result = userService.allUsers();
 
@@ -62,32 +62,32 @@ class UserAuthServiceTest {
         RegisterUserDto registerDto = new RegisterUserDto("newuser", "password123");
 
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-        when(userRepository.save(any(UserAuth.class))).thenReturn(adminUserAuth);
+        when(userAuthRepository.save(any(UserAuth.class))).thenReturn(adminUserAuth);
 
         UserAuth result = userService.createUser(registerDto);
 
         assertThat(result).isNotNull();
         assertThat(result.getNickname()).isEqualTo("admin");
-        verify(userRepository).save(any(UserAuth.class));
+        verify(userAuthRepository).save(any(UserAuth.class));
     }
 
     @Test
     void init_ShouldCreateAdmin_WhenAdminNotExists() {
-        when(userRepository.findByNickname("admin")).thenReturn(Optional.empty());
+        when(userAuthRepository.findByNickname("admin")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("123456")).thenReturn("encodedPassword");
 
         userService.init();
 
-        verify(userRepository).save(any(UserAuth.class));
+        verify(userAuthRepository).save(any(UserAuth.class));
     }
 
     @Test
     void init_ShouldNotCreateAdmin_WhenAdminExists() {
-        when(userRepository.findByNickname("admin")).thenReturn(Optional.of(adminUserAuth));
+        when(userAuthRepository.findByNickname("admin")).thenReturn(Optional.of(adminUserAuth));
 
 
         userService.init();
 
-        verify(userRepository, never()).save(any(UserAuth.class));
+        verify(userAuthRepository, never()).save(any(UserAuth.class));
     }
 }

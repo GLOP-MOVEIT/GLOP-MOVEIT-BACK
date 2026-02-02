@@ -5,7 +5,7 @@ import com.moveit.auth.entity.UserAuth;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper {
+public interface UserAuthMapper {
 
     UserDto toDto(UserAuth userAuth);
 }
