@@ -76,22 +76,14 @@ public class CompetitionService {
     }
 
     private void validateCompetitionDates(Competition competition, Championship championship) {
-        if (competition.getCompetitionStartDate() != null && competition.getCompetitionEndDate() != null) {
-            if (competition.getCompetitionStartDate().after(competition.getCompetitionEndDate())) {
-                throw new IllegalArgumentException("La date de début de la compétition doit être avant la date de fin");
-            }
+        if (competition.getCompetitionStartDate().after(competition.getCompetitionEndDate())) {
+            throw new IllegalArgumentException("La date de début de la compétition doit être avant la date de fin");
         }
-
-        if (championship.getStartDate() != null && competition.getCompetitionStartDate() != null) {
-            if (competition.getCompetitionStartDate().before(championship.getStartDate())) {
-                throw new IllegalArgumentException("La date de début de la compétition doit être après ou égale à la date de début du championnat");
-            }
+        if (competition.getCompetitionStartDate().before(championship.getStartDate())) {
+            throw new IllegalArgumentException("La date de début de la compétition doit être après ou égale à la date de début du championnat");
         }
-
-        if (championship.getEndDate() != null && competition.getCompetitionEndDate() != null) {
-            if (competition.getCompetitionEndDate().after(championship.getEndDate())) {
-                throw new IllegalArgumentException("La date de fin de la compétition doit être avant ou égale à la date de fin du championnat");
-            }
+        if (competition.getCompetitionEndDate().after(championship.getEndDate())) {
+            throw new IllegalArgumentException("La date de fin de la compétition doit être avant ou égale à la date de fin du championnat");
         }
     }
 }
