@@ -23,17 +23,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (userId == null && type == null) {
             return subscriptionRepository.findAll();
         }
-        
         // Si filtre par userId uniquement
         if (userId != null && type == null) {
             return subscriptionRepository.findByUserId(userId);
         }
-        
         // Si filtre par type uniquement
-        if (type != null) {
+        if (userId == null && type != null) {
             return subscriptionRepository.findByNotificationType(type);
         }
-        
         // Les deux filtres : filtrer manuellement
         return subscriptionRepository.findByUserId(userId).stream()
                 .filter(s -> s.getNotificationType() == type)
