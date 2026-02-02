@@ -20,6 +20,10 @@ public class VolunteerTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
+    @Column(name = "championship_id")
+    private Long championshipId;
+
     @Column(nullable = false)
     private String title;
 
