@@ -53,6 +53,8 @@ public class TrialService {
         existingTrial.setTrialDescription(trial.getTrialDescription());
         existingTrial.setTrialStatus(trial.getTrialStatus());
         existingTrial.setLocation(trial.getLocation());
+        existingTrial.setRoundNumber(trial.getRoundNumber());
+        existingTrial.setPosition(trial.getPosition());
 
         return trialRepository.save(existingTrial);
     }

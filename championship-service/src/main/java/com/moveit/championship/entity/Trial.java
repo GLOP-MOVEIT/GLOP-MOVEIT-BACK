@@ -1,6 +1,8 @@
 package com.moveit.championship.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +17,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "trialId")
 public class Trial {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,5 +50,28 @@ public class Trial {
 
     @Column
     private String location;
+
+    /**
+     * Numéro du tour (round) dans l'arbre de compétition.
+     * Ex : 1 = premier tour, 2 = quarts, 3 = demis, 4 = finale.
+     */
+    @Column
+    private Integer roundNumber;
+
+    /**
+     * Position du match dans son tour (1, 2, 3…).
+     * Permet de trier les matchs au sein d'un même tour.
+     */
+    @Column
+    private Integer position;
+
+    /**
+     * Référence vers le trial suivant dans l'arbre.
+     * Le vainqueur de ce trial avance vers le nextTrial.
+     * null si c'est la finale (pas de suite).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "next_trial_id")
+    private Trial nextTrial;
 
 }
