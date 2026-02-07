@@ -63,4 +63,8 @@ public class Competition {
     @NotNull(message = "Le nombre de manches est obligatoire")
     @Column(nullable = false)
     private Integer nbManches;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
 }
