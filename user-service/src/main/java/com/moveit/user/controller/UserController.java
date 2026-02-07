@@ -25,4 +25,14 @@ public class UserController {
     public User getUserProfile(@PathVariable Integer id) {
         return this.userService.getUserById(id);
     }
+
+    @PutMapping
+    public User updateUserProfile(@RequestBody User user) {
+        return this.userService.updateUser(user);
+    }
+
+    @PostMapping
+    public User createSpectator(@RequestBody User user) {
+        return this.userService.createSpectator(user);
+    }
 }
