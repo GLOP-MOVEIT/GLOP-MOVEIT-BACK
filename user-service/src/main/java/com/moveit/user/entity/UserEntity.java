@@ -13,7 +13,7 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private Integer userId;
 
     private String firstName;
     private String surname;
@@ -21,6 +21,7 @@ public class UserEntity {
     private String phoneNumber;
     private String language;
 
-    @Column(name = "role_name")
-    private String roleName;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private RoleEntity role;
 }

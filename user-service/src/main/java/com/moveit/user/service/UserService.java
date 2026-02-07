@@ -25,4 +25,20 @@ public class UserService {
                 .map(userMapper::toDto)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    public User updateUser(User user) {
+        if (userRepository.findById(user.getId()).isPresent()) {
+            return userMapper.toDto(userRepository.save(userMapper.toEntity(user)));
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
+    public User createSpectator(User user) {
+        if (userRepository.findById(user.getId()).isPresent()) {
+            throw new RuntimeException("User already exists");
+        } else {
+            return userMapper.toDto(userRepository.save(userMapper.toEntity(user)));
+        }
+    }
 }
