@@ -4,10 +4,7 @@ import com.moveit.user.dto.Role;
 import com.moveit.user.service.RoleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,7 +22,7 @@ public class RoleController {
     }
 
     @GetMapping("/{name}")
-    public Role getRoleByName(@RequestParam String name) {
+    public Role getRoleByName(@PathVariable String name) {
         return this.roleService.getRoleByName(name);
     }
 }
