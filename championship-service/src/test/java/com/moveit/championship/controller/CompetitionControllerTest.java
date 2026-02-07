@@ -6,6 +6,7 @@ import com.moveit.championship.entity.Status;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.mother.CompetitionMother;
 import com.moveit.championship.service.CompetitionService;
+import com.moveit.championship.service.TreeGenerationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,9 @@ class CompetitionControllerTest {
 
     @MockitoBean
     private CompetitionService competitionService;
+
+    @MockitoBean
+    private TreeGenerationService treeGenerationService;
 
     private Competition competition1;
     private Competition competition2;

@@ -2,6 +2,7 @@ package com.moveit.championship.mother;
 
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.entity.Event;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.entity.Status;
@@ -33,6 +34,7 @@ public class CompetitionMother {
         private List<Event> events = List.of();
         private List<Trial> trials = List.of();
         private Integer nbManches = 3;
+        private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
 
         private static Date createDate(int year, int month, int day) {
             Calendar cal = Calendar.getInstance();
@@ -53,7 +55,8 @@ public class CompetitionMother {
                     competitionStatus,
                     events,
                     trials,
-                    nbManches
+                    nbManches,
+                    competitionType
                 );
         }
     }
