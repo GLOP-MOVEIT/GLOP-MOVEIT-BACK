@@ -115,12 +115,13 @@ class CompetitionServiceTest {
     @DisplayName("Should throw exception when updating non-existent competition.")
     void shouldThrowExceptionWhenUpdatingNonExistentCompetition() {
         Competition competition = CompetitionMother.competition().build();
+        Integer competitionId = competition.getCompetitionId();
 
-        when(competitionRepository.findById(competition.getCompetitionId())).thenReturn(Optional.empty());
+        when(competitionRepository.findById(competitionId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> competitionService.updateCompetition(competition.getCompetitionId(), competition))
+        assertThatThrownBy(() -> competitionService.updateCompetition(competitionId, competition))
                 .isInstanceOf(CompetitionNotFoundException.class)
-                .hasMessageContaining("Competition with id " + competition.getCompetitionId() + " not found");
+                .hasMessageContaining("Competition with id " + competitionId + " not found");
 
         verify(competitionRepository, never()).save(any(Competition.class));
     }

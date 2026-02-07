@@ -7,7 +7,6 @@ import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.repository.CompetitionRepository;
 import com.moveit.championship.repository.TrialRepository;
-import com.moveit.championship.strategy.SingleEliminationStrategy;
 import com.moveit.championship.strategy.TreeGenerationStrategy;
 import com.moveit.championship.strategy.TreeStrategyFactory;
 import org.junit.jupiter.api.BeforeEach;

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,21 +82,21 @@ class SingleEliminationStrategyTest {
     @DisplayName("All trials should have PLANNED status")
     void testGenerateTrials_AllPlanned() {
         List<Trial> trials = strategy.generateTrials(competition, 8);
-        assertThat(trials).allMatch(t -> t.getTrialStatus() == Status.PLANNED);
+        assertThat(trials).isNotEmpty().allMatch(t -> t.getTrialStatus() == Status.PLANNED);
     }
 
     @Test
     @DisplayName("All trials should be linked to the competition")
     void testGenerateTrials_AllLinkedToCompetition() {
         List<Trial> trials = strategy.generateTrials(competition, 8);
-        assertThat(trials).allMatch(t -> t.getCompetition().equals(competition));
+        assertThat(trials).isNotEmpty().allMatch(t -> t.getCompetition().equals(competition));
     }
 
     @Test
     @DisplayName("All trials should have roundNumber and position set")
     void testGenerateTrials_RoundNumberAndPosition() {
         List<Trial> trials = strategy.generateTrials(competition, 8);
-        assertThat(trials).allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
+        assertThat(trials).isNotEmpty().allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
 
         // Tour 1 : 4 matchs (positions 1-4)
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();

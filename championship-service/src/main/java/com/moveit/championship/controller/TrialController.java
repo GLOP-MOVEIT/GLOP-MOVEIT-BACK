@@ -1,7 +1,6 @@
 package com.moveit.championship.controller;
 
 import com.moveit.championship.entity.Trial;
-import com.moveit.championship.exception.TrialNotFoundException;
 import com.moveit.championship.service.TrialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
