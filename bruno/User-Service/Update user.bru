@@ -1,0 +1,29 @@
+meta {
+  name: Update user
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{URL}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "userId":10,
+    "firstName":"Bob",
+    "surname":"Alice",
+    "email":"bob.alice@gmail.com",
+    "phoneNumber":"0123456789",
+    "language":"FR",
+    "acceptsNotifications": true,
+    "acceptsLocationSharing": false,
+    "role": "SPECTATOR"
+  }
+}
