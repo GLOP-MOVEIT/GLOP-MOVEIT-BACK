@@ -1,6 +1,7 @@
 package com.moveit.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,8 +22,8 @@ public class UserRequest {
     private String phoneNumber;
     @NotBlank(message = "Language is required")
     private String language;
-    @NotBlank(message = "Accepts notifications is required")
-    private boolean acceptsNotifications;
-    @NotBlank(message = "Accepts location sharing is required")
-    private boolean acceptsLocationSharing;
+    @NotNull(message = "Accepts notifications is required")
+    private Boolean acceptsNotifications;
+    @NotNull(message = "Accepts location sharing is required")
+    private Boolean acceptsLocationSharing;
 }
