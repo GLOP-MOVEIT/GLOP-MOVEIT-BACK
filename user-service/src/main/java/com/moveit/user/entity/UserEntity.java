@@ -15,15 +15,22 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer userId;
 
+    @Column(nullable = false)
     private String firstName;
+    @Column(nullable = false)
     private String surname;
+    @Column(unique = true, nullable = false)
     private String email;
+    @Column(unique = true, nullable = false)
     private String phoneNumber;
+    @Column(nullable = false)
     private String language;
+    @Column(nullable = false)
     private boolean acceptsNotifications;
+    @Column(nullable = false)
     private boolean acceptsLocationSharing;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
+    @JoinColumn(name = "role", nullable = false)
     private RoleEntity role;
 }
