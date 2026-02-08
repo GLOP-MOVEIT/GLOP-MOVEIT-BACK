@@ -2,7 +2,9 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
+import com.moveit.auth.dto.CreateSpectatorRequest;
 import com.moveit.auth.entity.UserAuth;
+import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,13 +21,26 @@ public class AuthenticationService {
     private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserFeignClient userFeignClient;
 
     public UserAuth signup(RegisterUserDto input) {
         UserAuth userAuth = new UserAuth()
                 .setNickname(input.nickname())
                 .setPassword(passwordEncoder.encode(input.password()));
 
-        return userAuthRepository.save(userAuth);
+        UserAuth savedUserAuth = userAuthRepository.save(userAuth);
+
+        userFeignClient.createSpectator(new CreateSpectatorRequest(
+                input.firstName(),
+                input.surname(),
+                input.email(),
+                input.phoneNumber(),
+                input.language(),
+                input.acceptsNotifications(),
+                input.acceptsLocationSharing()
+        ));
+
+        return savedUserAuth;
     }
 
     public UserAuth authenticate(LoginUserDto input) {

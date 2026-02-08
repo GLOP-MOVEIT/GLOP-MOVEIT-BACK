@@ -30,6 +30,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - FEIGN_USER_SERVICE_URL=http://user-service:8086
       - LOKI_URL=http://loki:3100
     depends_on:
       postgres:
