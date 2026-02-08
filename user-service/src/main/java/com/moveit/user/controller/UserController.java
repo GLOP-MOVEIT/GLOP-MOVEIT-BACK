@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public Page<User> getAllUsers(@RequestBody Pageable pageable) {
+    public Page<User> getAllUsers(Pageable pageable) {
         return this.userService.getAllUsers(pageable);
     }
 
