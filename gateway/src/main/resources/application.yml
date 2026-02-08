@@ -22,6 +22,8 @@ springdoc:
         url: /auth/v3/api-docs
       - name: Championship Service
         url: /championships/v3/api-docs
+      - name: User Service
+        url: /users/v3/api-docs
     operations-sorter: alpha
     tags-sorter: alpha
     display-request-duration: true
