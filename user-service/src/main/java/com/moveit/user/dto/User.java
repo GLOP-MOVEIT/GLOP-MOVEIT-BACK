@@ -9,11 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class User {
 
-    private Integer id;
+    private Integer userId;
     private String firstName;
     private String surname;
     private String email;
     private String phoneNumber;
     private String language;
-    private String roleName;
+    private Role role;
+    private boolean acceptsNotifications;
+    private boolean acceptsLocationSharing;
 }
