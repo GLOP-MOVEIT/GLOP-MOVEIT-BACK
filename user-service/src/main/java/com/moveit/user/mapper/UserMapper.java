@@ -4,23 +4,25 @@ import com.moveit.user.dto.User;
 import com.moveit.user.dto.UserRequest;
 import com.moveit.user.entity.RoleEntity;
 import com.moveit.user.entity.UserEntity;
-import com.moveit.user.repository.RoleRepository;
-import lombok.RequiredArgsConstructor;
+import com.moveit.user.service.RoleService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring")
-@RequiredArgsConstructor
 public abstract class UserMapper {
 
-    private final RoleRepository roleRepository;
+    @Autowired
+    protected RoleService roleService;
 
     public abstract User toDto(UserEntity userEntity);
+
+    public abstract UserEntity toEntity(User user);
 
     @Mapping(target = "role", expression = "java(getSpectatorRole())")
     public abstract UserEntity toEntity(UserRequest userRequest);
 
-    private RoleEntity getSpectatorRole() {
-        return this.roleRepository.findByName("SPECTATOR").get();
+    protected RoleEntity getSpectatorRole() {
+        return roleService.getRoleEntityByName("SPECTATOR");
     }
 }
