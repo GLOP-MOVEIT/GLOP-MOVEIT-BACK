@@ -1,4 +1,4 @@
-package com.moveit.user.config;
+package com.moveit.user.configuration;
 
 import com.moveit.user.entity.RoleEntity;
 import com.moveit.user.repository.RoleRepository;
