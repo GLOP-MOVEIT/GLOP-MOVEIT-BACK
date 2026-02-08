@@ -20,9 +20,4 @@ public class RoleController {
     public List<Role> getAllRoles() {
         return this.roleService.getAllRole();
     }
-
-    @GetMapping("/{name}")
-    public Role getRoleByName(@PathVariable String name) {
-        return this.roleService.getRoleByName(name);
-    }
 }
