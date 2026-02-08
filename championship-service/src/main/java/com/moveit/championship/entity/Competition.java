@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Competition {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "competition_id", nullable = false)
     private Integer competitionId;
 
