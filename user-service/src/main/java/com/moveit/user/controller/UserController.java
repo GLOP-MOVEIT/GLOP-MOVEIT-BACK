@@ -1,8 +1,10 @@
 package com.moveit.user.controller;
 
 import com.moveit.user.dto.User;
+import com.moveit.user.dto.UserRequest;
 import com.moveit.user.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,12 +29,12 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUserProfile(@RequestBody User user) {
+    public User updateUserProfile(@RequestBody @Valid UserRequest user) {
         return this.userService.updateUser(user);
     }
 
     @PostMapping
-    public User createSpectator(@RequestBody User user) {
+    public User createSpectator(@RequestBody @Valid UserRequest user) {
         return this.userService.createSpectator(user);
     }
 }

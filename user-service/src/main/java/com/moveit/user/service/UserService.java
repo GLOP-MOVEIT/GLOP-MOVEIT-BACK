@@ -1,6 +1,7 @@
 package com.moveit.user.service;
 
 import com.moveit.user.dto.User;
+import com.moveit.user.dto.UserRequest;
 import com.moveit.user.mapper.UserMapper;
 import com.moveit.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,28 +18,24 @@ public class UserService {
 
     public Page<User> getAllUsers(Pageable pageable) {
         return this.userRepository.findAll(pageable)
-                .map(userMapper::toDto);
+                .map(this.userMapper::toDto);
     }
 
     public User getUserById(Integer id) {
         return this.userRepository.findById(id)
-                .map(userMapper::toDto)
+                .map(this.userMapper::toDto)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User updateUser(User user) {
-        if (userRepository.findById(user.getId()).isPresent()) {
-            return userMapper.toDto(userRepository.save(userMapper.toEntity(user)));
+    public User updateUser(UserRequest user) {
+        if (this.userRepository.findById(user.getUserId()).isPresent()) {
+            return this.userMapper.toDto(this.userRepository.save(this.userMapper.toEntity(user)));
         } else {
             throw new RuntimeException("User not found");
         }
     }
 
-    public User createSpectator(User user) {
-        if (userRepository.findById(user.getId()).isPresent()) {
-            throw new RuntimeException("User already exists");
-        } else {
-            return userMapper.toDto(userRepository.save(userMapper.toEntity(user)));
-        }
+    public User createSpectator(UserRequest user) {
+        return this.userMapper.toDto(this.userRepository.save(this.userMapper.toEntity(user)));
     }
 }
