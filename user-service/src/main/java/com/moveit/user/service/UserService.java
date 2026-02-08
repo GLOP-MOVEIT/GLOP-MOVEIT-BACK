@@ -2,6 +2,7 @@ package com.moveit.user.service;
 
 import com.moveit.user.dto.User;
 import com.moveit.user.dto.UserRequest;
+import com.moveit.user.exception.UserNotFoundException;
 import com.moveit.user.mapper.UserMapper;
 import com.moveit.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +25,14 @@ public class UserService {
     public User getUserById(Integer id) {
         return this.userRepository.findById(id)
                 .map(this.userMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public User updateUser(UserRequest user) {
         if (this.userRepository.findById(user.getUserId()).isPresent()) {
             return this.userMapper.toDto(this.userRepository.save(this.userMapper.toEntity(user)));
         } else {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException(user.getUserId());
         }
     }
 
