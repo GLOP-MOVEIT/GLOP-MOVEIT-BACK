@@ -1,8 +1,6 @@
 package com.moveit.auth.dto;
 
-public record RegisterUserDto(
-        String nickname,
-        String password,
+public record CreateSpectatorRequest(
         String firstName,
         String surname,
         String email,
