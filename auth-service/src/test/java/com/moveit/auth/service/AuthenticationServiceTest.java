@@ -3,6 +3,7 @@ package com.moveit.auth.service;
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.UserAuth;
+import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class AuthenticationServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
+    @Mock
+    private UserFeignClient userFeignClient;
+
     @InjectMocks
     private AuthenticationService authenticationService;
 
@@ -50,7 +54,17 @@ class AuthenticationServiceTest {
 
     @Test
     void signup_ShouldCreateUser() {
-        RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
+        RegisterUserDto registerDto = new RegisterUserDto(
+                "testuser",
+                "password123",
+                "Test",
+                "User",
+                "test.user@example.com",
+                "987654321",
+                "en",
+                true,
+                true
+        );
 
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userAuthRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);

@@ -59,7 +59,17 @@ class UserAuthServiceTest {
 
     @Test
     void createUser_ShouldCreateUser() {
-        RegisterUserDto registerDto = new RegisterUserDto("newuser", "password123");
+        RegisterUserDto registerDto = new RegisterUserDto(
+                "newuser",
+                "password123",
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "123456789",
+                "fr",
+                true,
+                false
+        );
 
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userAuthRepository.save(any(UserAuth.class))).thenReturn(adminUserAuth);
