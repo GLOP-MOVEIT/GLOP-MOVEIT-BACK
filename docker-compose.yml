@@ -105,11 +105,14 @@ services:
     environment:
       - AUTH_SERVICE_URL=http://auth-service:8082
       - CHAMPIONSHIP_SERVICE_URL=http://championship-service:8083
+      - USER_SERVICE_URL=http://user-service:8086
       - LOKI_URL=http://loki:3100
     depends_on:
       auth-service:
         condition: service_healthy
       championship-service:
+        condition: service_healthy
+      user-service:
         condition: service_healthy
       loki:
         condition: service_started
