@@ -20,12 +20,6 @@ public class RoleService {
         return roleMapper.toDtoList(roleRepository.findAll());
     }
 
-    public Role getRoleByName(String name) {
-        return this.roleRepository.findByName(name)
-                .map(roleMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-    }
-
     public RoleEntity getRoleEntityByName(String name) {
         return this.roleRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
