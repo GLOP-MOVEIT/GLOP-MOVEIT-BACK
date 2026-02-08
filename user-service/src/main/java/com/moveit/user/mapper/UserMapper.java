@@ -17,8 +17,6 @@ public abstract class UserMapper {
 
     public abstract User toDto(UserEntity userEntity);
 
-    public abstract UserEntity toEntity(User user);
-
     @Mapping(target = "role", expression = "java(getSpectatorRole())")
     public abstract UserEntity toEntity(UserRequest userRequest);
 
