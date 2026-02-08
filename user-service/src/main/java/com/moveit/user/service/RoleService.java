@@ -1,6 +1,7 @@
 package com.moveit.user.service;
 
 import com.moveit.user.dto.Role;
+import com.moveit.user.entity.RoleEntity;
 import com.moveit.user.mapper.RoleMapper;
 import com.moveit.user.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,11 @@ public class RoleService {
     public Role getRoleByName(String name) {
         return this.roleRepository.findByName(name)
                 .map(roleMapper::toDto)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+    }
+
+    public RoleEntity getRoleEntityByName(String name) {
+        return this.roleRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
     }
 }
