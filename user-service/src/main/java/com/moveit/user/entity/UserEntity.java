@@ -20,6 +20,8 @@ public class UserEntity {
     private String email;
     private String phoneNumber;
     private String language;
+    private boolean acceptsNotifications;
+    private boolean acceptsLocationSharing;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
