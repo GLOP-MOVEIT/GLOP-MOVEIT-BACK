@@ -71,7 +71,17 @@ class AuthControllerTest {
 
     @Test
     void register_ShouldReturnUserDto_WhenValidInput() throws Exception {
-        RegisterUserDto registerDto = new RegisterUserDto("testuser", "password123");
+        RegisterUserDto registerDto = new RegisterUserDto(
+                "testuser",
+                "password123",
+                "Test",
+                "User",
+                "test.user@example.com",
+                "987654321",
+                "en",
+                true,
+                true
+        );
 
         when(authenticationService.signup(any(RegisterUserDto.class))).thenReturn(testUserAuth);
         when(userAuthMapper.toDto(testUserAuth)).thenReturn(testUserDto);
