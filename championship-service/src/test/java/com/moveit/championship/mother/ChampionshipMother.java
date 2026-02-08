@@ -24,9 +24,16 @@ public class ChampionshipMother {
         private List<Competition> competitions = List.of();
         private String name = "Championship Name";
         private String description = "Championship Description";
-        private Date startDate = new Date(2026, Calendar.JANUARY,1);
-        private Date endDate = new Date(2026, Calendar.APRIL,2);
+        private Date startDate = createDate(2026, Calendar.JANUARY, 1);
+        private Date endDate = createDate(2026, Calendar.APRIL, 2);
         private Status status = Status.PLANNED;
+
+        private static Date createDate(int year, int month, int day) {
+            Calendar cal = Calendar.getInstance();
+            cal.set(year, month, day, 0, 0, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            return cal.getTime();
+        }
 
         public Championship build() {
             return new Championship(

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,12 +18,12 @@ import java.util.List;
 @AllArgsConstructor
 public class Championship {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Integer id;
 
     @OneToMany(mappedBy = "championship", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Competition> competitions;
+    private List<Competition> competitions = new ArrayList<>();
 
     @NotBlank(message = "Le nom du championnat est obligatoire")
     @Column(nullable = false)
