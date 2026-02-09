@@ -10,11 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Stratégie Round Robin (tous contre tous).
- * Chaque participant affronte tous les autres une fois.
- * Ex : 4 participants → 6 matchs (combinaisons C(4,2))
- */
+
 @Component
 public class RoundRobinStrategy implements TreeGenerationStrategy {
 

@@ -11,12 +11,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Stratégie d'élimination directe.
- * Génère un arbre où le nombre de manches correspond aux tours nécessaires
- * pour éliminer tous les participants sauf le vainqueur.
- * Ex : 8 participants → 3 tours (quarts, demis, finale)
- */
 @Component
 public class SingleEliminationStrategy implements TreeGenerationStrategy {
 
