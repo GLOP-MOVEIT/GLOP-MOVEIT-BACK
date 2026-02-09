@@ -40,7 +40,6 @@ public class LocationService {
         existingLocation.setMainEntrance(location.getMainEntrance());
         existingLocation.setRefereeEntrance(location.getRefereeEntrance());
         existingLocation.setAthleteEntrance(location.getAthleteEntrance());
-        existingLocation.setVipEntrance(location.getVipEntrance());
         existingLocation.setDescription(location.getDescription());
         
         return locationRepository.save(existingLocation);
