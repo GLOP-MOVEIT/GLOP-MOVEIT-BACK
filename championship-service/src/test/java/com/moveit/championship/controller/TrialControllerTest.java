@@ -1,8 +1,10 @@
 package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.championship.entity.Location;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
+import com.moveit.championship.mother.LocationMother;
 import com.moveit.championship.service.TrialService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,16 +36,19 @@ class TrialControllerTest {
     private TrialService trialService;
 
     private Trial trial;
+    private Location location;
 
     @BeforeEach
     void setUp() {
+        location = LocationMother.location().build();
+        
         trial = new Trial();
         trial.setTrialId(1);
         trial.setTrialName("Trial 1");
         trial.setTrialStartDate(new Date());
         trial.setTrialEndDate(new Date());
         trial.setTrialStatus(Status.PLANNED);
-        trial.setLocation("Paris");
+        trial.setLocation(location);
     }
 
     @Test
