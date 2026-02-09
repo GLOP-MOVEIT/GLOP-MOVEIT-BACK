@@ -40,9 +40,6 @@ public class Location {
     @Column(length = 500)
     private String athleteEntrance;
 
-    @Column(length = 500)
-    private String vipEntrance;
-
     @Column(length = 1000)
     private String description;
 }
