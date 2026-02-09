@@ -1,6 +1,10 @@
 package com.moveit.user.service;
 
+import com.moveit.user.dto.RefuseRequest;
 import com.moveit.user.dto.Request;
+import com.moveit.user.dto.RequestStatus;
+import com.moveit.user.entity.RequestEntity;
+import com.moveit.user.exception.RequestNotFoundException;
 import com.moveit.user.mapper.RequestMapper;
 import com.moveit.user.repository.RequestRepository;
 import lombok.AllArgsConstructor;
@@ -23,7 +27,7 @@ public class RequestService {
     public Request getRequestById(Integer id) {
         return this.requestRepository.findById(id)
                 .map(requestMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
     }
 
     public Request createAthleteRequest(Integer id) {
@@ -32,5 +36,22 @@ public class RequestService {
 
     public Request createVolunteerRequest(Integer id) {
         return null;
+    }
+
+    public void acceptRequest(Integer id) {
+        RequestEntity request = this.requestRepository.findById(id)
+                .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
+
+        request.setRequestStatus(RequestStatus.APPROVED);
+        this.requestRepository.save(request);
+    }
+
+    public void refuseRequest(Integer id, RefuseRequest refuseRequest) {
+        RequestEntity request = this.requestRepository.findById(id)
+                .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
+
+        request.setRequestStatus(RequestStatus.REJECTED);
+        request.setRequestRejectionReason(refuseRequest.getRequestRejectionReason());
+        this.requestRepository.save(request);
     }
 }

@@ -21,6 +21,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return createProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(), "The requested role does not exist");
     }
 
+    @ExceptionHandler(RequestNotFoundException.class)
+    public ProblemDetail handleRequestNotFoundException(RequestNotFoundException ex) {
+        return createProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(), "The requested request does not exist");
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         String message = ex.getMessage();

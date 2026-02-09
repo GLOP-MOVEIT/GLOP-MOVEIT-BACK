@@ -1,5 +1,6 @@
 package com.moveit.user.controller;
 
+import com.moveit.user.dto.RefuseRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,5 +64,15 @@ public class RequestController {
     @PostMapping("/volunteer/{id}")
     public Request requestToVolunteer(@PathVariable Integer id) {
         return this.requestService.createVolunteerRequest(id);
+    }
+
+    @GetMapping("/accept/{id}")
+    public void acceptRequest(@PathVariable Integer id) {
+        this.requestService.acceptRequest(id);
+    }
+
+    @GetMapping("/refuse/{id}")
+    public void refuseRequest(@PathVariable Integer id, @RequestBody @Valid RefuseRequest refuseRequest) {
+        this.requestService.refuseRequest(id, refuseRequest);
     }
 }
