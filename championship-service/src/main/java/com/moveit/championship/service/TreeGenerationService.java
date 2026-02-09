@@ -4,7 +4,6 @@ import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.repository.CompetitionRepository;
-import com.moveit.championship.repository.TrialRepository;
 import com.moveit.championship.strategy.TreeGenerationStrategy;
 import com.moveit.championship.strategy.TreeStrategyFactory;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ import java.util.List;
 public class TreeGenerationService {
 
     private final CompetitionRepository competitionRepository;
-    private final TrialRepository trialRepository;
     private final TreeStrategyFactory treeStrategyFactory;
 
 
