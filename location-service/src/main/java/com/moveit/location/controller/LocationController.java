@@ -1,7 +1,7 @@
-package com.moveit.championship.controller;
+package com.moveit.location.controller;
 
-import com.moveit.championship.entity.Location;
-import com.moveit.championship.service.LocationService;
+import com.moveit.location.entity.Location;
+import com.moveit.location.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

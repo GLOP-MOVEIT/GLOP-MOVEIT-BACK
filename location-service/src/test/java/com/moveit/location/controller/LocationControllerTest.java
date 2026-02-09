@@ -1,10 +1,10 @@
-package com.moveit.championship.controller;
+package com.moveit.location.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moveit.championship.entity.Location;
-import com.moveit.championship.exception.LocationNotFoundException;
-import com.moveit.championship.mother.LocationMother;
-import com.moveit.championship.service.LocationService;
+import com.moveit.location.entity.Location;
+import com.moveit.location.exception.LocationNotFoundException;
+import com.moveit.location.mother.LocationMother;
+import com.moveit.location.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

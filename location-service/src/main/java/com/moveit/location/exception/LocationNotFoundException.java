@@ -1,4 +1,4 @@
-package com.moveit.championship.exception;
+package com.moveit.location.exception;
 
 public class LocationNotFoundException extends RuntimeException {
     public LocationNotFoundException(Integer id) {

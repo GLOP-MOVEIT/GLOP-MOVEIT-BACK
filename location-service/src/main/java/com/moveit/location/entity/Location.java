@@ -1,4 +1,4 @@
-package com.moveit.championship.entity;
+package com.moveit.location.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

@@ -52,7 +52,7 @@ public class TrialService {
         existingTrial.setTrialEndDate(trial.getTrialEndDate());
         existingTrial.setTrialDescription(trial.getTrialDescription());
         existingTrial.setTrialStatus(trial.getTrialStatus());
-        existingTrial.setLocation(trial.getLocation());
+        existingTrial.setLocationId(trial.getLocationId());
         existingTrial.setRoundNumber(trial.getRoundNumber());
         existingTrial.setPosition(trial.getPosition());
 

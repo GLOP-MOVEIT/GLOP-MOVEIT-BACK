@@ -1,6 +1,6 @@
-package com.moveit.championship.repository;
+package com.moveit.location.repository;
 
-import com.moveit.championship.entity.Location;
+import com.moveit.location.entity.Location;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -48,9 +48,8 @@ public class Trial {
     @Column(nullable = false)
     private Status trialStatus = Status.PLANNED;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id")
-    private Location location;
+    @Column(name = "location_id")
+    private Integer locationId;
 
     @Column
     private Integer roundNumber;

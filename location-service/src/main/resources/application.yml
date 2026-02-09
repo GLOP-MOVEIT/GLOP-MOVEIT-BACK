@@ -1,8 +1,8 @@
 spring:
   application:
-    name: championship-service
+    name: location-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/moveit_auth
+    url: jdbc:postgresql://localhost:5432/moveit_location
     username: postgres
     password: password
     driver-class-name: org.postgresql.Driver
@@ -16,25 +16,18 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-  port: 8083
-
-location:
-  service:
-    url: http://localhost:8084
+  port: 8084
 
 springdoc:
   api-docs:
     enabled: true
     path: /v3/api-docs
   swagger-ui:
-    enabled: false
+    enabled: true
+    path: /swagger-ui.html
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
-  prometheus:
-    metrics:
-      export:
-        enabled: true
+        include: health,info,metrics

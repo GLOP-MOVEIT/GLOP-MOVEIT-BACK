@@ -2,7 +2,6 @@ package com.moveit.championship.configuration;
 
 import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.exception.CompetitionNotFoundException;
-import com.moveit.championship.exception.LocationNotFoundException;
 import com.moveit.championship.exception.TrialNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,11 +24,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TrialNotFoundException.class)
     public ResponseEntity<Void> handleTrialNotFound() {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(LocationNotFoundException.class)
-    public ResponseEntity<Void> handleLocationNotFound() {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

@@ -1,8 +1,8 @@
-package com.moveit.championship.service;
+package com.moveit.location.service;
 
-import com.moveit.championship.entity.Location;
-import com.moveit.championship.exception.LocationNotFoundException;
-import com.moveit.championship.repository.LocationRepository;
+import com.moveit.location.entity.Location;
+import com.moveit.location.exception.LocationNotFoundException;
+import com.moveit.location.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

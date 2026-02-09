@@ -1,6 +1,6 @@
-package com.moveit.championship.mother;
+package com.moveit.location.mother;
 
-import com.moveit.championship.entity.Location;
+import com.moveit.location.entity.Location;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;

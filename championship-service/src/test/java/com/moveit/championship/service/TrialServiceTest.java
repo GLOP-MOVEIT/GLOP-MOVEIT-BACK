@@ -1,12 +1,10 @@
 package com.moveit.championship.service;
 
 import com.moveit.championship.entity.Competition;
-import com.moveit.championship.entity.Location;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.exception.TrialNotFoundException;
-import com.moveit.championship.mother.LocationMother;
 import com.moveit.championship.repository.CompetitionRepository;
 import com.moveit.championship.repository.TrialRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,13 +29,10 @@ class TrialServiceTest {
 
     private Competition competition;
     private Trial trial;
-    private Location location;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        
-        location = LocationMother.location().build();
         
         competition = new Competition();
         competition.setCompetitionId(1);
@@ -50,7 +45,7 @@ class TrialServiceTest {
         trial.setTrialEndDate(new Date());
         trial.setTrialStatus(Status.PLANNED);
         trial.setCompetition(competition);
-        trial.setLocation(location);
+        trial.setLocationId(1);
     }
 
     @Test
@@ -97,18 +92,13 @@ class TrialServiceTest {
 
     @Test
     void updateTrial_shouldUpdateFields() {
-        Location newLocation = LocationMother.location()
-                .withLocationId(2)
-                .withName("Parc des Princes")
-                .build();
-        
         Trial updated = new Trial();
         updated.setTrialName("Updated");
         updated.setTrialStartDate(new Date());
         updated.setTrialEndDate(new Date());
         updated.setTrialDescription("desc");
         updated.setTrialStatus(Status.ONGOING);
-        updated.setLocation(newLocation);
+        updated.setLocationId(2);
         
         when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
         when(trialRepository.save(any(Trial.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -117,8 +107,7 @@ class TrialServiceTest {
         
         assertThat(result.getTrialName()).isEqualTo("Updated");
         assertThat(result.getTrialStatus()).isEqualTo(Status.ONGOING);
-        assertThat(result.getLocation()).isEqualTo(newLocation);
-        assertThat(result.getLocation().getName()).isEqualTo("Parc des Princes");
+        assertThat(result.getLocationId()).isEqualTo(2);
     }
 
     @Test
