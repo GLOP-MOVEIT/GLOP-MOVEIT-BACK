@@ -66,11 +66,23 @@ public class RequestController {
         return this.requestService.createVolunteerRequest(userId);
     }
 
+    @Operation(summary = "Accepter une demande de promotion")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Demande de promotion acceptée avec succès", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Demande de promotion non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
     @GetMapping("/accept/{id}")
     public void acceptRequest(@PathVariable Integer id) {
         this.requestService.acceptRequest(id);
     }
 
+    @Operation(summary = "Refuser une demande de promotion")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Demande de promotion refusée avec succès", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Demande de promotion non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
     @GetMapping("/refuse/{id}")
     public void refuseRequest(@PathVariable Integer id, @RequestBody @Valid RefuseRequest refuseRequest) {
         this.requestService.refuseRequest(id, refuseRequest);
