@@ -56,6 +56,10 @@ public class Competition {
     @JsonManagedReference(value = "competition-event")
     private List<Event> events = new ArrayList<>();
 
+    @OneToMany(mappedBy = "competition", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "competition-trial")
+    private List<Trial> trials = new ArrayList<>();
+
     @NotNull(message = "Le nombre de manches est obligatoire")
     @Column(nullable = false)
     private Integer nbManches;
