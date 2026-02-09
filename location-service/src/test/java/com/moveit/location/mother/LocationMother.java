@@ -21,7 +21,6 @@ public class LocationMother {
         private String mainEntrance = "Avenue Jules Rimet, 93200 Saint-Denis";
         private String refereeEntrance = "Entrée E - Vestiaires arbitres";
         private String athleteEntrance = "Entrée B - Vestiaires équipes";
-        private String vipEntrance = "Entrée A - Loges VIP";
         private String description = "Grand stade national français";
 
         public Location build() {
@@ -33,7 +32,6 @@ public class LocationMother {
                     mainEntrance,
                     refereeEntrance,
                     athleteEntrance,
-                    vipEntrance,
                     description
             );
         }

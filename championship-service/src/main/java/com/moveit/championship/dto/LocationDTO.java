@@ -15,6 +15,5 @@ public class LocationDTO {
     private String mainEntrance;
     private String refereeEntrance;
     private String athleteEntrance;
-    private String vipEntrance;
     private String description;
 }
