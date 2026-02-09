@@ -4,9 +4,11 @@ import com.moveit.user.dto.RefuseRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
 import com.moveit.user.entity.RequestEntity;
+import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.RequestNotFoundException;
 import com.moveit.user.mapper.RequestMapper;
 import com.moveit.user.repository.RequestRepository;
+import com.moveit.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ public class RequestService {
 
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
+    private final UserRepository userRepository;
 
     public Page<Request> getAllRequests(Pageable pageable) {
         return this.requestRepository.findAll(pageable)
@@ -43,6 +46,11 @@ public class RequestService {
                 .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
 
         request.setRequestStatus(RequestStatus.APPROVED);
+
+        UserEntity user = request.getUser();
+        user.setRole(request.getRole());
+
+        this.userRepository.save(user);
         this.requestRepository.save(request);
     }
 
@@ -52,6 +60,7 @@ public class RequestService {
 
         request.setRequestStatus(RequestStatus.REJECTED);
         request.setRequestRejectionReason(refuseRequest.getRequestRejectionReason());
+
         this.requestRepository.save(request);
     }
 }
