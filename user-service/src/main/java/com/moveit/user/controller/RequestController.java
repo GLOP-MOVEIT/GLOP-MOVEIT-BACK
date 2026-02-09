@@ -50,9 +50,9 @@ public class RequestController {
             @ApiResponse(responseCode = "404", description = "Athlète non trouvé", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
-    @PostMapping("/athlete/{id}")
-    public Request requestToAthlete(@PathVariable Integer id) {
-        return this.requestService.createAthleteRequest(id);
+    @PostMapping("/athlete/{userId}")
+    public Request requestToAthlete(@PathVariable Integer userId) {
+        return this.requestService.createAthleteRequest(userId);
     }
 
     @Operation(summary = "Créer une demande de promotion pour un bénévole")
@@ -61,9 +61,9 @@ public class RequestController {
             @ApiResponse(responseCode = "404", description = "Bénévole non trouvé", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
-    @PostMapping("/volunteer/{id}")
-    public Request requestToVolunteer(@PathVariable Integer id) {
-        return this.requestService.createVolunteerRequest(id);
+    @PostMapping("/volunteer/{userId}")
+    public Request requestToVolunteer(@PathVariable Integer userId) {
+        return this.requestService.createVolunteerRequest(userId);
     }
 
     @GetMapping("/accept/{id}")
