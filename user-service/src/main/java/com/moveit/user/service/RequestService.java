@@ -8,7 +8,6 @@ import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.RequestNotFoundException;
 import com.moveit.user.mapper.RequestMapper;
 import com.moveit.user.repository.RequestRepository;
-import com.moveit.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
