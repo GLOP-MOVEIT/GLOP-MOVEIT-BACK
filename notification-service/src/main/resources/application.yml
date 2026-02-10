@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/moveit_notification
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8088
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /notification/v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /notification/swagger-ui.html
+
+# Actuator endpoints pour le monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+# Point 10 - Configuration de la pagination
+pagination:
+  default-page-size: 10
+  max-page-size: 100
+  min-page-size: 1
+logging:
+  level:
+    com.moveit.notification: INFO
+    org.springframework: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+

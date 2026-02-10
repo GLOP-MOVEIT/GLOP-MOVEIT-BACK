@@ -81,6 +81,7 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:8082
       - CHAMPIONSHIP_SERVICE_URL=http://championship-service:8083
       - LOKI_URL=http://loki:3100
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8088
     depends_on:
       auth-service:
         condition: service_healthy
@@ -92,6 +93,52 @@ services:
       - moveit-network
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  postgres-notification:
+    image: postgres:15
+    container_name: moveit-notification-postgres
+    environment:
+      POSTGRES_DB: moveit_notification
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-notification-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - moveit-network
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: moveit-notification-service
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-notification:5432/moveit_notification
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - LOKI_URL=http://loki:3100
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    networks:
+      - moveit-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8088/actuator/health || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -144,6 +191,7 @@ networks:
 
 volumes:
   postgres-data:
+  postgres-notification-data:
   prometheus-data:
   grafana-data:
   loki-data:

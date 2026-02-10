@@ -1,0 +1,24 @@
+meta {
+  name: CreateNotification
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{URL}}/notifications
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ0ZXN0QHRlc3QuZnIiLCJpYXQiOjE3Njg4NDA0OTgsImV4cCI6MTc2ODkyNjg5OH0.ZS5KH5vVN6zptTo32V3GHgbHqBmFtj3_56gJD8ReX4how4Xt7JF3He040QAi2T-m
+}
+
+body:json {
+  {
+    "userId": "123",
+    "content": "Test notification Bruno",
+    "title": "Titre de la notif",
+    "notificationType": "ALERT"
+  }
+}
