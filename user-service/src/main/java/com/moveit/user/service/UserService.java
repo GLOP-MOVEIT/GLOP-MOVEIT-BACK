@@ -2,6 +2,7 @@ package com.moveit.user.service;
 
 import com.moveit.user.dto.User;
 import com.moveit.user.dto.UserRequest;
+import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.UserNotFoundException;
 import com.moveit.user.mapper.UserMapper;
 import com.moveit.user.repository.UserRepository;
@@ -38,5 +39,14 @@ public class UserService {
 
     public User createSpectator(UserRequest user) {
         return this.userMapper.toDto(this.userRepository.save(this.userMapper.toEntity(user)));
+    }
+
+    public UserEntity getUserEntityById(Integer id) {
+        return this.userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    public void saveUserEntity(UserEntity user) {
+        this.userRepository.save(user);
     }
 }

@@ -20,7 +20,8 @@ public class RequestService {
 
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
-    private final UserRepository userRepository;
+    private final UserService userService;
+    private final RoleService roleService;
 
     public Page<Request> getAllRequests(Pageable pageable) {
         return this.requestRepository.findAll(pageable)
@@ -33,12 +34,20 @@ public class RequestService {
                 .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
     }
 
-    public Request createAthleteRequest(Integer id) {
-        return null;
+    public Request createAthleteRequest(Integer userId) {
+        RequestEntity entity = new RequestEntity();
+        entity.setRequestStatus(RequestStatus.PENDING);
+        entity.setUser(this.userService.getUserEntityById(userId));
+        entity.setRole(this.roleService.getRoleEntityByName("ATHLETE"));
+        return this.requestMapper.toDto(this.requestRepository.save(entity));
     }
 
-    public Request createVolunteerRequest(Integer id) {
-        return null;
+    public Request createVolunteerRequest(Integer userId) {
+        RequestEntity entity = new RequestEntity();
+        entity.setRequestStatus(RequestStatus.PENDING);
+        entity.setUser(this.userService.getUserEntityById(userId));
+        entity.setRole(this.roleService.getRoleEntityByName("VOLUNTEER"));
+        return this.requestMapper.toDto(this.requestRepository.save(entity));
     }
 
     public void acceptRequest(Integer id) {
@@ -50,7 +59,7 @@ public class RequestService {
         UserEntity user = request.getUser();
         user.setRole(request.getRole());
 
-        this.userRepository.save(user);
+        this.userService.saveUserEntity(user);
         this.requestRepository.save(request);
     }
 
