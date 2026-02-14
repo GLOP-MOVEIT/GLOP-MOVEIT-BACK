@@ -1,6 +1,8 @@
 package com.moveit.championship.controller;
 
+import com.moveit.championship.dto.CompetitionDTO;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.mapper.CompetitionMapper;
 import com.moveit.championship.service.CompetitionService;
 import com.moveit.championship.service.TreeGenerationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,66 +30,66 @@ public class CompetitionController {
 
     @Operation(summary = "Récupérer toutes les compétitions")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Compétitions récupérées avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "200", description = "Compétitions récupérées avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping
-    public ResponseEntity<List<Competition>> getAllCompetitions() {
+    public ResponseEntity<List<CompetitionDTO>> getAllCompetitions() {
         List<Competition> competitions = competitionService.getAllCompetitions();
-        return ResponseEntity.ok(competitions);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTOList(competitions));
     }
 
     @Operation(summary = "Récupérer une compétition par ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Compétition récupérée avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "200", description = "Compétition récupérée avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Competition> getCompetitionById(@PathVariable Integer id) {
+    public ResponseEntity<CompetitionDTO> getCompetitionById(@PathVariable Integer id) {
         Competition competition = competitionService.getCompetitionById(id);
-        return ResponseEntity.ok(competition);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
     }
 
     @Operation(summary = "Créer une nouvelle compétition (Admin)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Compétition créée avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "201", description = "Compétition créée avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content()),
             @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping
-    public ResponseEntity<Competition> createCompetition(@Valid @RequestBody Competition competition) {
+    public ResponseEntity<CompetitionDTO> createCompetition(@Valid @RequestBody Competition competition) {
         Competition createdCompetition = competitionService.createCompetition(competition);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCompetition);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CompetitionMapper.toCompetitionDTO(createdCompetition));
     }
 
     @Operation(summary = "Mettre à jour une compétition (Admin)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Compétition mise à jour avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "200", description = "Compétition mise à jour avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content()),
             @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
             @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Competition> updateCompetition(@PathVariable Integer id, @Valid @RequestBody Competition competition) {
+    public ResponseEntity<CompetitionDTO> updateCompetition(@PathVariable Integer id, @Valid @RequestBody Competition competition) {
         Competition updatedCompetition = competitionService.updateCompetition(id, competition);
-        return ResponseEntity.ok(updatedCompetition);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(updatedCompetition));
     }
 
     @Operation(summary = "Générer l'arbre complet d'une compétition (Admin)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Arbre généré avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "200", description = "Arbre généré avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content()),
             @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
             @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/{id}/generate-tree")
-    public ResponseEntity<Competition> generateTree(@PathVariable Integer id, @RequestParam int nbParticipants) {
+    public ResponseEntity<CompetitionDTO> generateTree(@PathVariable Integer id, @RequestParam int nbParticipants) {
         Competition competition = treeGenerationService.generateTree(id, nbParticipants);
-        return ResponseEntity.ok(competition);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
     }
 
     @Operation(summary = "Supprimer une compétition (Admin)")
