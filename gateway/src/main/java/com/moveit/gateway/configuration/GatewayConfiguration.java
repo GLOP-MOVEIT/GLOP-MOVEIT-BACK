@@ -40,6 +40,14 @@ public class GatewayConfiguration {
     }
 
     @Bean
+    public RouterFunction<ServerResponse> trialServiceRoute() {
+        return route("trial-service")
+                .route(path("/trials/**"), http())
+                .before(uri(championshipServiceUrl))
+                .build();
+    }
+
+    @Bean
     public RouterFunction<ServerResponse> locationServiceRoute() {
         return route("location-service")
                 .route(path("/locations/**"), http())

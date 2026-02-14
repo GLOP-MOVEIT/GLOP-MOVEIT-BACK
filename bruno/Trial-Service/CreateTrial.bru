@@ -1,0 +1,28 @@
+meta {
+  name: CreateTrial
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/trials/competition/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "trialName": "Manche 1 - Qualification",
+    "trialStartDate": "2024-03-05",
+    "trialEndDate": "2024-03-05",
+    "trialDescription": "Première manche de qualification",
+    "trialStatus": "PLANNED",
+    "locationId": 1,
+    "roundNumber": 1,
+    "position": 1
+  }
+}
