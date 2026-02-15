@@ -1,6 +1,6 @@
 package com.moveit.user.service;
 
-import com.moveit.user.dto.RefuseRequest;
+import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
 import com.moveit.user.entity.RequestEntity;
@@ -62,7 +62,7 @@ public class RequestService {
         this.requestRepository.save(request);
     }
 
-    public void refuseRequest(Integer id, RefuseRequest refuseRequest) {
+    public void rejectRequest(Integer id, RejectRequest refuseRequest) {
         RequestEntity request = this.requestRepository.findById(id)
                 .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
 

@@ -1,6 +1,6 @@
 package com.moveit.user.controller;
 
-import com.moveit.user.dto.RefuseRequest;
+import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,8 +83,8 @@ public class RequestController {
             @ApiResponse(responseCode = "404", description = "Demande de promotion non trouvée", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
-    @GetMapping("/refuse/{id}")
-    public void refuseRequest(@PathVariable Integer id, @RequestBody @Valid RefuseRequest refuseRequest) {
-        this.requestService.refuseRequest(id, refuseRequest);
+    @GetMapping("/reject/{id}")
+    public void rejectRequest(@PathVariable Integer id, @RequestBody @Valid RejectRequest rejectRequest) {
+        this.requestService.rejectRequest(id, rejectRequest);
     }
 }
