@@ -38,8 +38,8 @@ public class TicketController {
             @ApiResponse(responseCode = "404", description = "Ticket ou utilisateur non trouvé"),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
     })
-    @GetMapping("/{userId}/{ticketId}")
-    public Ticket getTicket(@PathVariable Integer userId, @PathVariable Integer ticketId) {
+    @GetMapping("/{ticketId}/")
+    public Ticket getTicket(@PathVariable Integer ticketId) {
         return this.ticketService.getTicketById(ticketId);
     }
 
