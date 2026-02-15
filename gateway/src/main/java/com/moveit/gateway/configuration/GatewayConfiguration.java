@@ -46,6 +46,10 @@ public class GatewayConfiguration {
                 .before(uri(userServiceUrl))
                 .route(path("/roles/**"), http())
                 .before(uri(userServiceUrl))
+                .route(path("/requests/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/tickets/**"), http())
+                .before(uri(userServiceUrl))
                 .build();
     }
 }
