@@ -1,0 +1,31 @@
+meta {
+  name: Create athlete request
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{URL}}/requests/athlete/:userId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  userId: 
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "firstName":"Bob",
+    "surname":"Alice",
+    "email":"bob.alice@gmail.com",
+    "phoneNumber":"0123456789",
+    "language":"FR",
+    "acceptsNotifications": true,
+    "acceptsLocationSharing": false
+  }
+}

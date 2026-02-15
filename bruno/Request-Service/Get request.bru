@@ -1,0 +1,26 @@
+meta {
+  name: Get request
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{URL}}/requests/:requestId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  requestId: 
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "nickname": "Julien",
+    "password": "password"
+  }
+}
