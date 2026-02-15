@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RefuseRequest {
+public class RejectRequest {
 
     @NotBlank(message = "Rejection reason is required")
     private String requestRejectionReason;
