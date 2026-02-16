@@ -1,0 +1,19 @@
+meta {
+  name: Get tickets
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{URL}}/tickets/:userId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  userId: 
+}
+
+auth:bearer {
+  token: token
+}

@@ -1,68 +1,55 @@
 package com.moveit.auth.service;
 
-import com.moveit.auth.entity.Role;
-import com.moveit.auth.entity.RoleEnum;
-import com.moveit.auth.entity.User;
-import com.moveit.auth.repository.UserRepository;
-import com.moveit.auth.model.LoginUserDto;
-import com.moveit.auth.model.RegisterUserDto;
+import com.moveit.auth.dto.LoginUserDto;
+import com.moveit.auth.dto.RegisterUserDto;
+import com.moveit.auth.dto.CreateSpectatorRequest;
+import com.moveit.auth.entity.UserAuth;
+import com.moveit.auth.feign.UserFeignClient;
+import com.moveit.auth.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.Date;
 
-/**
- * Service de gestion de l'authentification.
- */
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserRepository userRepository;
-    private final RoleService roleService;
+    private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final UserFeignClient userFeignClient;
 
-    /**
-     * Inscrit un nouvel utilisateur.
-     */
-    public User signup(RegisterUserDto input) {
+    public UserAuth signup(RegisterUserDto input) {
+        UserAuth userAuth = new UserAuth()
+                .setNickname(input.nickname())
+                .setPassword(passwordEncoder.encode(input.password()));
 
-        Optional<Role> optionalRole = roleService.findByName(RoleEnum.SPECTATOR);
+        UserAuth savedUserAuth = userAuthRepository.save(userAuth);
 
-        if (optionalRole.isEmpty()) {
-            return null;
-        }
+        userFeignClient.createSpectator(new CreateSpectatorRequest(
+                input.firstName(),
+                input.surname(),
+                input.email(),
+                input.phoneNumber(),
+                input.language(),
+                input.acceptsNotifications(),
+                input.acceptsLocationSharing()
+        ));
 
-        var user = new User()
-                .setFirstName(input.firstName())
-                .setSurname(input.surname())
-                .setEmail(input.email())
-                .setPassword(passwordEncoder.encode(input.password()))
-                .setPhoneNumber(input.phoneNumber())
-                .setRole(optionalRole.get())
-                .setAcceptsNotifications(input.acceptsNotifications())
-                .setAcceptsLocation(input.acceptsLocation());
-
-        return userRepository.save(user);
+        return savedUserAuth;
     }
 
-    /**
-     * Authentifie un utilisateur.
-     */
-    public UserDetails authenticate(LoginUserDto input) {
+    public UserAuth authenticate(LoginUserDto input) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.email(),
-                        input.password()
-                )
+                new UsernamePasswordAuthenticationToken(input.nickname(), input.password())
         );
 
-        return userRepository.findByEmail(input.email())
-                .orElseThrow();
+        UserAuth userAuth = userAuthRepository.findByNickname(input.nickname()).orElseThrow();
+        userAuth.setLastConnectionDate(new Date());
+        return userAuthRepository.save(userAuth);
     }
 }

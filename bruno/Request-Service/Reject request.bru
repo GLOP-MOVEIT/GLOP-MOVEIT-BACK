@@ -1,0 +1,25 @@
+meta {
+  name: Reject request
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{URL}}/requests/reject/:requestId
+  body: json
+  auth: bearer
+}
+
+params:path {
+  requestId: 
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "requestRejectionReason": "On veut pas de toi"
+  }
+}

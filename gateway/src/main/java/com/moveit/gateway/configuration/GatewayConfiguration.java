@@ -22,6 +22,8 @@ public class GatewayConfiguration {
 
     @Value("${LOCATION_SERVICE_URL:http://localhost:8084}")
     private String locationServiceUrl;
+    @Value("${USER_SERVICE_URL:http://localhost:8086}")
+    private String userServiceUrl;
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
@@ -52,6 +54,16 @@ public class GatewayConfiguration {
         return route("location-service")
                 .route(path("/locations/**"), http())
                 .before(uri(locationServiceUrl))
+    public RouterFunction<ServerResponse> userServiceRoute() {
+        return route("user-service")
+                .route(path("/users/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/roles/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/requests/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/tickets/**"), http())
+                .before(uri(userServiceUrl))
                 .build();
     }
 }

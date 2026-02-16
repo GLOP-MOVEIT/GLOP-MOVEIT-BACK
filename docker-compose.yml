@@ -30,6 +30,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - FEIGN_USER_SERVICE_URL=http://user-service:8086
       - LOKI_URL=http://loki:3100
     depends_on:
       postgres:
@@ -77,6 +78,11 @@ services:
     container_name: moveit-location-service
     ports:
       - "8084:8084"
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: moveit-user-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_auth
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -108,6 +114,7 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:8082
       - CHAMPIONSHIP_SERVICE_URL=http://championship-service:8083
       - LOCATION_SERVICE_URL=http://location-service:8084
+      - USER_SERVICE_URL=http://user-service:8086
       - LOKI_URL=http://loki:3100
     depends_on:
       auth-service:
@@ -115,6 +122,8 @@ services:
       championship-service:
         condition: service_healthy
       location-service:
+        condition: service_healthy
+      user-service:
         condition: service_healthy
       loki:
         condition: service_started

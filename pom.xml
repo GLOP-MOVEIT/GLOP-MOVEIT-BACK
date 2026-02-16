@@ -12,6 +12,7 @@
 
     <modules>
         <module>auth-service</module>
+        <module>user-service</module>
         <module>championship-service</module>
         <module>gateway</module>
         <module>location-service</module>
