@@ -27,4 +27,6 @@ public class CompetitionDTO {
     private List<TrialDTO> trials;
     private Integer nbManches;
     private CompetitionType competitionType;
+    private Integer maxPerHeat;
+    private Integer nbParticipants;
 }

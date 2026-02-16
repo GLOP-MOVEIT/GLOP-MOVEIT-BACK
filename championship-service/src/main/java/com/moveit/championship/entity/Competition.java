@@ -67,4 +67,10 @@ public class Competition {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
+
+    @Column(name = "max_per_heat")
+    private Integer maxPerHeat;
+
+    @Column(name = "nb_participants")
+    private Integer nbParticipants;
 }

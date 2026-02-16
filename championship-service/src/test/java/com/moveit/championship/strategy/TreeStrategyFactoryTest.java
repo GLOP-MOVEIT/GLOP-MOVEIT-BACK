@@ -21,6 +21,8 @@ class TreeStrategyFactoryTest {
     private SingleEliminationStrategy singleEliminationStrategy;
     @Mock
     private RoundRobinStrategy roundRobinStrategy;
+    @Mock
+    private HeatsStrategy heatsStrategy;
 
     private TreeStrategyFactory factory;
 
@@ -28,7 +30,8 @@ class TreeStrategyFactoryTest {
     void setUp() {
         when(singleEliminationStrategy.getType()).thenReturn(CompetitionType.SINGLE_ELIMINATION);
         when(roundRobinStrategy.getType()).thenReturn(CompetitionType.ROUND_ROBIN);
-        factory = new TreeStrategyFactory(List.of(singleEliminationStrategy, roundRobinStrategy));
+        when(heatsStrategy.getType()).thenReturn(CompetitionType.HEATS);
+        factory = new TreeStrategyFactory(List.of(singleEliminationStrategy, roundRobinStrategy, heatsStrategy));
     }
 
     @Test
@@ -43,6 +46,13 @@ class TreeStrategyFactoryTest {
     void testGetStrategy_RoundRobin() {
         TreeGenerationStrategy strategy = factory.getStrategy(CompetitionType.ROUND_ROBIN);
         assertThat(strategy).isEqualTo(roundRobinStrategy);
+    }
+
+    @Test
+    @DisplayName("Should return HeatsStrategy for HEATS type")
+    void testGetStrategy_Heats() {
+        TreeGenerationStrategy strategy = factory.getStrategy(CompetitionType.HEATS);
+        assertThat(strategy).isEqualTo(heatsStrategy);
     }
 
     @Test

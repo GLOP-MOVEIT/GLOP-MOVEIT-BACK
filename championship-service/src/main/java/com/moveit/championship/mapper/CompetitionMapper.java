@@ -68,6 +68,8 @@ public class CompetitionMapper {
                 .trials(trialDTOs)
                 .nbManches(competition.getNbManches())
                 .competitionType(competition.getCompetitionType())
+                .maxPerHeat(competition.getMaxPerHeat())
+                .nbParticipants(competition.getNbParticipants())
                 .build();
     }
 
