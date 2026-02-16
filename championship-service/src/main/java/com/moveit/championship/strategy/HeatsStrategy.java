@@ -19,9 +19,9 @@ public class HeatsStrategy implements TreeGenerationStrategy {
     }
 
     @Override
-    public List<Trial> generateTrials(Competition competition) {
+    public List<Trial> generateTrials(Competition competition, List<Integer> participantIds) {
         int nbManches = competition.getNbManches();
-        int nbParticipants = competition.getNbParticipants();
+        int nbParticipants = participantIds.size();
         int maxPerHeat = competition.getMaxPerHeat();
 
         if (nbManches < 1) {

@@ -19,7 +19,7 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
     }
 
     @Override
-    public List<Trial> generateTrials(Competition competition) {
+    public List<Trial> generateTrials(Competition competition, List<Integer> participantIds) {
         int nbRounds = competition.getNbManches();
         if (nbRounds < 1) {
             throw new IllegalArgumentException("Il faut au moins 1 manche pour une élimination directe");

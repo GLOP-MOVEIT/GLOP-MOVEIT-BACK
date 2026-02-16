@@ -22,7 +22,7 @@ public class TreeGenerationService {
 
 
     @Transactional
-    public Competition generateTree(Integer competitionId) {
+    public Competition generateTree(Integer competitionId, List<Integer> participantIds) {
         Competition competition = competitionRepository.findById(competitionId)
                 .orElseThrow(() -> new CompetitionNotFoundException(competitionId));
 
@@ -32,7 +32,7 @@ public class TreeGenerationService {
 
         TreeGenerationStrategy strategy = treeStrategyFactory.getStrategy(competition.getCompetitionType());
 
-        List<Trial> generatedTrials = strategy.generateTrials(competition);
+        List<Trial> generatedTrials = strategy.generateTrials(competition, participantIds);
 
         competition.getTrials().addAll(generatedTrials);
 

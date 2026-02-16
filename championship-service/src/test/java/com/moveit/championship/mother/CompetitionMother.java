@@ -36,7 +36,6 @@ public class CompetitionMother {
         private Integer nbManches = 3;
         private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
         private Integer maxPerHeat = null;
-        private Integer nbParticipants = null;
 
         private static Date createDate(int year, int month, int day) {
             Calendar cal = Calendar.getInstance();
@@ -59,8 +58,7 @@ public class CompetitionMother {
                     trials,
                     nbManches,
                     competitionType,
-                    maxPerHeat,
-                    nbParticipants
+                    maxPerHeat
                 );
         }
     }

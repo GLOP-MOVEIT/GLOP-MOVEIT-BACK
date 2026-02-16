@@ -28,5 +28,4 @@ public class CompetitionDTO {
     private Integer nbManches;
     private CompetitionType competitionType;
     private Integer maxPerHeat;
-    private Integer nbParticipants;
 }

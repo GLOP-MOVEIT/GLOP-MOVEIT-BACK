@@ -41,7 +41,7 @@ class RoundRobinStrategyTest {
     @DisplayName("Should generate correct number of trials for 3 rounds (4 participants)")
     void testGenerateTrials_3Rounds() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         // 3 rounds, 4 participants: 3 journées x 2 matchs = 6 matchs
         assertThat(trials).hasSize(6);
     }
@@ -50,7 +50,7 @@ class RoundRobinStrategyTest {
     @DisplayName("Should generate correct number of trials for 5 rounds (6 participants)")
     void testGenerateTrials_5Rounds() {
         competition.setNbManches(5);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         // 5 rounds, 6 participants: 5 journées x 3 matchs = 15 matchs
         assertThat(trials).hasSize(15);
     }
@@ -59,7 +59,7 @@ class RoundRobinStrategyTest {
     @DisplayName("Should generate correct number of trials for 1 round (2 participants)")
     void testGenerateTrials_1Round() {
         competition.setNbManches(1);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         // 1 round, 2 participants: 1 journée x 1 match = 1 match
         assertThat(trials).hasSize(1);
     }
@@ -68,7 +68,7 @@ class RoundRobinStrategyTest {
     @DisplayName("Should name trials with Journée format")
     void testGenerateTrials_NamingFormat() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials.getFirst().getTrialName()).contains("Journée 1");
     }
 
@@ -76,7 +76,7 @@ class RoundRobinStrategyTest {
     @DisplayName("Should throw when less than 1 round")
     void testGenerateTrials_LessThan1Round() {
         competition.setNbManches(0);
-        assertThatThrownBy(() -> strategy.generateTrials(competition))
+        assertThatThrownBy(() -> strategy.generateTrials(competition, List.of()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -84,7 +84,7 @@ class RoundRobinStrategyTest {
     @DisplayName("All trials should have PLANNED status")
     void testGenerateTrials_AllPlanned() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials).isNotEmpty().allMatch(t -> t.getTrialStatus() == Status.PLANNED);
     }
 
@@ -92,7 +92,7 @@ class RoundRobinStrategyTest {
     @DisplayName("All trials should be linked to the competition")
     void testGenerateTrials_AllLinkedToCompetition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials).isNotEmpty().allMatch(t -> t.getCompetition().equals(competition));
     }
 
@@ -100,7 +100,7 @@ class RoundRobinStrategyTest {
     @DisplayName("All trials should have roundNumber and position set")
     void testGenerateTrials_RoundNumberAndPosition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials).isNotEmpty().allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
 
         // Journée 1 : 2 matchs
@@ -121,7 +121,7 @@ class RoundRobinStrategyTest {
     @DisplayName("Round robin trials should not have nextTrial links")
     void testGenerateTrials_NoNextTrialLinks() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials).isNotEmpty().allMatch(t -> t.getNextTrial() == null);
     }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -174,42 +175,48 @@ class CompetitionControllerTest {
     @DisplayName("Should generate tree successfully.")
     void testGenerateTree_Success() throws Exception {
         Integer id = competition1.getCompetitionId();
+        List<Integer> participantIds = List.of(1, 2, 3, 4);
 
-        when(treeGenerationService.generateTree(id)).thenReturn(competition1);
+        when(treeGenerationService.generateTree(eq(id), anyList())).thenReturn(competition1);
 
         mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(participantIds)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.competitionId", equalTo(competition1.getCompetitionId())))
                 .andExpect(jsonPath("$.competitionName", equalTo(competition1.getCompetitionName())));
 
-        verify(treeGenerationService, times(1)).generateTree(id);
+        verify(treeGenerationService, times(1)).generateTree(eq(id), anyList());
     }
 
     @Test
     @DisplayName("Should return 404 when generating tree for non-existent competition.")
     void testGenerateTree_NotFound() throws Exception {
         Integer id = 999;
+        List<Integer> participantIds = List.of(1, 2);
 
-        when(treeGenerationService.generateTree(id))
+        when(treeGenerationService.generateTree(eq(id), anyList()))
                 .thenThrow(new CompetitionNotFoundException(id));
 
         mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(participantIds)))
                 .andExpect(status().isNotFound());
 
-        verify(treeGenerationService, times(1)).generateTree(id);
+        verify(treeGenerationService, times(1)).generateTree(eq(id), anyList());
     }
 
     @Test
     @DisplayName("Should generate tree even without extra params.")
     void testGenerateTree_NoExtraParam() throws Exception {
         Integer id = competition1.getCompetitionId();
+        List<Integer> participantIds = List.of(1, 2);
 
-        when(treeGenerationService.generateTree(id)).thenReturn(competition1);
+        when(treeGenerationService.generateTree(eq(id), anyList())).thenReturn(competition1);
 
         mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(participantIds)))
                 .andExpect(status().isOk());
     }
 

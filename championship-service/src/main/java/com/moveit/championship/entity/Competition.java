@@ -70,7 +70,4 @@ public class Competition {
 
     @Column(name = "max_per_heat")
     private Integer maxPerHeat;
-
-    @Column(name = "nb_participants")
-    private Integer nbParticipants;
 }

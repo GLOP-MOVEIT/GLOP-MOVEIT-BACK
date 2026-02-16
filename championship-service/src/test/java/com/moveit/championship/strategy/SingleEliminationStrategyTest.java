@@ -41,7 +41,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should generate correct number of trials for 3 rounds (8 participants)")
     void testGenerateTrials_3Rounds() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         // 3 rounds: 4 quarts + 2 demis + 1 finale = 7 matchs
         assertThat(trials).hasSize(7);
     }
@@ -50,7 +50,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should generate correct number of trials for 2 rounds (4 participants)")
     void testGenerateTrials_2Rounds() {
         competition.setNbManches(2);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         // 2 rounds: 2 demis + 1 finale = 3 matchs
         assertThat(trials).hasSize(3);
     }
@@ -59,7 +59,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should generate correct number of trials for 1 round (2 participants)")
     void testGenerateTrials_1Round() {
         competition.setNbManches(1);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         // 1 round: 1 finale
         assertThat(trials).hasSize(1);
         assertThat(trials.getFirst().getTrialName()).contains("Finale");
@@ -69,7 +69,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should name rounds correctly")
     void testGenerateTrials_RoundNames() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials.stream().filter(t -> t.getTrialName().contains("Quarts")).count()).isEqualTo(4);
         assertThat(trials.stream().filter(t -> t.getTrialName().contains("Demi")).count()).isEqualTo(2);
         assertThat(trials.stream().filter(t -> t.getTrialName().contains("Finale")).count()).isEqualTo(1);
@@ -79,7 +79,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should throw when less than 1 round")
     void testGenerateTrials_LessThan1Round() {
         competition.setNbManches(0);
-        assertThatThrownBy(() -> strategy.generateTrials(competition))
+        assertThatThrownBy(() -> strategy.generateTrials(competition, List.of()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -87,7 +87,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("All trials should have PLANNED status")
     void testGenerateTrials_AllPlanned() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials).isNotEmpty().allMatch(t -> t.getTrialStatus() == Status.PLANNED);
     }
 
@@ -95,7 +95,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("All trials should be linked to the competition")
     void testGenerateTrials_AllLinkedToCompetition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials).isNotEmpty().allMatch(t -> t.getCompetition().equals(competition));
     }
 
@@ -103,7 +103,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("All trials should have roundNumber and position set")
     void testGenerateTrials_RoundNumberAndPosition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
         assertThat(trials).isNotEmpty().allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
 
         // Tour 1 : 4 matchs (positions 1-4)
@@ -126,7 +126,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should link trials to next round correctly")
     void testGenerateTrials_NextTrialLinks() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, List.of());
 
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
         List<Trial> round2 = trials.stream().filter(t -> t.getRoundNumber() == 2).toList();

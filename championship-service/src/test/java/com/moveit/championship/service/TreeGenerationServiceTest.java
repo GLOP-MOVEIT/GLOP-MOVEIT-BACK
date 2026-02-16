@@ -21,6 +21,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 class TreeGenerationServiceTest {
@@ -68,10 +69,10 @@ class TreeGenerationServiceTest {
         TreeGenerationStrategy mockStrategy = mock(TreeGenerationStrategy.class);
         when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
         when(treeStrategyFactory.getStrategy(CompetitionType.SINGLE_ELIMINATION)).thenReturn(mockStrategy);
-        when(mockStrategy.generateTrials(any(Competition.class))).thenReturn(List.of(trial1));
+        when(mockStrategy.generateTrials(any(Competition.class), anyList())).thenReturn(List.of(trial1));
         when(competitionRepository.save(any(Competition.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Competition result = treeGenerationService.generateTree(1);
+        Competition result = treeGenerationService.generateTree(1, List.of(1, 2, 3, 4));
 
         assertThat(result.getTrials()).hasSize(1);
         assertThat(result.getNbManches()).isEqualTo(1);
@@ -83,7 +84,7 @@ class TreeGenerationServiceTest {
     @DisplayName("Should throw when competition not found")
     void testGenerateTree_CompetitionNotFound() {
         when(competitionRepository.findById(999)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> treeGenerationService.generateTree(999))
+        assertThatThrownBy(() -> treeGenerationService.generateTree(999, List.of()))
                 .isInstanceOf(CompetitionNotFoundException.class);
     }
 
@@ -99,10 +100,10 @@ class TreeGenerationServiceTest {
         TreeGenerationStrategy mockStrategy = mock(TreeGenerationStrategy.class);
         when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
         when(treeStrategyFactory.getStrategy(CompetitionType.SINGLE_ELIMINATION)).thenReturn(mockStrategy);
-        when(mockStrategy.generateTrials(any(Competition.class))).thenReturn(List.of());
+        when(mockStrategy.generateTrials(any(Competition.class), anyList())).thenReturn(List.of());
         when(competitionRepository.save(any(Competition.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Competition result = treeGenerationService.generateTree(1);
+        Competition result = treeGenerationService.generateTree(1, List.of(1, 2));
 
         assertThat(result.getTrials()).isEmpty();
     }

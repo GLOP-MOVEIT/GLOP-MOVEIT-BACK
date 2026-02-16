@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,6 +19,11 @@ class HeatsStrategyTest {
 
     private HeatsStrategy strategy;
     private Competition competition;
+    private List<Integer> participantIds;
+
+    private static List<Integer> createParticipantIds(int count) {
+        return IntStream.rangeClosed(1, count).boxed().toList();
+    }
 
     @BeforeEach
     void setUp() {
@@ -30,7 +36,7 @@ class HeatsStrategyTest {
         competition.setCompetitionType(CompetitionType.HEATS);
         competition.setNbManches(3);
         competition.setMaxPerHeat(8);
-        competition.setNbParticipants(29);
+        participantIds = createParticipantIds(29);
 
         Calendar cal = Calendar.getInstance();
         cal.set(2026, Calendar.JULY, 1);
@@ -46,14 +52,14 @@ class HeatsStrategyTest {
         // Demi-finales: 2 × 8 = 16 participants → 2 séries
         // Séries: 4 × 8 = 32 attendus, mais 29 réels → ceil(29/8) = 4 séries
         // Total: 4 + 2 + 1 = 7 trials
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
         assertThat(trials).hasSize(7);
     }
 
     @Test
     @DisplayName("Should generate correct round structure for 29 participants")
     void testGenerateTrials_RoundStructure() {
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
 
         // Round 1 (Séries): 4×8=32 attendus, 29 réels → ceil(29/8) = 4
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
@@ -71,7 +77,7 @@ class HeatsStrategyTest {
     @Test
     @DisplayName("Should name rounds correctly")
     void testGenerateTrials_RoundNames() {
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
 
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
         assertThat(round1).allMatch(t -> t.getTrialName().contains("Séries"));
@@ -86,10 +92,10 @@ class HeatsStrategyTest {
     @Test
     @DisplayName("Should generate correct trials for 16 participants, 2 rounds")
     void testGenerateTrials_16Participants_2Rounds() {
-        competition.setNbParticipants(16);
+        List<Integer> ids16 = createParticipantIds(16);
         competition.setNbManches(2);
 
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, ids16);
 
         // Round 1: 2 × maxPerHeat = 16, 16 participants → 16/8 = 2 séries
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
@@ -105,10 +111,10 @@ class HeatsStrategyTest {
     @Test
     @DisplayName("Should generate single finale for 8 or fewer participants with 1 round")
     void testGenerateTrials_8Participants_1Round() {
-        competition.setNbParticipants(8);
+        List<Integer> ids8 = createParticipantIds(8);
         competition.setNbManches(1);
 
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, ids8);
         assertThat(trials).hasSize(1);
         assertThat(trials.getFirst().getTrialName()).contains("Finale");
     }
@@ -116,7 +122,7 @@ class HeatsStrategyTest {
     @Test
     @DisplayName("Should include participant count in description")
     void testGenerateTrials_DescriptionContainsParticipants() {
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
         // First heat has 8 participants
         assertThat(trials.getFirst().getTrialDescription()).contains("8 participants");
         // Last heat of round 1 (4th série) has 5 participants (29 - 3*8)
@@ -128,15 +134,15 @@ class HeatsStrategyTest {
     @DisplayName("Should throw when less than 1 round")
     void testGenerateTrials_LessThan1Round() {
         competition.setNbManches(0);
-        assertThatThrownBy(() -> strategy.generateTrials(competition))
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("Should throw when less than 2 participants")
     void testGenerateTrials_LessThan2Participants() {
-        competition.setNbParticipants(1);
-        assertThatThrownBy(() -> strategy.generateTrials(competition))
+        List<Integer> ids1 = createParticipantIds(1);
+        assertThatThrownBy(() -> strategy.generateTrials(competition, ids1))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -144,28 +150,28 @@ class HeatsStrategyTest {
     @DisplayName("Should throw when less than 2 per heat")
     void testGenerateTrials_LessThan2PerHeat() {
         competition.setMaxPerHeat(1);
-        assertThatThrownBy(() -> strategy.generateTrials(competition))
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("All trials should have PLANNED status")
     void testGenerateTrials_AllPlanned() {
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
         assertThat(trials).isNotEmpty().allMatch(t -> t.getTrialStatus() == Status.PLANNED);
     }
 
     @Test
     @DisplayName("All trials should be linked to the competition")
     void testGenerateTrials_AllLinkedToCompetition() {
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
         assertThat(trials).isNotEmpty().allMatch(t -> t.getCompetition().equals(competition));
     }
 
     @Test
     @DisplayName("All trials should have roundNumber and position set")
     void testGenerateTrials_RoundNumberAndPosition() {
-        List<Trial> trials = strategy.generateTrials(competition);
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
         assertThat(trials).isNotEmpty().allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
 
         // Round 1: positions 1-4
