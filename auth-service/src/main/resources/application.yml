@@ -18,6 +18,10 @@ spring:
 server:
   port: 8082
 
+feign:
+  user-service:
+    url: ${FEIGN_USER_SERVICE_URL:http://localhost:8086}
+
 springdoc:
   api-docs:
     enabled: true

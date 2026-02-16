@@ -20,6 +20,9 @@ public class GatewayConfiguration {
     @Value("${CHAMPIONSHIP_SERVICE_URL:http://localhost:8083}")
     private String championshipServiceUrl;
 
+    @Value("${USER_SERVICE_URL:http://localhost:8086}")
+    private String userServiceUrl;
+
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
         return route("auth-service")
@@ -33,6 +36,20 @@ public class GatewayConfiguration {
         return route("championship-service")
                 .route(path("/championships/**"), http())
                 .before(uri(championshipServiceUrl))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> userServiceRoute() {
+        return route("user-service")
+                .route(path("/users/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/roles/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/requests/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/tickets/**"), http())
+                .before(uri(userServiceUrl))
                 .build();
     }
 }
