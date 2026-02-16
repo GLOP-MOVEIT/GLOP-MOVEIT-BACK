@@ -54,6 +54,9 @@ public class GatewayConfiguration {
         return route("location-service")
                 .route(path("/locations/**"), http())
                 .before(uri(locationServiceUrl))
+                .build();
+    }
+    @Bean
     public RouterFunction<ServerResponse> userServiceRoute() {
         return route("user-service")
                 .route(path("/users/**"), http())
