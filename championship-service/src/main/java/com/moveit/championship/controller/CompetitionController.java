@@ -1,6 +1,7 @@
 package com.moveit.championship.controller;
 
 import com.moveit.championship.dto.CompetitionDTO;
+import com.moveit.championship.dto.CompetitionUpdateDTO;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.mapper.CompetitionMapper;
@@ -75,8 +76,8 @@ public class CompetitionController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PutMapping("/{id}")
-    public ResponseEntity<CompetitionDTO> updateCompetition(@PathVariable Integer id, @Valid @RequestBody Competition competition) {
-        Competition updatedCompetition = competitionService.updateCompetition(id, competition);
+    public ResponseEntity<CompetitionDTO> updateCompetition(@PathVariable Integer id, @Valid @RequestBody CompetitionUpdateDTO dto) {
+        Competition updatedCompetition = competitionService.updateCompetition(id, dto);
         return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(updatedCompetition));
     }
 

@@ -134,41 +134,42 @@ class CompetitionControllerTest {
     @Test
     @DisplayName("Should update competition successfully.")
     void testUpdateCompetition_Success() throws Exception {
+        var updateDto = com.moveit.championship.dto.CompetitionUpdateDTOMother.validUpdate();
         Competition updatedCompetition = CompetitionMother.competition()
                 .withCompetitionId(competition1.getCompetitionId())
-                .withCompetitionName("Compétition mise à jour")
-                .withCompetitionStatus(Status.ONGOING)
+                .withCompetitionName(updateDto.getCompetitionName())
+                .withCompetitionStatus(updateDto.getCompetitionStatus())
                 .build();
 
-        when(competitionService.updateCompetition(eq(competition1.getCompetitionId()), any(Competition.class)))
+        when(competitionService.updateCompetition(eq(competition1.getCompetitionId()), any(com.moveit.championship.dto.CompetitionUpdateDTO.class)))
                 .thenReturn(updatedCompetition);
 
         mockMvc.perform(put("/championships/competitions/" + competition1.getCompetitionId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedCompetition)))
+                        .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.competitionId", equalTo(updatedCompetition.getCompetitionId())))
                 .andExpect(jsonPath("$.competitionName", equalTo(updatedCompetition.getCompetitionName())))
                 .andExpect(jsonPath("$.competitionStatus", equalTo(updatedCompetition.getCompetitionStatus().name())));
 
-        verify(competitionService, times(1)).updateCompetition(eq(competition1.getCompetitionId()), any(Competition.class));
+        verify(competitionService, times(1)).updateCompetition(eq(competition1.getCompetitionId()), any(com.moveit.championship.dto.CompetitionUpdateDTO.class));
     }
 
     @Test
     @DisplayName("Should return 404 when updating non-existent competition.")
     void testUpdateCompetition_NotFound() throws Exception {
         Integer id = 999;
-        Competition updatedCompetition = CompetitionMother.competition().withCompetitionId(id).build();
+        var updateDto = com.moveit.championship.dto.CompetitionUpdateDTOMother.validUpdate();
 
-        when(competitionService.updateCompetition(eq(id), any(Competition.class)))
+        when(competitionService.updateCompetition(eq(id), any(com.moveit.championship.dto.CompetitionUpdateDTO.class)))
                 .thenThrow(new CompetitionNotFoundException(id));
 
         mockMvc.perform(put("/championships/competitions/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedCompetition)))
+                        .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isNotFound());
 
-        verify(competitionService, times(1)).updateCompetition(eq(id), any(Competition.class));
+        verify(competitionService, times(1)).updateCompetition(eq(id), any(com.moveit.championship.dto.CompetitionUpdateDTO.class));
     }
 
     @Test

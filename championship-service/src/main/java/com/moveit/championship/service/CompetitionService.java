@@ -56,6 +56,21 @@ public class CompetitionService {
         return competitionRepository.save(competition);
     }
 
+    public Competition updateCompetition(Integer id, com.moveit.championship.dto.CompetitionUpdateDTO dto) {
+        Competition existing = competitionRepository.findById(id)
+                .orElseThrow(() -> new CompetitionNotFoundException(id));
+
+        existing.setCompetitionName(dto.getCompetitionName());
+        existing.setCompetitionStartDate(dto.getCompetitionStartDate());
+        existing.setCompetitionEndDate(dto.getCompetitionEndDate());
+        existing.setCompetitionDescription(dto.getCompetitionDescription());
+        existing.setCompetitionStatus(dto.getCompetitionStatus());
+
+        validateCompetitionDates(existing, existing.getChampionship());
+        applyDefaultStatus(existing);
+        return competitionRepository.save(existing);
+    }
+
     public void deleteCompetition(Integer id) {
         if (!competitionRepository.existsById(id)) {
             throw new CompetitionNotFoundException(id);
