@@ -52,6 +52,16 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
                 trial.setTrialStatus(Status.PLANNED);
                 trial.setRoundNumber(round);
                 trial.setPosition(match);
+
+                // Distribuer 2 participants par match au premier tour
+                if (round == 1 && participantIds != null && !participantIds.isEmpty()) {
+                    int startIndex = (match - 1) * 2;
+                    int endIndex = Math.min(startIndex + 2, participantIds.size());
+                    if (startIndex < participantIds.size()) {
+                        trial.setParticipantIds(new ArrayList<>(participantIds.subList(startIndex, endIndex)));
+                    }
+                }
+
                 currentRoundTrials.add(trial);
                 trials.add(trial);
             }

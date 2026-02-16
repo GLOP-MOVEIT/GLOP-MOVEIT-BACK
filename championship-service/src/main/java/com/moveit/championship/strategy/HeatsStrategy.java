@@ -74,6 +74,13 @@ public class HeatsStrategy implements TreeGenerationStrategy {
                 trial.setRoundNumber(round);
                 trial.setPosition(heat);
 
+                // Distribuer les participants dans les séries du premier tour
+                if (round == 1) {
+                    int startIndex = (heat - 1) * maxPerHeat;
+                    int endIndex = Math.min(startIndex + participantsInHeat, participantIds.size());
+                    trial.setParticipantIds(new ArrayList<>(participantIds.subList(startIndex, endIndex)));
+                }
+
                 currentRoundTrials.add(trial);
                 trials.add(trial);
             }

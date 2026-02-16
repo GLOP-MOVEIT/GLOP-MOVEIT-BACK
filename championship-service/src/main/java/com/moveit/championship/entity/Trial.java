@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Table(name = "trial")
 @Entity
@@ -60,5 +62,10 @@ public class Trial {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "next_trial_id")
     private Trial nextTrial;
+
+    @ElementCollection
+    @CollectionTable(name = "trial_participants", joinColumns = @JoinColumn(name = "trial_id"))
+    @Column(name = "participant_id")
+    private List<Integer> participantIds = new ArrayList<>();
 
 }

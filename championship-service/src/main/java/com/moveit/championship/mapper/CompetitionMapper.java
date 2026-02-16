@@ -30,6 +30,7 @@ public class CompetitionMapper {
                 .position(trial.getPosition())
                 .nextTrialId(trial.getNextTrial() != null ? trial.getNextTrial().getTrialId() : null)
                 .competitionId(trial.getCompetition() != null ? trial.getCompetition().getCompetitionId() : null)
+                .participantIds(trial.getParticipantIds())
                 .build();
     }
 

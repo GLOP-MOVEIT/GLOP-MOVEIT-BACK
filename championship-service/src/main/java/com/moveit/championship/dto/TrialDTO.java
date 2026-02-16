@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,4 +25,5 @@ public class TrialDTO {
     private Integer position;
     private Integer nextTrialId;
     private Integer competitionId;
+    private List<Integer> participantIds;
 }

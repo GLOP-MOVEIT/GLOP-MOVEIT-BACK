@@ -30,6 +30,13 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
         int nbParticipants = nbRounds + 1;
         int matchesPerRound = nbParticipants / 2;
 
+        // Préparer la liste pour le round-robin (algorithme du cercle)
+        List<Integer> ids = new ArrayList<>(participantIds != null ? participantIds : List.of());
+        while (ids.size() < nbParticipants) {
+            ids.add(-1);
+        }
+        List<Integer> rotating = new ArrayList<>(ids.subList(1, ids.size()));
+
         long totalDuration = competition.getCompetitionEndDate().getTime() - competition.getCompetitionStartDate().getTime();
         long roundDuration = totalDuration / nbRounds;
 
@@ -38,6 +45,10 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
         for (int round = 1; round <= nbRounds; round++) {
             Date roundStart = new Date(competition.getCompetitionStartDate().getTime() + (round - 1) * roundDuration);
             Date roundEnd = new Date(competition.getCompetitionStartDate().getTime() + round * roundDuration);
+
+            List<Integer> currentOrder = new ArrayList<>();
+            currentOrder.add(ids.getFirst());
+            currentOrder.addAll(rotating);
 
             for (int match = 1; match <= matchesPerRound; match++) {
                 Trial trial = new Trial();
@@ -49,9 +60,19 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
                 trial.setTrialStatus(Status.PLANNED);
                 trial.setRoundNumber(round);
                 trial.setPosition(match);
+
+                int home = currentOrder.get(match - 1);
+                int away = currentOrder.get(currentOrder.size() - match);
+                List<Integer> matchParticipants = new ArrayList<>();
+                if (home != -1) matchParticipants.add(home);
+                if (away != -1) matchParticipants.add(away);
+                trial.setParticipantIds(matchParticipants);
+
                 trials.add(trial);
                 matchNumber++;
             }
+
+            rotating.addFirst(rotating.removeLast());
         }
 
         return trials;
