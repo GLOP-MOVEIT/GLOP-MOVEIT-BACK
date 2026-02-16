@@ -2,6 +2,7 @@ package com.moveit.championship.controller;
 
 import com.moveit.championship.dto.CompetitionDTO;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.mapper.CompetitionMapper;
 import com.moveit.championship.service.CompetitionService;
 import com.moveit.championship.service.TreeGenerationService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+
 @RequiredArgsConstructor
 @RequestMapping("/championships/competitions")
 @Tag(name = "Compétitions", description = "API de gestion des compétitions")
@@ -103,5 +105,16 @@ public class CompetitionController {
     public ResponseEntity<Void> deleteCompetition(@PathVariable Integer id) {
         competitionService.deleteCompetition(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Récupérer tous les types de compétition")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Types de compétition récupérés avec succès", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/types")
+    public ResponseEntity<List<String>> getCompetitionTypes() {
+        List<String> types = List.of(CompetitionType.values()).stream().map(Enum::name).toList();
+        return ResponseEntity.ok(types);
     }
 }
