@@ -79,7 +79,8 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should throw when less than 1 round")
     void testGenerateTrials_LessThan1Round() {
         competition.setNbManches(0);
-        assertThatThrownBy(() -> strategy.generateTrials(competition, List.of()))
+        List<Integer> participantIds = List.of();
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

@@ -80,13 +80,13 @@ class HeatsStrategyTest {
         List<Trial> trials = strategy.generateTrials(competition, participantIds);
 
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
-        assertThat(round1).allMatch(t -> t.getTrialName().contains("Séries"));
+        assertThat(round1).isNotEmpty().allMatch(t -> t.getTrialName().contains("Séries"));
 
         List<Trial> round2 = trials.stream().filter(t -> t.getRoundNumber() == 2).toList();
-        assertThat(round2).allMatch(t -> t.getTrialName().contains("Demi-finales"));
+        assertThat(round2).isNotEmpty().allMatch(t -> t.getTrialName().contains("Demi-finales"));
 
         List<Trial> round3 = trials.stream().filter(t -> t.getRoundNumber() == 3).toList();
-        assertThat(round3).allMatch(t -> t.getTrialName().contains("Finale"));
+        assertThat(round3).isNotEmpty().allMatch(t -> t.getTrialName().contains("Finale"));
     }
 
     @Test

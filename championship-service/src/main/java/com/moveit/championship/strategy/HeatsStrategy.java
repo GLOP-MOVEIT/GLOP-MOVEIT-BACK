@@ -24,15 +24,7 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         int nbParticipants = participantIds.size();
         int maxPerHeat = competition.getMaxPerHeat();
 
-        if (nbManches < 1) {
-            throw new IllegalArgumentException("Il faut au moins 1 manche pour des séries");
-        }
-        if (nbParticipants < 2) {
-            throw new IllegalArgumentException("Il faut au moins 2 participants pour des séries");
-        }
-        if (maxPerHeat < 2) {
-            throw new IllegalArgumentException("Il faut au moins 2 places par série");
-        }
+        validateInputs(nbManches, nbParticipants, maxPerHeat);
 
         List<Trial> trials = new ArrayList<>();
 
@@ -46,7 +38,7 @@ public class HeatsStrategy implements TreeGenerationStrategy {
 
             // Nombre de participants attendus pour ce tour : maxPerHeat * 2^(nbManches - round)
             // Finale = 1 * maxPerHeat, Demi = 2 * maxPerHeat, etc.
-            int expectedParticipants = maxPerHeat * (int) Math.pow(2, nbManches - round);
+            int expectedParticipants = maxPerHeat * (int) Math.pow(2, (double) nbManches - round);
 
             // Pour le premier tour, on cap au nombre réel de participants
             int currentParticipants = (round == 1)
@@ -96,6 +88,18 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         }
 
         return trials;
+    }
+
+    private void validateInputs(int nbManches, int nbParticipants, int maxPerHeat) {
+        if (nbManches < 1) {
+            throw new IllegalArgumentException("Il faut au moins 1 manche pour des séries");
+        }
+        if (nbParticipants < 2) {
+            throw new IllegalArgumentException("Il faut au moins 2 participants pour des séries");
+        }
+        if (maxPerHeat < 2) {
+            throw new IllegalArgumentException("Il faut au moins 2 places par série");
+        }
     }
 
     private String getRoundName(int round, int totalRounds) {

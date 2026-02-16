@@ -26,7 +26,7 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
         }
 
         List<Trial> trials = new ArrayList<>();
-        int matchesInRound = (int) Math.pow(2, nbRounds - 1);
+        int matchesInRound = (int) Math.pow(2, (double) nbRounds - 1);
 
         long totalDuration = competition.getCompetitionEndDate().getTime() - competition.getCompetitionStartDate().getTime();
         long roundDuration = totalDuration / nbRounds;
@@ -54,12 +54,8 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
                 trial.setPosition(match);
 
                 // Distribuer 2 participants par match au premier tour
-                if (round == 1 && participantIds != null && !participantIds.isEmpty()) {
-                    int startIndex = (match - 1) * 2;
-                    int endIndex = Math.min(startIndex + 2, participantIds.size());
-                    if (startIndex < participantIds.size()) {
-                        trial.setParticipantIds(new ArrayList<>(participantIds.subList(startIndex, endIndex)));
-                    }
+                if (round == 1) {
+                    assignParticipantsToFirstRound(trial, match, participantIds);
                 }
 
                 currentRoundTrials.add(trial);
@@ -81,6 +77,17 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
         }
 
         return trials;
+    }
+
+    private void assignParticipantsToFirstRound(Trial trial, int match, List<Integer> participantIds) {
+        if (participantIds == null || participantIds.isEmpty()) {
+            return;
+        }
+        int startIndex = (match - 1) * 2;
+        int endIndex = Math.min(startIndex + 2, participantIds.size());
+        if (startIndex < participantIds.size()) {
+            trial.setParticipantIds(new ArrayList<>(participantIds.subList(startIndex, endIndex)));
+        }
     }
 
     private String getRoundName(int round, int totalRounds) {

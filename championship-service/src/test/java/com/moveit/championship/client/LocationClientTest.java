@@ -47,8 +47,8 @@ class LocationClientTest {
         );
 
         when(restTemplate.getForObject(
-                eq(locationServiceUrl + "/locations/" + locationId),
-                eq(LocationDTO.class)
+                locationServiceUrl + "/locations/" + locationId,
+                LocationDTO.class
         )).thenReturn(expectedLocation);
 
         // When
@@ -106,14 +106,14 @@ class LocationClientTest {
         String expectedUrl = locationServiceUrl + "/locations/42";
 
         LocationDTO mockLocation = new LocationDTO();
-        when(restTemplate.getForObject(eq(expectedUrl), eq(LocationDTO.class)))
+        when(restTemplate.getForObject(expectedUrl, LocationDTO.class))
                 .thenReturn(mockLocation);
 
         // When
         locationClient.getLocationById(locationId);
 
         // Then
-        verify(restTemplate).getForObject(eq(expectedUrl), eq(LocationDTO.class));
+        verify(restTemplate).getForObject(expectedUrl, LocationDTO.class);
     }
 
     @Test

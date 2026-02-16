@@ -84,7 +84,8 @@ class TreeGenerationServiceTest {
     @DisplayName("Should throw when competition not found")
     void testGenerateTree_CompetitionNotFound() {
         when(competitionRepository.findById(999)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> treeGenerationService.generateTree(999, List.of()))
+        List<Integer> participantIds = List.of();
+        assertThatThrownBy(() -> treeGenerationService.generateTree(999, participantIds))
                 .isInstanceOf(CompetitionNotFoundException.class);
     }
 

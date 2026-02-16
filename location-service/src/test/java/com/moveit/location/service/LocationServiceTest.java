@@ -46,8 +46,7 @@ class LocationServiceTest {
 
         List<Location> result = locationService.getAllLocations();
 
-        assertThat(result).hasSize(2);
-        assertThat(result).containsExactly(location, location2);
+        assertThat(result).hasSize(2).containsExactly(location, location2);
         verify(locationRepository, times(1)).findAll();
     }
 
@@ -102,9 +101,9 @@ class LocationServiceTest {
 
         Location result = locationService.updateLocation(1, updatedData);
 
-        assertThat(result.getName()).isEqualTo("Nouveau Stade");
-        assertThat(result.getLatitude()).isEqualTo(48.8566);
-        assertThat(result.getLongitude()).isEqualTo(2.3522);
+        assertThat(result)
+                .extracting(Location::getName, Location::getLatitude, Location::getLongitude)
+                .containsExactly("Nouveau Stade", 48.8566, 2.3522);
         verify(locationRepository, times(1)).findById(1);
         verify(locationRepository, times(1)).save(any(Location.class));
     }

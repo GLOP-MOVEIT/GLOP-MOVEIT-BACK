@@ -7,6 +7,8 @@ import com.moveit.championship.entity.Trial;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Calendar;
 import java.util.List;
@@ -37,31 +39,13 @@ class RoundRobinStrategyTest {
         competition.setCompetitionEndDate(cal.getTime());
     }
 
-    @Test
-    @DisplayName("Should generate correct number of trials for 3 rounds (4 participants)")
-    void testGenerateTrials_3Rounds() {
-        competition.setNbManches(3);
+    @ParameterizedTest
+    @CsvSource({"3, 6", "5, 15", "1, 1"})
+    @DisplayName("Should generate correct number of trials for given rounds")
+    void testGenerateTrials_CorrectTrialCount(int nbManches, int expectedTrials) {
+        competition.setNbManches(nbManches);
         List<Trial> trials = strategy.generateTrials(competition, List.of());
-        // 3 rounds, 4 participants: 3 journées x 2 matchs = 6 matchs
-        assertThat(trials).hasSize(6);
-    }
-
-    @Test
-    @DisplayName("Should generate correct number of trials for 5 rounds (6 participants)")
-    void testGenerateTrials_5Rounds() {
-        competition.setNbManches(5);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
-        // 5 rounds, 6 participants: 5 journées x 3 matchs = 15 matchs
-        assertThat(trials).hasSize(15);
-    }
-
-    @Test
-    @DisplayName("Should generate correct number of trials for 1 round (2 participants)")
-    void testGenerateTrials_1Round() {
-        competition.setNbManches(1);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
-        // 1 round, 2 participants: 1 journée x 1 match = 1 match
-        assertThat(trials).hasSize(1);
+        assertThat(trials).hasSize(expectedTrials);
     }
 
     @Test
@@ -76,7 +60,8 @@ class RoundRobinStrategyTest {
     @DisplayName("Should throw when less than 1 round")
     void testGenerateTrials_LessThan1Round() {
         competition.setNbManches(0);
-        assertThatThrownBy(() -> strategy.generateTrials(competition, List.of()))
+        List<Integer> participantIds = List.of();
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
