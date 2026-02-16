@@ -49,7 +49,10 @@ public class CompetitionMapper {
         if (competition == null) return null;
 
         List<TrialDTO> trialDTOs = competition.getTrials() != null
-                ? competition.getTrials().stream().map(CompetitionMapper::toTrialDTO).toList()
+                ? competition.getTrials().stream()
+                    .sorted(java.util.Comparator.comparing(com.moveit.championship.entity.Trial::getRoundNumber)
+                        .thenComparing(com.moveit.championship.entity.Trial::getPosition))
+                    .map(CompetitionMapper::toTrialDTO).toList()
                 : Collections.emptyList();
 
         List<EventDTO> eventDTOs = competition.getEvents() != null
