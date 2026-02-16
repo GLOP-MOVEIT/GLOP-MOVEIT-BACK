@@ -174,45 +174,43 @@ class CompetitionControllerTest {
     @DisplayName("Should generate tree successfully.")
     void testGenerateTree_Success() throws Exception {
         Integer id = competition1.getCompetitionId();
-        int nbParticipants = 8;
 
-        when(treeGenerationService.generateTree(id, nbParticipants)).thenReturn(competition1);
+        when(treeGenerationService.generateTree(id)).thenReturn(competition1);
 
         mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
-                        .param("nbParticipants", String.valueOf(nbParticipants))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.competitionId", equalTo(competition1.getCompetitionId())))
                 .andExpect(jsonPath("$.competitionName", equalTo(competition1.getCompetitionName())));
 
-        verify(treeGenerationService, times(1)).generateTree(id, nbParticipants);
+        verify(treeGenerationService, times(1)).generateTree(id);
     }
 
     @Test
     @DisplayName("Should return 404 when generating tree for non-existent competition.")
     void testGenerateTree_NotFound() throws Exception {
         Integer id = 999;
-        int nbParticipants = 8;
 
-        when(treeGenerationService.generateTree(id, nbParticipants))
+        when(treeGenerationService.generateTree(id))
                 .thenThrow(new CompetitionNotFoundException(id));
 
         mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
-                        .param("nbParticipants", String.valueOf(nbParticipants))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(treeGenerationService, times(1)).generateTree(id, nbParticipants);
+        verify(treeGenerationService, times(1)).generateTree(id);
     }
 
     @Test
-    @DisplayName("Should return 400 when generating tree without nbParticipants param.")
-    void testGenerateTree_MissingParam() throws Exception {
+    @DisplayName("Should generate tree even without extra params.")
+    void testGenerateTree_NoExtraParam() throws Exception {
         Integer id = competition1.getCompetitionId();
+
+        when(treeGenerationService.generateTree(id)).thenReturn(competition1);
 
         mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 
     @Test

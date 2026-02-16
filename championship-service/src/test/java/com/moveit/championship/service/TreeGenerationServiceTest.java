@@ -45,7 +45,7 @@ class TreeGenerationServiceTest {
         competition.setCompetitionSport("Football");
         competition.setCompetitionStatus(Status.PLANNED);
         competition.setCompetitionType(CompetitionType.SINGLE_ELIMINATION);
-        competition.setNbManches(0);
+        competition.setNbManches(1);
         competition.setTrials(new ArrayList<>());
 
         Calendar cal = Calendar.getInstance();
@@ -68,10 +68,10 @@ class TreeGenerationServiceTest {
         TreeGenerationStrategy mockStrategy = mock(TreeGenerationStrategy.class);
         when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
         when(treeStrategyFactory.getStrategy(CompetitionType.SINGLE_ELIMINATION)).thenReturn(mockStrategy);
-        when(mockStrategy.generateTrials(any(Competition.class), eq(2))).thenReturn(List.of(trial1));
+        when(mockStrategy.generateTrials(any(Competition.class))).thenReturn(List.of(trial1));
         when(competitionRepository.save(any(Competition.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Competition result = treeGenerationService.generateTree(1, 2);
+        Competition result = treeGenerationService.generateTree(1);
 
         assertThat(result.getTrials()).hasSize(1);
         assertThat(result.getNbManches()).isEqualTo(1);
@@ -83,7 +83,7 @@ class TreeGenerationServiceTest {
     @DisplayName("Should throw when competition not found")
     void testGenerateTree_CompetitionNotFound() {
         when(competitionRepository.findById(999)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> treeGenerationService.generateTree(999, 8))
+        assertThatThrownBy(() -> treeGenerationService.generateTree(999))
                 .isInstanceOf(CompetitionNotFoundException.class);
     }
 
@@ -99,10 +99,10 @@ class TreeGenerationServiceTest {
         TreeGenerationStrategy mockStrategy = mock(TreeGenerationStrategy.class);
         when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
         when(treeStrategyFactory.getStrategy(CompetitionType.SINGLE_ELIMINATION)).thenReturn(mockStrategy);
-        when(mockStrategy.generateTrials(any(Competition.class), eq(2))).thenReturn(List.of());
+        when(mockStrategy.generateTrials(any(Competition.class))).thenReturn(List.of());
         when(competitionRepository.save(any(Competition.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Competition result = treeGenerationService.generateTree(1, 2);
+        Competition result = treeGenerationService.generateTree(1);
 
         assertThat(result.getTrials()).isEmpty();
     }

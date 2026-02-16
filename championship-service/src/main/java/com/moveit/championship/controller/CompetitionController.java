@@ -87,8 +87,8 @@ public class CompetitionController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/{id}/generate-tree")
-    public ResponseEntity<CompetitionDTO> generateTree(@PathVariable Integer id, @RequestParam int nbParticipants) {
-        Competition competition = treeGenerationService.generateTree(id, nbParticipants);
+    public ResponseEntity<CompetitionDTO> generateTree(@PathVariable Integer id) {
+        Competition competition = treeGenerationService.generateTree(id);
         return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
     }
 

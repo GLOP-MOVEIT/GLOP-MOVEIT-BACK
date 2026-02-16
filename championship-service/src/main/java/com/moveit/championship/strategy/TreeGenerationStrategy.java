@@ -12,5 +12,5 @@ public interface TreeGenerationStrategy {
 
     CompetitionType getType();
 
-    List<Trial> generateTrials(Competition competition, int nbParticipants);
+    List<Trial> generateTrials(Competition competition);
 }

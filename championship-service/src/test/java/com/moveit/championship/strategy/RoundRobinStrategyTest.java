@@ -38,61 +38,69 @@ class RoundRobinStrategyTest {
     }
 
     @Test
-    @DisplayName("Should generate correct number of trials for 4 participants")
-    void testGenerateTrials_4Participants() {
-        List<Trial> trials = strategy.generateTrials(competition, 4);
-        // 4 participants: 3 journées x 2 matchs = 6 matchs
+    @DisplayName("Should generate correct number of trials for 3 rounds (4 participants)")
+    void testGenerateTrials_3Rounds() {
+        competition.setNbManches(3);
+        List<Trial> trials = strategy.generateTrials(competition);
+        // 3 rounds, 4 participants: 3 journées x 2 matchs = 6 matchs
         assertThat(trials).hasSize(6);
     }
 
     @Test
-    @DisplayName("Should generate correct number of trials for 6 participants")
-    void testGenerateTrials_6Participants() {
-        List<Trial> trials = strategy.generateTrials(competition, 6);
-        // 6 participants: 5 journées x 3 matchs = 15 matchs
+    @DisplayName("Should generate correct number of trials for 5 rounds (6 participants)")
+    void testGenerateTrials_5Rounds() {
+        competition.setNbManches(5);
+        List<Trial> trials = strategy.generateTrials(competition);
+        // 5 rounds, 6 participants: 5 journées x 3 matchs = 15 matchs
         assertThat(trials).hasSize(15);
     }
 
     @Test
-    @DisplayName("Should generate correct number of trials for 2 participants")
-    void testGenerateTrials_2Participants() {
-        List<Trial> trials = strategy.generateTrials(competition, 2);
-        // 2 participants: 1 journée x 1 match = 1 match
+    @DisplayName("Should generate correct number of trials for 1 round (2 participants)")
+    void testGenerateTrials_1Round() {
+        competition.setNbManches(1);
+        List<Trial> trials = strategy.generateTrials(competition);
+        // 1 round, 2 participants: 1 journée x 1 match = 1 match
         assertThat(trials).hasSize(1);
     }
 
     @Test
     @DisplayName("Should name trials with Journée format")
     void testGenerateTrials_NamingFormat() {
-        List<Trial> trials = strategy.generateTrials(competition, 4);
+        competition.setNbManches(3);
+        List<Trial> trials = strategy.generateTrials(competition);
         assertThat(trials.getFirst().getTrialName()).contains("Journée 1");
     }
 
     @Test
-    @DisplayName("Should throw when less than 2 participants")
-    void testGenerateTrials_LessThan2() {
-        assertThatThrownBy(() -> strategy.generateTrials(competition, 1))
+    @DisplayName("Should throw when less than 1 round")
+    void testGenerateTrials_LessThan1Round() {
+        competition.setNbManches(0);
+        assertThatThrownBy(() -> strategy.generateTrials(competition))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("All trials should have PLANNED status")
     void testGenerateTrials_AllPlanned() {
-        List<Trial> trials = strategy.generateTrials(competition, 4);
+        competition.setNbManches(3);
+        List<Trial> trials = strategy.generateTrials(competition);
         assertThat(trials).isNotEmpty().allMatch(t -> t.getTrialStatus() == Status.PLANNED);
     }
 
     @Test
     @DisplayName("All trials should be linked to the competition")
     void testGenerateTrials_AllLinkedToCompetition() {
-        List<Trial> trials = strategy.generateTrials(competition, 4);
+        competition.setNbManches(3);
+        List<Trial> trials = strategy.generateTrials(competition);
         assertThat(trials).isNotEmpty().allMatch(t -> t.getCompetition().equals(competition));
     }
 
     @Test
     @DisplayName("All trials should have roundNumber and position set")
     void testGenerateTrials_RoundNumberAndPosition() {
-        List<Trial> trials = strategy.generateTrials(competition, 4);
+        competition.setNbManches(3);
+        List<Trial> trials = strategy.generateTrials(competition);
         assertThat(trials).isNotEmpty().allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
 
         // Journée 1 : 2 matchs
@@ -112,7 +120,8 @@ class RoundRobinStrategyTest {
     @Test
     @DisplayName("Round robin trials should not have nextTrial links")
     void testGenerateTrials_NoNextTrialLinks() {
-        List<Trial> trials = strategy.generateTrials(competition, 4);
+        competition.setNbManches(3);
+        List<Trial> trials = strategy.generateTrials(competition);
         assertThat(trials).isNotEmpty().allMatch(t -> t.getNextTrial() == null);
     }
 }

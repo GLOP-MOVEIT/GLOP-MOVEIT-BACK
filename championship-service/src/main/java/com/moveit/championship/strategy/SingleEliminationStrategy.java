@@ -19,14 +19,14 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
     }
 
     @Override
-    public List<Trial> generateTrials(Competition competition, int nbParticipants) {
-        if (nbParticipants < 2) {
-            throw new IllegalArgumentException("Il faut au moins 2 participants pour une élimination directe");
+    public List<Trial> generateTrials(Competition competition) {
+        int nbRounds = competition.getNbManches();
+        if (nbRounds < 1) {
+            throw new IllegalArgumentException("Il faut au moins 1 manche pour une élimination directe");
         }
 
         List<Trial> trials = new ArrayList<>();
-        int nbRounds = (int) Math.ceil(Math.log(nbParticipants) / Math.log(2));
-        int matchesInRound = nearestPowerOfTwo(nbParticipants) / 2;
+        int matchesInRound = (int) Math.pow(2, nbRounds - 1);
 
         long totalDuration = competition.getCompetitionEndDate().getTime() - competition.getCompetitionStartDate().getTime();
         long roundDuration = totalDuration / nbRounds;
@@ -83,13 +83,5 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
         } else {
             return "Tour " + round;
         }
-    }
-
-    private int nearestPowerOfTwo(int n) {
-        int power = 1;
-        while (power < n) {
-            power *= 2;
-        }
-        return power;
     }
 }
