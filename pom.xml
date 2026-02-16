@@ -153,6 +153,14 @@
                             <goals>
                                 <goal>report</goal>
                             </goals>
+                            <configuration>
+                                <excludes>
+                                    <!-- main() jamais appelé en test -->
+                                    <exclude>**/*Application.class</exclude>
+                                    <!-- Beans Spring jamais chargés en @WebMvcTest -->
+                                    <exclude>**/configuration/**</exclude>
+                                </excludes>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
