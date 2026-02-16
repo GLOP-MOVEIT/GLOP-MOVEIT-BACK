@@ -70,4 +70,8 @@ public class Competition {
 
     @Column(name = "max_per_heat")
     private Integer maxPerHeat;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "participant_type", nullable = false)
+    private ParticipantType participantType = ParticipantType.INDIVIDUAL;
 }

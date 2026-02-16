@@ -4,6 +4,7 @@ import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.entity.Event;
+import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.entity.Status;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,7 @@ public class CompetitionMother {
         private Integer nbManches = 3;
         private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
         private Integer maxPerHeat = null;
+        private ParticipantType participantType = ParticipantType.INDIVIDUAL;
 
         private static Date createDate(int year, int month, int day) {
             Calendar cal = Calendar.getInstance();
@@ -58,7 +60,8 @@ public class CompetitionMother {
                     trials,
                     nbManches,
                     competitionType,
-                    maxPerHeat
+                    maxPerHeat,
+                    participantType
                 );
         }
     }

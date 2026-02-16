@@ -1,6 +1,7 @@
 package com.moveit.championship.dto;
 
 import com.moveit.championship.entity.CompetitionType;
+import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,4 +29,5 @@ public class CompetitionDTO {
     private Integer nbManches;
     private CompetitionType competitionType;
     private Integer maxPerHeat;
+    private ParticipantType participantType;
 }
