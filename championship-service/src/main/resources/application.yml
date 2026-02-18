@@ -21,7 +21,7 @@ server:
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
+    path: /championships/v3/api-docs
   swagger-ui:
     enabled: false
 
