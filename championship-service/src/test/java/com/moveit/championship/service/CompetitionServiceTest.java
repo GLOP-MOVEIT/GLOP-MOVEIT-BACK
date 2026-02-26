@@ -370,7 +370,7 @@ class CompetitionServiceTest {
 
         Competition result = competitionService.assignLocation(1, 5, null);
 
-        assertThat(result.getTrials()).allMatch(t -> t.getLocationId() == 5);
+        assertThat(result.getTrials()).isNotEmpty().allMatch(t -> t.getLocationId() == 5);
         verify(competitionRepository).save(competition);
     }
 
