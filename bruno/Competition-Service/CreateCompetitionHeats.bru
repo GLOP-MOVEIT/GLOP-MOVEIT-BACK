@@ -1,7 +1,7 @@
 meta {
-  name: CreateCompetition
+  name: CreateCompetitionHeats
   type: http
-  seq: 3
+  seq: 8
 }
 
 post {
@@ -16,15 +16,16 @@ auth:bearer {
 
 body:json {
   {
-    "competitionSport": "Football",
-    "competitionName": "Coupe Nationale",
+    "competitionSport": "Natation",
+    "competitionName": "Séries Qualificatives",
     "competitionStartDate": "2024-07-01",
     "competitionEndDate": "2024-09-01",
-    "competitionDescription": "Phase finale",
+    "competitionDescription": "Compétition par séries (heats)",
     "competitionStatus": "PLANNED",
     "nbManches": 3,
-    "competitionType": "SINGLE_ELIMINATION",
+    "competitionType": "HEATS",
     "participantType": "INDIVIDUAL",
+    "maxPerHeat": 4,
     "championship": {
       "id": 1
     }

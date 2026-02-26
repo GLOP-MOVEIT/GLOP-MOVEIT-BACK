@@ -1,7 +1,7 @@
 meta {
-  name: CreateCompetition
+  name: CreateCompetitionRoundRobin
   type: http
-  seq: 3
+  seq: 7
 }
 
 post {
@@ -16,14 +16,14 @@ auth:bearer {
 
 body:json {
   {
-    "competitionSport": "Football",
-    "competitionName": "Coupe Nationale",
+    "competitionSport": "Tennis",
+    "competitionName": "Tournoi Round Robin",
     "competitionStartDate": "2024-07-01",
     "competitionEndDate": "2024-09-01",
-    "competitionDescription": "Phase finale",
+    "competitionDescription": "Compétition en poule (round robin)",
     "competitionStatus": "PLANNED",
     "nbManches": 3,
-    "competitionType": "SINGLE_ELIMINATION",
+    "competitionType": "ROUND_ROBIN",
     "participantType": "INDIVIDUAL",
     "championship": {
       "id": 1

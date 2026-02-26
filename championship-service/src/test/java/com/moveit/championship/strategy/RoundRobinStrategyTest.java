@@ -40,11 +40,15 @@ class RoundRobinStrategyTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"3, 6", "5, 15", "1, 1"})
-    @DisplayName("Should generate correct number of trials for given rounds")
-    void testGenerateTrials_CorrectTrialCount(int nbManches, int expectedTrials) {
-        competition.setNbManches(nbManches);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+    @CsvSource({"4, 6", "6, 15", "3, 6"})
+    @DisplayName("Should generate correct number of trials for given participant count")
+    void testGenerateTrials_CorrectTrialCount(int nbParticipants, int expectedTrials) {
+        competition.setNbManches(3);
+        List<Integer> participantIds = new java.util.ArrayList<>();
+        for (int i = 1; i <= nbParticipants; i++) {
+            participantIds.add(i);
+        }
+        List<Trial> trials = strategy.generateTrials(competition, participantIds);
         assertThat(trials).hasSize(expectedTrials);
     }
 
@@ -52,14 +56,23 @@ class RoundRobinStrategyTest {
     @DisplayName("Should name trials with Journée format")
     void testGenerateTrials_NamingFormat() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4));
         assertThat(trials.getFirst().getTrialName()).contains("Journée 1");
     }
 
     @Test
-    @DisplayName("Should throw when less than 1 round")
-    void testGenerateTrials_LessThan1Round() {
-        competition.setNbManches(0);
+    @DisplayName("Should throw when less than 2 participants")
+    void testGenerateTrials_LessThan2Participants() {
+        competition.setNbManches(3);
+        List<Integer> participantIds = List.of(1);
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw when participant list is empty")
+    void testGenerateTrials_EmptyParticipants() {
+        competition.setNbManches(3);
         List<Integer> participantIds = List.of();
         assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
                 .isInstanceOf(IllegalArgumentException.class);
@@ -69,7 +82,7 @@ class RoundRobinStrategyTest {
     @DisplayName("All trials should have PLANNED status")
     void testGenerateTrials_AllPlanned() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4));
         assertThat(trials).isNotEmpty().allMatch(t -> t.getTrialStatus() == Status.PLANNED);
     }
 
@@ -77,7 +90,7 @@ class RoundRobinStrategyTest {
     @DisplayName("All trials should be linked to the competition")
     void testGenerateTrials_AllLinkedToCompetition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4));
         assertThat(trials).isNotEmpty().allMatch(t -> t.getCompetition().equals(competition));
     }
 
@@ -85,7 +98,8 @@ class RoundRobinStrategyTest {
     @DisplayName("All trials should have roundNumber and position set")
     void testGenerateTrials_RoundNumberAndPosition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        // 4 participants => 3 rounds, 2 matches per round
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4));
         assertThat(trials).isNotEmpty().allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
 
         // Journée 1 : 2 matchs
@@ -106,7 +120,27 @@ class RoundRobinStrategyTest {
     @DisplayName("Round robin trials should not have nextTrial links")
     void testGenerateTrials_NoNextTrialLinks() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4));
         assertThat(trials).isNotEmpty().allMatch(t -> t.getNextTrial() == null);
+    }
+
+    @Test
+    @DisplayName("Every participant should play every other participant exactly once")
+    void testGenerateTrials_AllPairsCovered() {
+        competition.setNbManches(3);
+        List<Integer> participants = List.of(1, 2, 3, 4);
+        List<Trial> trials = strategy.generateTrials(competition, participants);
+
+        // 4 participants => C(4,2) = 6 unique pairs
+        java.util.Set<String> pairs = new java.util.HashSet<>();
+        for (Trial t : trials) {
+            List<Integer> ids = t.getParticipantIds();
+            if (ids.size() == 2) {
+                int a = Math.min(ids.get(0), ids.get(1));
+                int b = Math.max(ids.get(0), ids.get(1));
+                pairs.add(a + "-" + b);
+            }
+        }
+        assertThat(pairs).hasSize(6);
     }
 }

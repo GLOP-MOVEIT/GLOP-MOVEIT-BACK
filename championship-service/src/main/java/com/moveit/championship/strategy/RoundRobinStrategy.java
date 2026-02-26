@@ -21,20 +21,23 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
 
     @Override
     public List<Trial> generateTrials(Competition competition, List<Integer> participantIds) {
-        int nbRounds = competition.getNbManches();
-        if (nbRounds < 1) {
-            throw new IllegalArgumentException("Il faut au moins 1 manche pour un round robin");
+        List<Integer> ids = new ArrayList<>(participantIds != null ? participantIds : List.of());
+        if (ids.size() < 2) {
+            throw new IllegalArgumentException("Il faut au moins 2 participants pour un round robin");
         }
 
-        List<Trial> trials = new ArrayList<>();
-        int nbParticipants = nbRounds + 1;
-        int matchesPerRound = nbParticipants / 2;
-
-        // Préparer la liste pour le round-robin (algorithme du cercle)
-        List<Integer> ids = new ArrayList<>(participantIds != null ? participantIds : List.of());
-        while (ids.size() < nbParticipants) {
+        // Si nombre impair, ajouter un "bye" (-1) pour équilibrer
+        if (ids.size() % 2 != 0) {
             ids.add(-1);
         }
+
+        int nbParticipants = ids.size();
+        int nbRounds = nbParticipants - 1;
+        int matchesPerRound = nbParticipants / 2;
+
+        List<Trial> trials = new ArrayList<>();
+
+        // Préparer la liste pour le round-robin (algorithme du cercle)
         List<Integer> rotating = new ArrayList<>(ids.subList(1, ids.size()));
 
         long totalDuration = competition.getCompetitionEndDate().getTime() - competition.getCompetitionStartDate().getTime();
