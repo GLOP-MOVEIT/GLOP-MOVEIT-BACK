@@ -54,7 +54,7 @@ class ChampionshipControllerTest {
     }
 
     @Test
-    @DisplayName("Should retrieve all championships successfully.")
+    @DisplayName("Should retrieve all championships as summaries (without competitions).")
     void testGetAllChampionships_Success() throws Exception {
         when(championshipService.getAllChampionships()).thenReturn(List.of(championship1, championship2));
 
@@ -64,6 +64,7 @@ class ChampionshipControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", equalTo(championship1.getId())))
                 .andExpect(jsonPath("$[0].name", equalTo(championship1.getName())))
+                .andExpect(jsonPath("$[0].competitions").doesNotExist())
                 .andExpect(jsonPath("$[1].id", equalTo(championship2.getId())))
                 .andExpect(jsonPath("$[1].name", equalTo(championship2.getName())));
 

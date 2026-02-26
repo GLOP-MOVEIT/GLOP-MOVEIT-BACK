@@ -273,7 +273,7 @@ class CompetitionControllerTest {
     @DisplayName("Should assign location to specific round successfully.")
     void testAssignLocation_WithRoundNumber() throws Exception {
         Integer id = competition1.getCompetitionId();
-        when(competitionService.assignLocation(eq(id), eq(7), eq(2))).thenReturn(competition1);
+        when(competitionService.assignLocation(id, 7, 2)).thenReturn(competition1);
 
         String body = "{\"locationId\": 7, \"roundNumber\": 2}";
 
@@ -283,7 +283,7 @@ class CompetitionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.competitionId", equalTo(id)));
 
-        verify(competitionService, times(1)).assignLocation(eq(id), eq(7), eq(2));
+        verify(competitionService, times(1)).assignLocation(id, 7, 2);
     }
 
     @Test
