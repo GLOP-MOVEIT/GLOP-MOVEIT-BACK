@@ -2,7 +2,6 @@ package com.moveit.championship.controller;
 
 import com.moveit.championship.dto.ChampionshipUpdateDTO;
 import com.moveit.championship.entity.Championship;
-import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.service.ChampionshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

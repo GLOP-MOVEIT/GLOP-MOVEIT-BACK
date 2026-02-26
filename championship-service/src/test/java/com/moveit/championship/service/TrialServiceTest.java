@@ -1,5 +1,7 @@
 package com.moveit.championship.service;
 
+import java.util.*;
+
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
@@ -13,11 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
-
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
 
 class TrialServiceTest {
     @Mock

@@ -1,5 +1,7 @@
 package com.moveit.championship.service;
 
+import java.util.*;
+
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.entity.Status;
@@ -16,13 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
-
+import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
 
 class TreeGenerationServiceTest {
 

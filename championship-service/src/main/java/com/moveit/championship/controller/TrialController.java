@@ -1,5 +1,7 @@
 package com.moveit.championship.controller;
 
+import org.springframework.web.bind.annotation.*;
+
 import com.moveit.championship.dto.TrialDTO;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.mapper.CompetitionMapper;
@@ -14,7 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 

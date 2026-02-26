@@ -1,5 +1,7 @@
 package com.moveit.location.controller;
 
+import org.springframework.web.bind.annotation.*;
+
 import com.moveit.location.entity.Location;
 import com.moveit.location.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +14,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
