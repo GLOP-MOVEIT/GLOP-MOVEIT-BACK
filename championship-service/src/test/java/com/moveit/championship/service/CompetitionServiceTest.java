@@ -1,7 +1,9 @@
 package com.moveit.championship.service;
 
+import com.moveit.championship.dto.CompetitionUpdateDTO;
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.exception.CompetitionNotFoundException;
@@ -96,32 +98,35 @@ class CompetitionServiceTest {
     @DisplayName("Should update competition.")
     void shouldUpdateCompetition() {
         Competition existing = CompetitionMother.competition().build();
-        Competition updated = CompetitionMother.competition()
-                .withCompetitionName("Updated Competition")
-                .build();
-        Championship championship = updated.getChampionship();
+        CompetitionUpdateDTO dto = new CompetitionUpdateDTO();
+        dto.setCompetitionName("Updated Competition");
+        dto.setCompetitionStartDate(existing.getCompetitionStartDate());
+        dto.setCompetitionEndDate(existing.getCompetitionEndDate());
+        dto.setCompetitionDescription(existing.getCompetitionDescription());
+        dto.setCompetitionStatus(Status.PLANNED);
 
         when(competitionRepository.findById(existing.getCompetitionId()))
                 .thenReturn(Optional.of(existing));
-        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
-        when(competitionRepository.save(any(Competition.class))).thenReturn(updated);
+        when(competitionRepository.save(any(Competition.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        var result = competitionService.updateCompetition(existing.getCompetitionId(), updated);
+        var result = competitionService.updateCompetition(existing.getCompetitionId(), dto);
 
-        assertThat(result).isEqualTo(updated);
-        verify(championshipRepository, times(1)).findById(championship.getId());
+        assertThat(result.getCompetitionName()).isEqualTo("Updated Competition");
+        assertThat(result.getCompetitionId()).isEqualTo(existing.getCompetitionId());
         verify(competitionRepository, times(1)).save(any(Competition.class));
     }
 
     @Test
     @DisplayName("Should throw exception when updating non-existent competition.")
     void shouldThrowExceptionWhenUpdatingNonExistentCompetition() {
-        Competition competition = CompetitionMother.competition().build();
-        Integer competitionId = competition.getCompetitionId();
+        Integer competitionId = 99;
+        CompetitionUpdateDTO dto = new CompetitionUpdateDTO();
+        dto.setCompetitionName("Test");
 
         when(competitionRepository.findById(competitionId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> competitionService.updateCompetition(competitionId, competition))
+        assertThatThrownBy(() -> competitionService.updateCompetition(competitionId, dto))
                 .isInstanceOf(CompetitionNotFoundException.class)
                 .hasMessageContaining("Competition with id " + competitionId + " not found");
 

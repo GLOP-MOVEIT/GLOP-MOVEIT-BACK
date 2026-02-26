@@ -1,5 +1,6 @@
 package com.moveit.championship.controller;
 
+import com.moveit.championship.dto.ChampionshipUpdateDTO;
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.service.ChampionshipService;
@@ -45,9 +46,6 @@ public class ChampionshipController {
     @GetMapping("/{id}")
     public ResponseEntity<Championship> getChampionshipById(@PathVariable Integer id) {
         Championship championship = championshipService.getChampionshipById(id);
-        if (championship == null) {
-            throw new ChampionshipNotFoundException(id);
-        }
         return ResponseEntity.ok(championship);
     }
 
@@ -73,11 +71,8 @@ public class ChampionshipController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Championship> updateChampionship(@PathVariable Integer id, @Valid @RequestBody Championship championship) {
-        Championship updatedChampionship = championshipService.updateChampionship(id, championship);
-        if (updatedChampionship == null) {
-            throw new ChampionshipNotFoundException(id);
-        }
+    public ResponseEntity<Championship> updateChampionship(@PathVariable Integer id, @Valid @RequestBody ChampionshipUpdateDTO dto) {
+        Championship updatedChampionship = championshipService.updateChampionship(id, dto);
         return ResponseEntity.ok(updatedChampionship);
     }
 
@@ -90,10 +85,6 @@ public class ChampionshipController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteChampionship(@PathVariable Integer id) {
-        Championship championship = championshipService.getChampionshipById(id);
-        if (championship == null) {
-            throw new ChampionshipNotFoundException(id);
-        }
         championshipService.deleteChampionship(id);
         return ResponseEntity.noContent().build();
     }

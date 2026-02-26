@@ -4,6 +4,7 @@ import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
+import com.moveit.championship.dto.CompetitionUpdateDTO;
 import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.repository.ChampionshipRepository;
@@ -43,21 +44,7 @@ public class CompetitionService {
         return competitionRepository.save(competition);
     }
 
-    public Competition updateCompetition(Integer id, Competition competition) {
-        competitionRepository.findById(id)
-                .orElseThrow(() -> new CompetitionNotFoundException(id));
-
-        var championship = championshipRepository.findById(competition.getChampionship().getId())
-                .orElseThrow(() -> new ChampionshipNotFoundException(competition.getChampionship().getId()));
-
-        validateCompetitionDates(competition, championship);
-        competition.setCompetitionId(id);
-        attachEvents(competition);
-        applyDefaultStatus(competition);
-        return competitionRepository.save(competition);
-    }
-
-    public Competition updateCompetition(Integer id, com.moveit.championship.dto.CompetitionUpdateDTO dto) {
+    public Competition updateCompetition(Integer id, CompetitionUpdateDTO dto) {
         Competition existing = competitionRepository.findById(id)
                 .orElseThrow(() -> new CompetitionNotFoundException(id));
 
