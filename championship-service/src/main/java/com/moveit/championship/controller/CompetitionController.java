@@ -2,6 +2,7 @@ package com.moveit.championship.controller;
 
 import com.moveit.championship.dto.AssignLocationDTO;
 import com.moveit.championship.dto.CompetitionDTO;
+import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.dto.CompetitionUpdateDTO;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.CompetitionType;
@@ -34,13 +35,13 @@ public class CompetitionController {
 
     @Operation(summary = "Récupérer toutes les compétitions")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Compétitions récupérées avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Compétitions récupérées avec succès", content = @Content(schema = @Schema(implementation = CompetitionSummaryDTO.class))),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping
-    public ResponseEntity<List<CompetitionDTO>> getAllCompetitions() {
+    public ResponseEntity<List<CompetitionSummaryDTO>> getAllCompetitions() {
         List<Competition> competitions = competitionService.getAllCompetitions();
-        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTOList(competitions));
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionSummaryDTOList(competitions));
     }
 
     @Operation(summary = "Récupérer une compétition par ID")

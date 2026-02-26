@@ -1,6 +1,7 @@
 package com.moveit.championship.mapper;
 
 import com.moveit.championship.dto.CompetitionDTO;
+import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.dto.EventDTO;
 import com.moveit.championship.dto.TrialDTO;
 import com.moveit.championship.entity.Competition;
@@ -80,5 +81,29 @@ public class CompetitionMapper {
     public static List<CompetitionDTO> toCompetitionDTOList(List<Competition> competitions) {
         if (competitions == null) return Collections.emptyList();
         return competitions.stream().map(CompetitionMapper::toCompetitionDTO).toList();
+    }
+
+    public static CompetitionSummaryDTO toCompetitionSummaryDTO(Competition competition) {
+        if (competition == null) return null;
+
+        return CompetitionSummaryDTO.builder()
+                .competitionId(competition.getCompetitionId())
+                .championshipId(competition.getChampionship() != null ? competition.getChampionship().getId() : null)
+                .competitionSport(competition.getCompetitionSport())
+                .competitionName(competition.getCompetitionName())
+                .competitionStartDate(competition.getCompetitionStartDate())
+                .competitionEndDate(competition.getCompetitionEndDate())
+                .competitionDescription(competition.getCompetitionDescription())
+                .competitionStatus(competition.getCompetitionStatus())
+                .nbManches(competition.getNbManches())
+                .competitionType(competition.getCompetitionType())
+                .maxPerHeat(competition.getMaxPerHeat())
+                .participantType(competition.getParticipantType())
+                .build();
+    }
+
+    public static List<CompetitionSummaryDTO> toCompetitionSummaryDTOList(List<Competition> competitions) {
+        if (competitions == null) return Collections.emptyList();
+        return competitions.stream().map(CompetitionMapper::toCompetitionSummaryDTO).toList();
     }
 }
