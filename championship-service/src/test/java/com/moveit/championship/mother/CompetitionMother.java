@@ -2,7 +2,10 @@ package com.moveit.championship.mother;
 
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.entity.Event;
+import com.moveit.championship.entity.ParticipantType;
+import com.moveit.championship.entity.Trial;
 import com.moveit.championship.entity.Status;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -30,7 +33,11 @@ public class CompetitionMother {
         private String competitionDescription = "Description de la compétition";
         private Status competitionStatus = Status.PLANNED;
         private List<Event> events = List.of();
+        private List<Trial> trials = List.of();
         private Integer nbManches = 3;
+        private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
+        private Integer maxPerHeat = null;
+        private ParticipantType participantType = ParticipantType.INDIVIDUAL;
 
         private static Date createDate(int year, int month, int day) {
             Calendar cal = Calendar.getInstance();
@@ -40,7 +47,7 @@ public class CompetitionMother {
         }
 
         public Competition build() {
-            return new Competition(
+                return new Competition(
                     competitionId,
                     championship,
                     competitionSport,
@@ -50,8 +57,12 @@ public class CompetitionMother {
                     competitionDescription,
                     competitionStatus,
                     events,
-                    nbManches
-            );
+                    trials,
+                    nbManches,
+                    competitionType,
+                    maxPerHeat,
+                    participantType
+                );
         }
     }
 }

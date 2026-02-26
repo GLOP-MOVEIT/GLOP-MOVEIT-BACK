@@ -20,7 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Competition {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "competition_id", nullable = false)
     private Integer competitionId;
 
@@ -56,7 +56,22 @@ public class Competition {
     @JsonManagedReference(value = "competition-event")
     private List<Event> events = new ArrayList<>();
 
+    @OneToMany(mappedBy = "competition", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "competition-trial")
+    private List<Trial> trials = new ArrayList<>();
+
     @NotNull(message = "Le nombre de manches est obligatoire")
     @Column(nullable = false)
     private Integer nbManches;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
+
+    @Column(name = "max_per_heat")
+    private Integer maxPerHeat;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "participant_type", nullable = false)
+    private ParticipantType participantType = ParticipantType.INDIVIDUAL;
 }

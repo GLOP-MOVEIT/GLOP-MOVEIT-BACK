@@ -1,7 +1,14 @@
 package com.moveit.championship.controller;
 
+import com.moveit.championship.dto.AssignLocationDTO;
+import com.moveit.championship.dto.CompetitionDTO;
+import com.moveit.championship.dto.CompetitionSummaryDTO;
+import com.moveit.championship.dto.CompetitionUpdateDTO;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.CompetitionType;
+import com.moveit.championship.mapper.CompetitionMapper;
 import com.moveit.championship.service.CompetitionService;
+import com.moveit.championship.service.TreeGenerationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,61 +24,92 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+
 @RequiredArgsConstructor
 @RequestMapping("/championships/competitions")
 @Tag(name = "Compétitions", description = "API de gestion des compétitions")
 public class CompetitionController {
 
     private final CompetitionService competitionService;
+    private final TreeGenerationService treeGenerationService;
 
     @Operation(summary = "Récupérer toutes les compétitions")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Compétitions récupérées avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "200", description = "Compétitions récupérées avec succès", content = @Content(schema = @Schema(implementation = CompetitionSummaryDTO.class))),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping
-    public ResponseEntity<List<Competition>> getAllCompetitions() {
+    public ResponseEntity<List<CompetitionSummaryDTO>> getAllCompetitions() {
         List<Competition> competitions = competitionService.getAllCompetitions();
-        return ResponseEntity.ok(competitions);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionSummaryDTOList(competitions));
     }
 
     @Operation(summary = "Récupérer une compétition par ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Compétition récupérée avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "200", description = "Compétition récupérée avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Competition> getCompetitionById(@PathVariable Integer id) {
+    public ResponseEntity<CompetitionDTO> getCompetitionById(@PathVariable Integer id) {
         Competition competition = competitionService.getCompetitionById(id);
-        return ResponseEntity.ok(competition);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
     }
 
     @Operation(summary = "Créer une nouvelle compétition (Admin)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Compétition créée avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "201", description = "Compétition créée avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content()),
             @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping
-    public ResponseEntity<Competition> createCompetition(@Valid @RequestBody Competition competition) {
+    public ResponseEntity<CompetitionDTO> createCompetition(@Valid @RequestBody Competition competition) {
         Competition createdCompetition = competitionService.createCompetition(competition);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCompetition);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CompetitionMapper.toCompetitionDTO(createdCompetition));
     }
 
     @Operation(summary = "Mettre à jour une compétition (Admin)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Compétition mise à jour avec succès", content = @Content(schema = @Schema(implementation = Competition.class))),
+            @ApiResponse(responseCode = "200", description = "Compétition mise à jour avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
             @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content()),
             @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
             @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Competition> updateCompetition(@PathVariable Integer id, @Valid @RequestBody Competition competition) {
-        Competition updatedCompetition = competitionService.updateCompetition(id, competition);
-        return ResponseEntity.ok(updatedCompetition);
+    public ResponseEntity<CompetitionDTO> updateCompetition(@PathVariable Integer id, @Valid @RequestBody CompetitionUpdateDTO dto) {
+        Competition updatedCompetition = competitionService.updateCompetition(id, dto);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(updatedCompetition));
+    }
+
+    @Operation(summary = "Générer l'arbre complet d'une compétition (Admin)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Arbre généré avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Données invalides", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @PostMapping("/{id}/generate-tree")
+    public ResponseEntity<CompetitionDTO> generateTree(@PathVariable Integer id, @RequestBody List<Integer> participantIds) {
+        Competition competition = treeGenerationService.generateTree(id, participantIds);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
+    }
+
+    @Operation(summary = "Assigner un lieu aux matchs d'une compétition (Admin)",
+            description = "Assigne un lieu à tous les matchs de la compétition, ou uniquement à ceux d'un round spécifique si roundNumber est fourni")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lieu assigné avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Données invalides ou pas de matchs générés", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @PutMapping("/{id}/assign-location")
+    public ResponseEntity<CompetitionDTO> assignLocation(@PathVariable Integer id, @Valid @RequestBody AssignLocationDTO dto) {
+        Competition competition = competitionService.assignLocation(id, dto.getLocationId(), dto.getRoundNumber());
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
     }
 
     @Operation(summary = "Supprimer une compétition (Admin)")
@@ -85,5 +123,16 @@ public class CompetitionController {
     public ResponseEntity<Void> deleteCompetition(@PathVariable Integer id) {
         competitionService.deleteCompetition(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Récupérer tous les types de compétition")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Types de compétition récupérés avec succès", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/types")
+    public ResponseEntity<List<String>> getCompetitionTypes() {
+        List<String> types = List.of(CompetitionType.values()).stream().map(Enum::name).toList();
+        return ResponseEntity.ok(types);
     }
 }

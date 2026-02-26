@@ -1,8 +1,10 @@
 package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.championship.dto.ChampionshipUpdateDTO;
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Status;
+import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.mother.ChampionshipMother;
 import com.moveit.championship.service.ChampionshipService;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +54,7 @@ class ChampionshipControllerTest {
     }
 
     @Test
-    @DisplayName("Should retrieve all championships successfully.")
+    @DisplayName("Should retrieve all championships as summaries (without competitions).")
     void testGetAllChampionships_Success() throws Exception {
         when(championshipService.getAllChampionships()).thenReturn(List.of(championship1, championship2));
 
@@ -62,6 +64,7 @@ class ChampionshipControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", equalTo(championship1.getId())))
                 .andExpect(jsonPath("$[0].name", equalTo(championship1.getName())))
+                .andExpect(jsonPath("$[0].competitions").doesNotExist())
                 .andExpect(jsonPath("$[1].id", equalTo(championship2.getId())))
                 .andExpect(jsonPath("$[1].name", equalTo(championship2.getName())));
 
@@ -100,7 +103,8 @@ class ChampionshipControllerTest {
     @Test
     @DisplayName("Should return 404 when championship by ID not found.")
     void testGetChampionshipById_NotFound() throws Exception {
-        when(championshipService.getChampionshipById(999)).thenReturn(null);
+        when(championshipService.getChampionshipById(999))
+                .thenThrow(new ChampionshipNotFoundException(999));
 
         mockMvc.perform(get("/championships/999")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -134,61 +138,73 @@ class ChampionshipControllerTest {
                 .withStatus(Status.ONGOING)
                 .build();
 
-        when(championshipService.updateChampionship(eq(1), any(Championship.class)))
+        ChampionshipUpdateDTO dto = new ChampionshipUpdateDTO(
+                updatedChampionship.getName(),
+                updatedChampionship.getDescription(),
+                updatedChampionship.getStartDate(),
+                updatedChampionship.getEndDate(),
+                updatedChampionship.getStatus()
+        );
+
+        when(championshipService.updateChampionship(eq(1), any(ChampionshipUpdateDTO.class)))
                 .thenReturn(updatedChampionship);
 
         mockMvc.perform(put("/championships/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedChampionship)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(updatedChampionship.getId())))
                 .andExpect(jsonPath("$.name", equalTo(updatedChampionship.getName())))
                 .andExpect(jsonPath("$.status", equalTo(updatedChampionship.getStatus().name())));
 
-        verify(championshipService, times(1)).updateChampionship(eq(1), any(Championship.class));
+        verify(championshipService, times(1)).updateChampionship(eq(1), any(ChampionshipUpdateDTO.class));
     }
 
     @Test
     @DisplayName("Should return 404 when updating non-existent championship.")
     void testUpdateChampionship_NotFound() throws Exception {
-        var updatedChampionship = ChampionshipMother.championship().withId(999).build();
+        ChampionshipUpdateDTO dto = new ChampionshipUpdateDTO(
+                "Non existant",
+                "Description",
+                championship1.getStartDate(),
+                championship1.getEndDate(),
+                Status.PLANNED
+        );
 
-        when(championshipService.updateChampionship(eq(updatedChampionship.getId()), any(Championship.class)))
-                .thenReturn(null);
+        when(championshipService.updateChampionship(eq(999), any(ChampionshipUpdateDTO.class)))
+                .thenThrow(new ChampionshipNotFoundException(999));
 
         mockMvc.perform(put("/championships/999")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedChampionship)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound());
 
-        verify(championshipService, times(1)).updateChampionship(eq(updatedChampionship.getId()), any(Championship.class));
+        verify(championshipService, times(1)).updateChampionship(eq(999), any(ChampionshipUpdateDTO.class));
     }
 
     @Test
     @DisplayName("Should delete championship successfully.")
     void testDeleteChampionship_Success() throws Exception {
-        when(championshipService.getChampionshipById(1)).thenReturn(championship1);
         doNothing().when(championshipService).deleteChampionship(1);
 
         mockMvc.perform(delete("/championships/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(championshipService, times(1)).getChampionshipById(1);
         verify(championshipService, times(1)).deleteChampionship(1);
     }
 
     @Test
     @DisplayName("Should return 404 when deleting non-existent championship.")
     void testDeleteChampionship_NotFound() throws Exception {
-        when(championshipService.getChampionshipById(999)).thenReturn(null);
+        doThrow(new ChampionshipNotFoundException(999))
+                .when(championshipService).deleteChampionship(999);
 
         mockMvc.perform(delete("/championships/999")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(championshipService, times(1)).getChampionshipById(999);
-        verify(championshipService, never()).deleteChampionship(999);
+        verify(championshipService, times(1)).deleteChampionship(999);
     }
 
 }

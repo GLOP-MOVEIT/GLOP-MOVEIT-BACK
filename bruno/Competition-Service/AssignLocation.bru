@@ -1,0 +1,22 @@
+meta {
+  name: AssignLocation
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{URL}}/championships/competitions/1/assign-location
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "locationId": 1,
+    "roundNumber": null
+  }
+}
