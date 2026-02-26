@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -245,5 +246,73 @@ class CompetitionControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(competitionService, times(1)).deleteCompetition(id);
+    }
+
+    // --- assignLocation tests ---
+
+    @Test
+    @DisplayName("Should assign location to all trials successfully.")
+    void testAssignLocation_Success() throws Exception {
+        Integer id = competition1.getCompetitionId();
+        when(competitionService.assignLocation(eq(id), eq(5), isNull())).thenReturn(competition1);
+
+        String body = "{\"locationId\": 5}";
+
+        mockMvc.perform(put("/championships/competitions/" + id + "/assign-location")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.competitionId", equalTo(id)));
+
+        verify(competitionService, times(1)).assignLocation(eq(id), eq(5), isNull());
+    }
+
+    @Test
+    @DisplayName("Should assign location to specific round successfully.")
+    void testAssignLocation_WithRoundNumber() throws Exception {
+        Integer id = competition1.getCompetitionId();
+        when(competitionService.assignLocation(eq(id), eq(7), eq(2))).thenReturn(competition1);
+
+        String body = "{\"locationId\": 7, \"roundNumber\": 2}";
+
+        mockMvc.perform(put("/championships/competitions/" + id + "/assign-location")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.competitionId", equalTo(id)));
+
+        verify(competitionService, times(1)).assignLocation(eq(id), eq(7), eq(2));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when assigning location to non-existent competition.")
+    void testAssignLocation_NotFound() throws Exception {
+        Integer id = 999;
+        when(competitionService.assignLocation(eq(id), eq(5), isNull()))
+                .thenThrow(new CompetitionNotFoundException(id));
+
+        String body = "{\"locationId\": 5}";
+
+        mockMvc.perform(put("/championships/competitions/" + id + "/assign-location")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isNotFound());
+
+        verify(competitionService, times(1)).assignLocation(eq(id), eq(5), isNull());
+    }
+
+    @Test
+    @DisplayName("Should return 400 when locationId is missing.")
+    void testAssignLocation_MissingLocationId() throws Exception {
+        Integer id = competition1.getCompetitionId();
+
+        String body = "{\"roundNumber\": 1}";
+
+        mockMvc.perform(put("/championships/competitions/" + id + "/assign-location")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
+
+        verify(competitionService, never()).assignLocation(any(), any(), any());
     }
 }
