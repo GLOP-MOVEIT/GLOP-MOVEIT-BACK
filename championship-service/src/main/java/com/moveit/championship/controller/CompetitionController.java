@@ -1,5 +1,6 @@
 package com.moveit.championship.controller;
 
+import com.moveit.championship.dto.AssignLocationDTO;
 import com.moveit.championship.dto.CompetitionDTO;
 import com.moveit.championship.dto.CompetitionUpdateDTO;
 import com.moveit.championship.entity.Competition;
@@ -92,6 +93,21 @@ public class CompetitionController {
     @PostMapping("/{id}/generate-tree")
     public ResponseEntity<CompetitionDTO> generateTree(@PathVariable Integer id, @RequestBody List<Integer> participantIds) {
         Competition competition = treeGenerationService.generateTree(id, participantIds);
+        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
+    }
+
+    @Operation(summary = "Assigner un lieu aux matchs d'une compétition (Admin)",
+            description = "Assigne un lieu à tous les matchs de la compétition, ou uniquement à ceux d'un round spécifique si roundNumber est fourni")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lieu assigné avec succès", content = @Content(schema = @Schema(implementation = CompetitionDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Données invalides ou pas de matchs générés", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Accès refusé - Rôle Admin requis", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Compétition non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @PutMapping("/{id}/assign-location")
+    public ResponseEntity<CompetitionDTO> assignLocation(@PathVariable Integer id, @Valid @RequestBody AssignLocationDTO dto) {
+        Competition competition = competitionService.assignLocation(id, dto.getLocationId(), dto.getRoundNumber());
         return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
     }
 

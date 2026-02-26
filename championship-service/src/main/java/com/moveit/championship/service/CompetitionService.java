@@ -3,6 +3,7 @@ package com.moveit.championship.service;
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Status;
+import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.repository.ChampionshipRepository;
@@ -76,6 +77,22 @@ public class CompetitionService {
             throw new CompetitionNotFoundException(id);
         }
         competitionRepository.deleteById(id);
+    }
+
+    public Competition assignLocation(Integer competitionId, Integer locationId, Integer roundNumber) {
+        Competition competition = competitionRepository.findById(competitionId)
+                .orElseThrow(() -> new CompetitionNotFoundException(competitionId));
+
+        List<Trial> trials = competition.getTrials();
+        if (trials == null || trials.isEmpty()) {
+            throw new IllegalStateException("La compétition n'a pas encore de matchs générés");
+        }
+
+        trials.stream()
+                .filter(trial -> roundNumber == null || roundNumber.equals(trial.getRoundNumber()))
+                .forEach(trial -> trial.setLocationId(locationId));
+
+        return competitionRepository.save(competition);
     }
 
     private void attachEvents(Competition competition) {
