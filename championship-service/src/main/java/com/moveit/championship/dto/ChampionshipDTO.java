@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -17,8 +17,8 @@ public class ChampionshipDTO {
     private Integer id;
     private String name;
     private String description;
-    private Date startDate;
-    private Date endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private Status status;
     private List<CompetitionSummaryDTO> competitions;
 }

@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Table(name = "championship")
@@ -35,11 +35,11 @@ public class Championship {
 
     @NotNull(message = "La date de début est obligatoire")
     @Column(nullable = false)
-    private Date startDate;
+    private LocalDateTime startDate;
 
     @NotNull(message = "La date de fin est obligatoire")
     @Column(nullable = false)
-    private Date endDate;
+    private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     private Status status;

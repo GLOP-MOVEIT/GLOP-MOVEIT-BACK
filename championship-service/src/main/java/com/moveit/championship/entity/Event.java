@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Table(name = "event")
@@ -26,6 +26,6 @@ public class Event {
     private Competition competition;
 
     private String eventName;
-    private Date eventDate;
+    private LocalDateTime eventDate;
     private String eventDescription;
 }

@@ -18,8 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -192,31 +192,15 @@ class CompetitionServiceTest {
     @Test
     @DisplayName("Should throw exception when competition start date is before championship start date.")
     void shouldThrowExceptionWhenCompetitionStartDateIsBeforeChampionshipStartDate() {
-        Calendar champStartCal = Calendar.getInstance();
-        champStartCal.set(2026, Calendar.FEBRUARY, 1, 0, 0, 0);
-        champStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar champEndCal = Calendar.getInstance();
-        champEndCal.set(2026, Calendar.DECEMBER, 31, 0, 0, 0);
-        champEndCal.set(Calendar.MILLISECOND, 0);
-
         Championship championship = ChampionshipMother.championship()
-                .withStartDate(champStartCal.getTime())
-                .withEndDate(champEndCal.getTime())
+                .withStartDate(LocalDateTime.of(2026, 2, 1, 0, 0))
+                .withEndDate(LocalDateTime.of(2026, 12, 31, 0, 0))
                 .build();
-
-        Calendar compStartCal = Calendar.getInstance();
-        compStartCal.set(2026, Calendar.JANUARY, 15, 0, 0, 0); // Avant le championship (février)
-        compStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar compEndCal = Calendar.getInstance();
-        compEndCal.set(2026, Calendar.MARCH, 15, 0, 0, 0);
-        compEndCal.set(Calendar.MILLISECOND, 0);
 
         Competition competition = CompetitionMother.competition()
                 .withChampionship(championship)
-                .withCompetitionStartDate(compStartCal.getTime())
-                .withCompetitionEndDate(compEndCal.getTime())
+                .withCompetitionStartDate(LocalDateTime.of(2026, 1, 15, 0, 0))
+                .withCompetitionEndDate(LocalDateTime.of(2026, 3, 15, 0, 0))
                 .build();
 
         when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
@@ -231,31 +215,15 @@ class CompetitionServiceTest {
     @Test
     @DisplayName("Should throw exception when competition end date is after championship end date.")
     void shouldThrowExceptionWhenCompetitionEndDateIsAfterChampionshipEndDate() {
-        Calendar champStartCal = Calendar.getInstance();
-        champStartCal.set(2026, Calendar.JANUARY, 1, 0, 0, 0);
-        champStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar champEndCal = Calendar.getInstance();
-        champEndCal.set(2026, Calendar.APRIL, 30, 0, 0, 0);
-        champEndCal.set(Calendar.MILLISECOND, 0);
-
         Championship championship = ChampionshipMother.championship()
-                .withStartDate(champStartCal.getTime())
-                .withEndDate(champEndCal.getTime())
+                .withStartDate(LocalDateTime.of(2026, 1, 1, 0, 0))
+                .withEndDate(LocalDateTime.of(2026, 4, 30, 0, 0))
                 .build();
-
-        Calendar compStartCal = Calendar.getInstance();
-        compStartCal.set(2026, Calendar.FEBRUARY, 1, 0, 0, 0);
-        compStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar compEndCal = Calendar.getInstance();
-        compEndCal.set(2026, Calendar.MAY, 31, 0, 0, 0); // Après le championship (avril)
-        compEndCal.set(Calendar.MILLISECOND, 0);
 
         Competition competition = CompetitionMother.competition()
                 .withChampionship(championship)
-                .withCompetitionStartDate(compStartCal.getTime())
-                .withCompetitionEndDate(compEndCal.getTime())
+                .withCompetitionStartDate(LocalDateTime.of(2026, 2, 1, 0, 0))
+                .withCompetitionEndDate(LocalDateTime.of(2026, 5, 31, 0, 0))
                 .build();
 
         when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
@@ -270,31 +238,15 @@ class CompetitionServiceTest {
     @Test
     @DisplayName("Should throw exception when competition start date is after competition end date.")
     void shouldThrowExceptionWhenCompetitionStartDateIsAfterEndDate() {
-        Calendar champStartCal = Calendar.getInstance();
-        champStartCal.set(2026, Calendar.JANUARY, 1, 0, 0, 0);
-        champStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar champEndCal = Calendar.getInstance();
-        champEndCal.set(2026, Calendar.DECEMBER, 31, 0, 0, 0);
-        champEndCal.set(Calendar.MILLISECOND, 0);
-
         Championship championship = ChampionshipMother.championship()
-                .withStartDate(champStartCal.getTime())
-                .withEndDate(champEndCal.getTime())
+                .withStartDate(LocalDateTime.of(2026, 1, 1, 0, 0))
+                .withEndDate(LocalDateTime.of(2026, 12, 31, 0, 0))
                 .build();
-
-        Calendar compStartCal = Calendar.getInstance();
-        compStartCal.set(2026, Calendar.JUNE, 1, 0, 0, 0);
-        compStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar compEndCal = Calendar.getInstance();
-        compEndCal.set(2026, Calendar.MARCH, 1, 0, 0, 0); // Avant la date de début
-        compEndCal.set(Calendar.MILLISECOND, 0);
 
         Competition competition = CompetitionMother.competition()
                 .withChampionship(championship)
-                .withCompetitionStartDate(compStartCal.getTime())
-                .withCompetitionEndDate(compEndCal.getTime())
+                .withCompetitionStartDate(LocalDateTime.of(2026, 6, 1, 0, 0))
+                .withCompetitionEndDate(LocalDateTime.of(2026, 3, 1, 0, 0))
                 .build();
 
         when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
@@ -309,31 +261,15 @@ class CompetitionServiceTest {
     @Test
     @DisplayName("Should create competition when dates are valid and within championship date range.")
     void shouldCreateCompetitionWhenDatesAreValid() {
-        Calendar champStartCal = Calendar.getInstance();
-        champStartCal.set(2026, Calendar.JANUARY, 1, 0, 0, 0);
-        champStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar champEndCal = Calendar.getInstance();
-        champEndCal.set(2026, Calendar.DECEMBER, 31, 0, 0, 0);
-        champEndCal.set(Calendar.MILLISECOND, 0);
-
         Championship championship = ChampionshipMother.championship()
-                .withStartDate(champStartCal.getTime())
-                .withEndDate(champEndCal.getTime())
+                .withStartDate(LocalDateTime.of(2026, 1, 1, 0, 0))
+                .withEndDate(LocalDateTime.of(2026, 12, 31, 0, 0))
                 .build();
-
-        Calendar compStartCal = Calendar.getInstance();
-        compStartCal.set(2026, Calendar.MARCH, 1, 0, 0, 0);
-        compStartCal.set(Calendar.MILLISECOND, 0);
-
-        Calendar compEndCal = Calendar.getInstance();
-        compEndCal.set(2026, Calendar.JUNE, 30, 0, 0, 0);
-        compEndCal.set(Calendar.MILLISECOND, 0);
 
         Competition competition = CompetitionMother.competition()
                 .withChampionship(championship)
-                .withCompetitionStartDate(compStartCal.getTime())
-                .withCompetitionEndDate(compEndCal.getTime())
+                .withCompetitionStartDate(LocalDateTime.of(2026, 3, 1, 0, 0))
+                .withCompetitionEndDate(LocalDateTime.of(2026, 6, 30, 0, 0))
                 .build();
 
         when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));

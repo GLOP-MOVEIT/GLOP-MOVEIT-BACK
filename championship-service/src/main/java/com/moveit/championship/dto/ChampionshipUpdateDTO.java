@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -20,10 +20,10 @@ public class ChampionshipUpdateDTO {
     private String description;
 
     @NotNull(message = "La date de début est obligatoire")
-    private Date startDate;
+    private LocalDateTime startDate;
 
     @NotNull(message = "La date de fin est obligatoire")
-    private Date endDate;
+    private LocalDateTime endDate;
 
     private Status status;
 }
