@@ -3,7 +3,6 @@ package com.moveit.volunteer_service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateVolunteerPreferenceRequest;
-import com.moveit.volunteer_service.entity.VolunteerPreference;
 import com.moveit.volunteer_service.exception.VolunteerPreferenceNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerPreferenceMother;
 import com.moveit.volunteer_service.service.VolunteerPreferenceService;
@@ -18,14 +17,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = VolunteerPreferenceController.class)
 @Import(TestJacksonConfig.class)

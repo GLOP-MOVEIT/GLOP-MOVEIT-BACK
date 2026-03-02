@@ -3,7 +3,6 @@ package com.moveit.volunteer_service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
-import com.moveit.volunteer_service.entity.VolunteerTask;
 import com.moveit.volunteer_service.enums.TaskStatus;
 import com.moveit.volunteer_service.exception.VolunteerTaskNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerTaskMother;
@@ -20,14 +19,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = VolunteerTaskController.class)
 @Import(TestJacksonConfig.class)
@@ -146,7 +145,7 @@ class VolunteerTaskControllerTest {
     void shouldUpdateTaskStatus() throws Exception {
         var updated = VolunteerTaskMother.defaultTask();
         updated.setStatus(TaskStatus.IN_PROGRESS);
-        when(volunteerTaskService.updateTaskStatus(eq(1L), eq(TaskStatus.IN_PROGRESS))).thenReturn(updated);
+        when(volunteerTaskService.updateTaskStatus(1L, TaskStatus.IN_PROGRESS)).thenReturn(updated);
 
         mockMvc.perform(patch("/volunteer/tasks/1/status")
                         .param("status", "IN_PROGRESS")

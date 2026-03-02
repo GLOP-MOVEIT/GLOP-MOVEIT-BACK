@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
 import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
-import com.moveit.volunteer_service.entity.TaskAssignment;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
 import com.moveit.volunteer_service.exception.TaskAssignmentNotFoundException;
 import com.moveit.volunteer_service.mother.TaskAssignmentMother;
@@ -20,14 +19,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = TaskAssignmentController.class)
 @Import(TestJacksonConfig.class)

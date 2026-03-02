@@ -3,7 +3,6 @@ package com.moveit.volunteer_service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskTypeRequest;
-import com.moveit.volunteer_service.entity.VolunteerTaskType;
 import com.moveit.volunteer_service.exception.VolunteerTaskTypeNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerTaskTypeMother;
 import com.moveit.volunteer_service.service.VolunteerTaskTypeService;
@@ -18,14 +17,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = VolunteerTaskTypeController.class)
 @Import(TestJacksonConfig.class)

@@ -2,7 +2,6 @@ package com.moveit.volunteer_service.service;
 
 import com.moveit.volunteer_service.dto.CreateVolunteerPreferenceRequest;
 import com.moveit.volunteer_service.entity.VolunteerPreference;
-import com.moveit.volunteer_service.entity.VolunteerTaskType;
 import com.moveit.volunteer_service.exception.VolunteerPreferenceNotFoundException;
 import com.moveit.volunteer_service.exception.VolunteerTaskTypeNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerPreferenceMother;
@@ -19,10 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VolunteerPreferenceServiceTest {
