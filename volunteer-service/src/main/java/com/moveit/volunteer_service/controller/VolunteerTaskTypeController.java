@@ -1,12 +1,12 @@
 package com.moveit.volunteer_service.controller;
 
+import org.springframework.web.bind.annotation.*;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskTypeRequest;
 import com.moveit.volunteer_service.dto.VolunteerTaskTypeDTO;
 import com.moveit.volunteer_service.mapper.VolunteerTaskTypeMapper;
 import com.moveit.volunteer_service.service.VolunteerTaskTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
