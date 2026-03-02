@@ -1,0 +1,32 @@
+meta {
+  name: CreateCompetitionRoundRobin
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{URL}}/championships/competitions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "competitionSport": "Tennis",
+    "competitionName": "Tournoi Round Robin",
+    "competitionStartDate": "2024-07-01",
+    "competitionEndDate": "2024-09-01",
+    "competitionDescription": "Compétition en poule (round robin)",
+    "competitionStatus": "PLANNED",
+    "nbManches": 3,
+    "competitionType": "ROUND_ROBIN",
+    "participantType": "INDIVIDUAL",
+    "championship": {
+      "id": 1
+    }
+  }
+}

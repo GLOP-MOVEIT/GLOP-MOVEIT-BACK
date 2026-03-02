@@ -1,7 +1,10 @@
 package com.moveit.championship.service;
 
+import com.moveit.championship.dto.CompetitionUpdateDTO;
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.Status;
+import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.mother.ChampionshipMother;
@@ -15,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -94,33 +98,37 @@ class CompetitionServiceTest {
     @DisplayName("Should update competition.")
     void shouldUpdateCompetition() {
         Competition existing = CompetitionMother.competition().build();
-        Competition updated = CompetitionMother.competition()
-                .withCompetitionName("Updated Competition")
-                .build();
-        Championship championship = updated.getChampionship();
+        CompetitionUpdateDTO dto = new CompetitionUpdateDTO();
+        dto.setCompetitionName("Updated Competition");
+        dto.setCompetitionStartDate(existing.getCompetitionStartDate());
+        dto.setCompetitionEndDate(existing.getCompetitionEndDate());
+        dto.setCompetitionDescription(existing.getCompetitionDescription());
+        dto.setCompetitionStatus(Status.PLANNED);
 
         when(competitionRepository.findById(existing.getCompetitionId()))
                 .thenReturn(Optional.of(existing));
-        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
-        when(competitionRepository.save(any(Competition.class))).thenReturn(updated);
+        when(competitionRepository.save(any(Competition.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        var result = competitionService.updateCompetition(existing.getCompetitionId(), updated);
+        var result = competitionService.updateCompetition(existing.getCompetitionId(), dto);
 
-        assertThat(result).isEqualTo(updated);
-        verify(championshipRepository, times(1)).findById(championship.getId());
+        assertThat(result.getCompetitionName()).isEqualTo("Updated Competition");
+        assertThat(result.getCompetitionId()).isEqualTo(existing.getCompetitionId());
         verify(competitionRepository, times(1)).save(any(Competition.class));
     }
 
     @Test
     @DisplayName("Should throw exception when updating non-existent competition.")
     void shouldThrowExceptionWhenUpdatingNonExistentCompetition() {
-        Competition competition = CompetitionMother.competition().build();
+        Integer competitionId = 99;
+        CompetitionUpdateDTO dto = new CompetitionUpdateDTO();
+        dto.setCompetitionName("Test");
 
-        when(competitionRepository.findById(competition.getCompetitionId())).thenReturn(Optional.empty());
+        when(competitionRepository.findById(competitionId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> competitionService.updateCompetition(competition.getCompetitionId(), competition))
+        assertThatThrownBy(() -> competitionService.updateCompetition(competitionId, dto))
                 .isInstanceOf(CompetitionNotFoundException.class)
-                .hasMessageContaining("Competition with id " + competition.getCompetitionId() + " not found");
+                .hasMessageContaining("Competition with id " + competitionId + " not found");
 
         verify(competitionRepository, never()).save(any(Competition.class));
     }
@@ -336,5 +344,72 @@ class CompetitionServiceTest {
         assertThat(result).isEqualTo(competition);
         verify(championshipRepository, times(1)).findById(championship.getId());
         verify(competitionRepository, times(1)).save(competition);
+    }
+
+    // --- assignLocation tests ---
+
+    private Trial createTrial(Integer id, Integer roundNumber) {
+        Trial trial = new Trial();
+        trial.setTrialId(id);
+        trial.setRoundNumber(roundNumber);
+        return trial;
+    }
+
+    @Test
+    @DisplayName("Should assign location to all trials when roundNumber is null")
+    void shouldAssignLocationToAllTrials() {
+        List<Trial> trials = new ArrayList<>(List.of(
+                createTrial(1, 1),
+                createTrial(2, 1),
+                createTrial(3, 2)
+        ));
+        Competition competition = CompetitionMother.competition().withTrials(trials).build();
+
+        when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
+        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
+
+        Competition result = competitionService.assignLocation(1, 5, null);
+
+        assertThat(result.getTrials()).isNotEmpty().allMatch(t -> t.getLocationId() == 5);
+        verify(competitionRepository).save(competition);
+    }
+
+    @Test
+    @DisplayName("Should assign location only to trials of a specific round")
+    void shouldAssignLocationToSpecificRound() {
+        Trial t1 = createTrial(1, 1);
+        Trial t2 = createTrial(2, 1);
+        Trial t3 = createTrial(3, 2);
+        List<Trial> trials = new ArrayList<>(List.of(t1, t2, t3));
+        Competition competition = CompetitionMother.competition().withTrials(trials).build();
+
+        when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
+        when(competitionRepository.save(any(Competition.class))).thenReturn(competition);
+
+        Competition result = competitionService.assignLocation(1, 7, 1);
+
+        assertThat(result.getTrials().get(0).getLocationId()).isEqualTo(7);
+        assertThat(result.getTrials().get(1).getLocationId()).isEqualTo(7);
+        assertThat(result.getTrials().get(2).getLocationId()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should throw when competition not found for assignLocation")
+    void shouldThrowWhenCompetitionNotFoundForAssignLocation() {
+        when(competitionRepository.findById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> competitionService.assignLocation(99, 5, null))
+                .isInstanceOf(CompetitionNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw when competition has no trials for assignLocation")
+    void shouldThrowWhenNoTrialsForAssignLocation() {
+        Competition competition = CompetitionMother.competition().withTrials(new ArrayList<>()).build();
+        when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
+
+        assertThatThrownBy(() -> competitionService.assignLocation(1, 5, null))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("pas encore de matchs");
     }
 }

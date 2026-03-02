@@ -71,6 +71,33 @@ services:
       retries: 5
       start_period: 60s
 
+  location-service:
+    build:
+      context: .
+      dockerfile: location-service/Dockerfile
+    container_name: moveit-location-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_auth
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - LOKI_URL=http://loki:3100
+    depends_on:
+      postgres:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    networks:
+      - moveit-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8084/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   user-service:
     build:
       context: .
@@ -106,12 +133,15 @@ services:
     environment:
       - AUTH_SERVICE_URL=http://auth-service:8082
       - CHAMPIONSHIP_SERVICE_URL=http://championship-service:8083
+      - LOCATION_SERVICE_URL=http://location-service:8084
       - USER_SERVICE_URL=http://user-service:8086
       - LOKI_URL=http://loki:3100
     depends_on:
       auth-service:
         condition: service_healthy
       championship-service:
+        condition: service_healthy
+      location-service:
         condition: service_healthy
       user-service:
         condition: service_healthy

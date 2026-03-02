@@ -1,0 +1,33 @@
+meta {
+  name: CreateCompetitionHeats
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{URL}}/championships/competitions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "competitionSport": "Natation",
+    "competitionName": "Séries Qualificatives",
+    "competitionStartDate": "2024-07-01",
+    "competitionEndDate": "2024-09-01",
+    "competitionDescription": "Compétition par séries (heats)",
+    "competitionStatus": "PLANNED",
+    "nbManches": 3,
+    "competitionType": "HEATS",
+    "participantType": "INDIVIDUAL",
+    "maxPerHeat": 4,
+    "championship": {
+      "id": 1
+    }
+  }
+}
