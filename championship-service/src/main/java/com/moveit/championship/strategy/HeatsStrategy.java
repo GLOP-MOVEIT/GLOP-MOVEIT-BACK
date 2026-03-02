@@ -48,8 +48,8 @@ public class HeatsStrategy implements TreeGenerationStrategy {
 
             int nbHeats = (int) Math.ceil((double) currentParticipants / maxPerHeat);
 
-            LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round - 1));
-            LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
+            LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) (round - 1)));
+            LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) round));
 
             List<Trial> currentRoundTrials = new ArrayList<>();
 

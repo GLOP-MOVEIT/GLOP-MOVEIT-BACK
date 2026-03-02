@@ -38,8 +38,8 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
         for (int round = 1; round <= nbRounds; round++) {
             String roundName = getRoundName(round, nbRounds);
 
-            LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round - 1));
-            LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
+            LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) (round - 1)));
+            LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) round));
 
             List<Trial> currentRoundTrials = new ArrayList<>();
 

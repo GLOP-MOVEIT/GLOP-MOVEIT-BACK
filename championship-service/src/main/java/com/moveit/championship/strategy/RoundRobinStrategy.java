@@ -47,8 +47,8 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
         int matchNumber = 1;
 
         for (int round = 1; round <= nbRounds; round++) {
-LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round - 1));
-                LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
+LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) (round - 1)));
+                LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) round));
 
             List<Integer> currentOrder = new ArrayList<>();
             currentOrder.add(ids.getFirst());
