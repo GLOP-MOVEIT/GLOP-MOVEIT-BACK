@@ -45,7 +45,7 @@ public class ChampionshipService {
     }
 
     private void validateChampionshipDates(Championship championship) {
-        if (championship.getStartDate().after(championship.getEndDate())) {
+        if (championship.getStartDate().isAfter(championship.getEndDate())) {
             throw new IllegalArgumentException("La date de début du championnat doit être avant la date de fin");
         }
     }

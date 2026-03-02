@@ -1,5 +1,6 @@
 package com.moveit.championship.service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.moveit.championship.entity.Competition;
@@ -49,11 +50,8 @@ class TreeGenerationServiceTest {
         competition.setNbManches(1);
         competition.setTrials(new ArrayList<>());
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MARCH, 1);
-        competition.setCompetitionStartDate(cal.getTime());
-        cal.set(2026, Calendar.MARCH, 15);
-        competition.setCompetitionEndDate(cal.getTime());
+        competition.setCompetitionStartDate(LocalDateTime.of(2026, 3, 1, 0, 0));
+        competition.setCompetitionEndDate(LocalDateTime.of(2026, 3, 15, 0, 0));
     }
 
     @Test

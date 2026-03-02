@@ -6,8 +6,9 @@ import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -40,14 +41,14 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
         // Préparer la liste pour le round-robin (algorithme du cercle)
         List<Integer> rotating = new ArrayList<>(ids.subList(1, ids.size()));
 
-        long totalDuration = competition.getCompetitionEndDate().getTime() - competition.getCompetitionStartDate().getTime();
-        long roundDuration = totalDuration / nbRounds;
+        Duration totalDuration = Duration.between(competition.getCompetitionStartDate(), competition.getCompetitionEndDate());
+        Duration roundDuration = totalDuration.dividedBy(nbRounds);
 
         int matchNumber = 1;
 
         for (int round = 1; round <= nbRounds; round++) {
-            Date roundStart = new Date(competition.getCompetitionStartDate().getTime() + (round - 1) * roundDuration);
-            Date roundEnd = new Date(competition.getCompetitionStartDate().getTime() + round * roundDuration);
+LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round - 1));
+                LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
 
             List<Integer> currentOrder = new ArrayList<>();
             currentOrder.add(ids.getFirst());

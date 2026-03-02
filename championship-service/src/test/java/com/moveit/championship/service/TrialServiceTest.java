@@ -1,5 +1,6 @@
 package com.moveit.championship.service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.moveit.championship.entity.Competition;
@@ -41,8 +42,8 @@ class TrialServiceTest {
         trial = new Trial();
         trial.setTrialId(1);
         trial.setTrialName("Trial 1");
-        trial.setTrialStartDate(new Date());
-        trial.setTrialEndDate(new Date());
+        trial.setTrialStartDate(LocalDateTime.now());
+        trial.setTrialEndDate(LocalDateTime.now());
         trial.setTrialStatus(Status.PLANNED);
         trial.setCompetition(competition);
         trial.setLocationId(1);
@@ -94,8 +95,8 @@ class TrialServiceTest {
     void updateTrial_shouldUpdateFields() {
         Trial updated = new Trial();
         updated.setTrialName("Updated");
-        updated.setTrialStartDate(new Date());
-        updated.setTrialEndDate(new Date());
+        updated.setTrialStartDate(LocalDateTime.now());
+        updated.setTrialEndDate(LocalDateTime.now());
         updated.setTrialDescription("desc");
         updated.setTrialStatus(Status.ONGOING);
         updated.setLocationId(2);

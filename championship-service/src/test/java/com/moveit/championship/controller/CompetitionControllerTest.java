@@ -1,6 +1,7 @@
 package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.championship.config.TestJacksonConfig;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.exception.CompetitionNotFoundException;
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CompetitionController.class)
-@Import(ObjectMapper.class)
+@Import(TestJacksonConfig.class)
 class CompetitionControllerTest {
 
     @Autowired

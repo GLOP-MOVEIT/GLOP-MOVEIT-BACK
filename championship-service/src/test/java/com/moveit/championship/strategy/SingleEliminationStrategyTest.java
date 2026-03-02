@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,11 +30,8 @@ class SingleEliminationStrategyTest {
         competition.setCompetitionType(CompetitionType.SINGLE_ELIMINATION);
         competition.setNbManches(0);
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MARCH, 1);
-        competition.setCompetitionStartDate(cal.getTime());
-        cal.set(2026, Calendar.MARCH, 15);
-        competition.setCompetitionEndDate(cal.getTime());
+        competition.setCompetitionStartDate(LocalDateTime.of(2026, 3, 1, 0, 0));
+        competition.setCompetitionEndDate(LocalDateTime.of(2026, 3, 15, 0, 0));
     }
 
     @Test

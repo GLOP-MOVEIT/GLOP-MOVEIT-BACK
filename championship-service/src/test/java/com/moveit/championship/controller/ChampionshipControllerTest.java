@@ -1,6 +1,7 @@
 package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.championship.config.TestJacksonConfig;
 import com.moveit.championship.dto.ChampionshipUpdateDTO;
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Status;
@@ -29,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = ChampionshipController.class)
-@Import(ObjectMapper.class)
+@Import(TestJacksonConfig.class)
 class ChampionshipControllerTest {
 
     @Autowired

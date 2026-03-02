@@ -11,8 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class CompetitionMother {
@@ -28,8 +27,8 @@ public class CompetitionMother {
         private Championship championship = ChampionshipMother.championship().build();
         private String competitionSport = "Football";
         private String competitionName = "Ligue 1";
-        private Date competitionStartDate = createDate(2026, Calendar.JANUARY, 1);
-        private Date competitionEndDate = createDate(2026, Calendar.MARCH, 1);
+        private LocalDateTime competitionStartDate = LocalDateTime.of(2026, 1, 1, 0, 0);
+        private LocalDateTime competitionEndDate = LocalDateTime.of(2026, 3, 1, 0, 0);
         private String competitionDescription = "Description de la compétition";
         private Status competitionStatus = Status.PLANNED;
         private List<Event> events = List.of();
@@ -38,13 +37,6 @@ public class CompetitionMother {
         private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
         private Integer maxPerHeat = null;
         private ParticipantType participantType = ParticipantType.INDIVIDUAL;
-
-        private static Date createDate(int year, int month, int day) {
-            Calendar cal = Calendar.getInstance();
-            cal.set(year, month, day, 0, 0, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            return cal.getTime();
-        }
 
         public Competition build() {
                 return new Competition(

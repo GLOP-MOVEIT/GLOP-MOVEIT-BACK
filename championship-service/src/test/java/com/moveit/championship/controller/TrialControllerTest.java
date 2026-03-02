@@ -1,6 +1,7 @@
 package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.championship.config.TestJacksonConfig;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.service.TrialService;
@@ -13,7 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(controllers = TrialController.class)
-@Import(ObjectMapper.class)
+@Import(TestJacksonConfig.class)
 class TrialControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -40,8 +41,8 @@ class TrialControllerTest {
         trial = new Trial();
         trial.setTrialId(1);
         trial.setTrialName("Trial 1");
-        trial.setTrialStartDate(new Date());
-        trial.setTrialEndDate(new Date());
+        trial.setTrialStartDate(LocalDateTime.now());
+        trial.setTrialEndDate(LocalDateTime.now());
         trial.setTrialStatus(Status.PLANNED);
         trial.setLocationId(1);
     }
