@@ -30,4 +30,15 @@ public class RoleController {
     public List<Role> getAllRoles() {
         return this.roleService.getAllRole();
     }
+
+    @Operation(summary = "Récupérer un rôle par son nom")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rôle récupéré avec succès", content = @Content(schema = @Schema(implementation = Role.class))),
+            @ApiResponse(responseCode = "404", description = "Rôle non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/{name}")
+    public Role getRoleByName(@PathVariable String name) {
+        return this.roleService.getRoleByName(name);
+    }
 }

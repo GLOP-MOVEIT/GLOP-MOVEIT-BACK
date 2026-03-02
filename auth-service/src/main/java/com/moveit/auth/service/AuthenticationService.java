@@ -2,7 +2,7 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
-import com.moveit.auth.dto.CreateSpectatorRequest;
+import com.moveit.auth.dto.CreateUserRequest;
 import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
@@ -30,7 +30,7 @@ public class AuthenticationService {
 
         UserAuth savedUserAuth = userAuthRepository.save(userAuth);
 
-        userFeignClient.createSpectator(new CreateSpectatorRequest(
+        userFeignClient.createSpectator(new CreateUserRequest(
                 input.firstName(),
                 input.surname(),
                 input.email(),

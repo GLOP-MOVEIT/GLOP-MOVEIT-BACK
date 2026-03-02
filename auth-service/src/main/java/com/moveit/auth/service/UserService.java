@@ -1,7 +1,9 @@
 package com.moveit.auth.service;
 
+import com.moveit.auth.dto.CreateUserRequest;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.UserAuth;
+import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ public class UserService {
 
     private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserFeignClient userFeignClient;
 
     @PostConstruct
     void init() {
@@ -27,6 +30,16 @@ public class UserService {
                 .setNickname("admin")
                 .setPassword(passwordEncoder.encode("123456"));
         userAuthRepository.save(admin);
+
+        userFeignClient.createAdmin(new CreateUserRequest(
+                "Admin",
+                "Admin",
+                "admin@moveit.com",
+                "0000000000",
+                "fr",
+                false,
+                false
+        ));
     }
 
     public List<UserAuth> allUsers() {

@@ -3,7 +3,7 @@ package com.moveit.auth.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateSpectatorRequest(
+public record CreateUserRequest(
         @NotBlank(message = "First name is required")
         String firstName,
         @NotBlank(message = "Surname is required")
@@ -19,3 +19,4 @@ public record CreateSpectatorRequest(
         @NotNull(message = "Accepts location sharing is required")
         Boolean acceptsLocationSharing
 ) {}
+

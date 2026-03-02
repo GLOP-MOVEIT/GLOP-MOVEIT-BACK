@@ -41,6 +41,10 @@ public class UserService {
         return this.userMapper.toDto(this.userRepository.save(this.userMapper.toEntity(user)));
     }
 
+    public User createAdmin(UserRequest user) {
+        return this.userMapper.toDto(this.userRepository.save(this.userMapper.toAdminEntity(user)));
+    }
+
     public UserEntity getUserEntityById(Integer id) {
         return this.userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));

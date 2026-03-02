@@ -1,7 +1,9 @@
 package com.moveit.auth.service;
 
+import com.moveit.auth.dto.CreateUserRequest;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.entity.UserAuth;
+import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,13 +31,16 @@ class UserAuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private UserFeignClient userFeignClient;
+
     private UserService userService;
 
     private UserAuth adminUserAuth;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userAuthRepository, passwordEncoder);
+        userService = new UserService(userAuthRepository, passwordEncoder, userFeignClient);
 
         adminUserAuth = new UserAuth()
                 .setId(1)
@@ -89,15 +94,16 @@ class UserAuthServiceTest {
         userService.init();
 
         verify(userAuthRepository).save(any(UserAuth.class));
+        verify(userFeignClient).createAdmin(any(CreateUserRequest.class));
     }
 
     @Test
     void init_ShouldNotCreateAdmin_WhenAdminExists() {
         when(userAuthRepository.findByNickname("admin")).thenReturn(Optional.of(adminUserAuth));
 
-
         userService.init();
 
         verify(userAuthRepository, never()).save(any(UserAuth.class));
+        verify(userFeignClient, never()).createAdmin(any(CreateUserRequest.class));
     }
 }

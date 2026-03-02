@@ -20,7 +20,14 @@ public abstract class UserMapper {
     @Mapping(target = "role", expression = "java(getSpectatorRole())")
     public abstract UserEntity toEntity(UserRequest userRequest);
 
+    @Mapping(target = "role", expression = "java(getAdminRole())")
+    public abstract UserEntity toAdminEntity(UserRequest userRequest);
+
     protected RoleEntity getSpectatorRole() {
         return roleService.getRoleEntityByName("SPECTATOR");
+    }
+
+    protected RoleEntity getAdminRole() {
+        return roleService.getRoleEntityByName("ADMIN");
     }
 }

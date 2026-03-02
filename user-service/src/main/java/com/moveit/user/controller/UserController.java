@@ -66,4 +66,15 @@ public class UserController {
     public User createSpectator(@RequestBody @Valid UserRequest user) {
         return this.userService.createSpectator(user);
     }
+
+    @Operation(summary = "Créer un nouvel administrateur")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Administrateur créé avec succès", content = @Content(schema = @Schema(implementation = User.class))),
+            @ApiResponse(responseCode = "400", description = "Données de création invalides", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @PostMapping("/admin")
+    public User createAdmin(@RequestBody @Valid UserRequest user) {
+        return this.userService.createAdmin(user);
+    }
 }
