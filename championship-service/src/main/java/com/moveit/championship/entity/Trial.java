@@ -9,8 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Table(name = "trial")
@@ -35,11 +35,11 @@ public class Trial {
 
     @NotNull(message = "La date de début est obligatoire")
     @Column(nullable = false)
-    private Date trialStartDate;
+    private LocalDateTime trialStartDate;
 
     @NotNull(message = "La date de fin est obligatoire")
     @Column(nullable = false)
-    private Date trialEndDate;
+    private LocalDateTime trialEndDate;
 
     @Column(length = 1000)
     private String trialDescription;

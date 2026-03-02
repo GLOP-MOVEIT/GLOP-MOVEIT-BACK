@@ -6,8 +6,9 @@ import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -28,8 +29,8 @@ public class HeatsStrategy implements TreeGenerationStrategy {
 
         List<Trial> trials = new ArrayList<>();
 
-        long totalDuration = competition.getCompetitionEndDate().getTime() - competition.getCompetitionStartDate().getTime();
-        long roundDuration = totalDuration / nbManches;
+        Duration totalDuration = Duration.between(competition.getCompetitionStartDate(), competition.getCompetitionEndDate());
+        Duration roundDuration = totalDuration.dividedBy(nbManches);
 
         List<Trial> previousRoundTrials = new ArrayList<>();
 
@@ -47,8 +48,8 @@ public class HeatsStrategy implements TreeGenerationStrategy {
 
             int nbHeats = (int) Math.ceil((double) currentParticipants / maxPerHeat);
 
-            Date roundStart = new Date(competition.getCompetitionStartDate().getTime() + (round - 1) * roundDuration);
-            Date roundEnd = new Date(competition.getCompetitionStartDate().getTime() + round * roundDuration);
+            LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) (round - 1)));
+            LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) round));
 
             List<Trial> currentRoundTrials = new ArrayList<>();
 

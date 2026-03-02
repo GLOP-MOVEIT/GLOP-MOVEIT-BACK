@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,11 +32,8 @@ class RoundRobinStrategyTest {
         competition.setCompetitionType(CompetitionType.ROUND_ROBIN);
         competition.setNbManches(0);
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.MARCH, 1);
-        competition.setCompetitionStartDate(cal.getTime());
-        cal.set(2026, Calendar.JUNE, 1);
-        competition.setCompetitionEndDate(cal.getTime());
+        competition.setCompetitionStartDate(LocalDateTime.of(2026, 3, 1, 0, 0));
+        competition.setCompetitionEndDate(LocalDateTime.of(2026, 6, 1, 0, 0));
     }
 
     @ParameterizedTest

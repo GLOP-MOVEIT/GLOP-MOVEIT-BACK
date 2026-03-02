@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,8 +16,8 @@ import java.util.List;
 public class TrialDTO {
     private Integer trialId;
     private String trialName;
-    private Date trialStartDate;
-    private Date trialEndDate;
+    private LocalDateTime trialStartDate;
+    private LocalDateTime trialEndDate;
     private String trialDescription;
     private Status trialStatus;
     private Integer locationId;

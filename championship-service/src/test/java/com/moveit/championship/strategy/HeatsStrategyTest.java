@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -38,11 +38,8 @@ class HeatsStrategyTest {
         competition.setMaxPerHeat(8);
         participantIds = createParticipantIds(29);
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(2026, Calendar.JULY, 1);
-        competition.setCompetitionStartDate(cal.getTime());
-        cal.set(2026, Calendar.JULY, 3);
-        competition.setCompetitionEndDate(cal.getTime());
+        competition.setCompetitionStartDate(LocalDateTime.of(2026, 7, 1, 0, 0));
+        competition.setCompetitionEndDate(LocalDateTime.of(2026, 7, 3, 0, 0));
     }
 
     @Test

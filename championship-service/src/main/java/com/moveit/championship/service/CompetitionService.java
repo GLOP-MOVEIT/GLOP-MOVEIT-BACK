@@ -95,13 +95,13 @@ public class CompetitionService {
     }
 
     private void validateCompetitionDates(Competition competition, Championship championship) {
-        if (competition.getCompetitionStartDate().after(competition.getCompetitionEndDate())) {
+        if (competition.getCompetitionStartDate().isAfter(competition.getCompetitionEndDate())) {
             throw new IllegalArgumentException("La date de début de la compétition doit être avant la date de fin");
         }
-        if (competition.getCompetitionStartDate().before(championship.getStartDate())) {
+        if (competition.getCompetitionStartDate().isBefore(championship.getStartDate())) {
             throw new IllegalArgumentException("La date de début de la compétition doit être après ou égale à la date de début du championnat");
         }
-        if (competition.getCompetitionEndDate().after(championship.getEndDate())) {
+        if (competition.getCompetitionEndDate().isAfter(championship.getEndDate())) {
             throw new IllegalArgumentException("La date de fin de la compétition doit être avant ou égale à la date de fin du championnat");
         }
     }

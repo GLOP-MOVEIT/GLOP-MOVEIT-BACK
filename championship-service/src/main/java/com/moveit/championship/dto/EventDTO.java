@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -15,6 +15,6 @@ import java.util.UUID;
 public class EventDTO {
     private UUID eventId;
     private String eventName;
-    private Date eventDate;
+    private LocalDateTime eventDate;
     private String eventDescription;
 }
