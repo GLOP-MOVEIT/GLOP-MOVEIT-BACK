@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +44,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/signup")
-    public ResponseEntity<UserDto> register(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<UserDto> register(@RequestBody @Valid RegisterUserDto registerUserDto) {
         UserAuth registeredUserAuth = authenticationService.signup(registerUserDto);
         return ResponseEntity.ok(userAuthMapper.toDto(registeredUserAuth));
     }
@@ -55,7 +56,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody @Valid LoginUserDto loginUserDto) {
         UserAuth authenticatedUserAuth = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUserAuth);
         LoginResponse loginResponse = new LoginResponse()
