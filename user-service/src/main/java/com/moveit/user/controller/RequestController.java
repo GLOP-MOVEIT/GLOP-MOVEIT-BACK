@@ -66,6 +66,17 @@ public class RequestController {
         return this.requestService.createVolunteerRequest(userId);
     }
 
+    @Operation(summary = "Promouvoir un utilisateur au rôle d'arbitre")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Utilisateur promu au rôle d'arbitre avec succès", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @PostMapping("/referee/{userId}")
+    public void promoteToReferee(@PathVariable Integer userId) {
+        this.requestService.promoteToReferee(userId);
+    }
+
     @Operation(summary = "Accepter une demande de promotion")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Demande de promotion acceptée avec succès", content = @Content()),

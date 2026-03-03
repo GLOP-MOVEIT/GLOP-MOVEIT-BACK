@@ -71,4 +71,10 @@ public class RequestService {
 
         this.requestRepository.save(request);
     }
+
+    public void promoteToReferee(Integer userId) {
+        UserEntity user = this.userService.getUserEntityById(userId);
+        user.setRole(this.roleService.getRoleEntityByName("REFEREE"));
+        this.userService.saveUserEntity(user);
+    }
 }
