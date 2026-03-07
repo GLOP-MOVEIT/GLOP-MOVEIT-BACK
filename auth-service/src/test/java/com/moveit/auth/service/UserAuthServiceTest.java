@@ -2,6 +2,7 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.CreateUserRequest;
 import com.moveit.auth.dto.RegisterUserDto;
+import com.moveit.auth.dto.UserCreatedResponse;
 import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
@@ -88,8 +89,12 @@ class UserAuthServiceTest {
 
     @Test
     void init_ShouldCreateAdmin_WhenAdminNotExists() {
+        UserCreatedResponse adminCreatedResponse = new UserCreatedResponse();
+        adminCreatedResponse.setUserId(1);
+
         when(userAuthRepository.findByNickname("admin")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("123456")).thenReturn("encodedPassword");
+        when(userFeignClient.createAdmin(any(CreateUserRequest.class))).thenReturn(adminCreatedResponse);
 
         userService.init();
 

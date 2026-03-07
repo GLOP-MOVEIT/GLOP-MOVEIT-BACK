@@ -2,6 +2,7 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
+import com.moveit.auth.dto.UserCreatedResponse;
 import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,14 +68,18 @@ class AuthenticationServiceTest {
                 true
         );
 
+        UserCreatedResponse userCreatedResponse = new UserCreatedResponse();
+        userCreatedResponse.setUserId(42);
+
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
         when(userAuthRepository.save(any(UserAuth.class))).thenReturn(testUserAuth);
+        when(userFeignClient.createSpectator(any())).thenReturn(userCreatedResponse);
 
         UserAuth result = authenticationService.signup(registerDto);
 
         assertThat(result).isNotNull();
         assertThat(result.getNickname()).isEqualTo("testuser");
-        verify(userAuthRepository).save(any(UserAuth.class));
+        verify(userAuthRepository, times(2)).save(any(UserAuth.class));
     }
 
 
