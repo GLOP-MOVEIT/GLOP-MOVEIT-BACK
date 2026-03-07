@@ -3,6 +3,7 @@ package com.moveit.auth.service;
 import com.moveit.auth.dto.LoginUserDto;
 import com.moveit.auth.dto.RegisterUserDto;
 import com.moveit.auth.dto.CreateUserRequest;
+import com.moveit.auth.dto.UserCreatedResponse;
 import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
@@ -30,7 +31,7 @@ public class AuthenticationService {
 
         UserAuth savedUserAuth = userAuthRepository.save(userAuth);
 
-        userFeignClient.createSpectator(new CreateUserRequest(
+        UserCreatedResponse createdUser = userFeignClient.createSpectator(new CreateUserRequest(
                 input.firstName(),
                 input.surname(),
                 input.email(),
@@ -40,7 +41,8 @@ public class AuthenticationService {
                 input.acceptsLocationSharing()
         ));
 
-        return savedUserAuth;
+        savedUserAuth.setUserId(createdUser.getUserId());
+        return userAuthRepository.save(savedUserAuth);
     }
 
     public UserAuth authenticate(LoginUserDto input) {

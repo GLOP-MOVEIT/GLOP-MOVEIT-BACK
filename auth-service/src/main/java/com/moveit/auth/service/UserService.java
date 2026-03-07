@@ -2,6 +2,7 @@ package com.moveit.auth.service;
 
 import com.moveit.auth.dto.CreateUserRequest;
 import com.moveit.auth.dto.RegisterUserDto;
+import com.moveit.auth.dto.UserCreatedResponse;
 import com.moveit.auth.entity.UserAuth;
 import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
@@ -29,9 +30,7 @@ public class UserService {
         UserAuth admin = new UserAuth()
                 .setNickname("admin")
                 .setPassword(passwordEncoder.encode("123456"));
-        userAuthRepository.save(admin);
-
-        userFeignClient.createAdmin(new CreateUserRequest(
+        UserCreatedResponse createdAdmin = userFeignClient.createAdmin(new CreateUserRequest(
                 "Admin",
                 "Admin",
                 "admin@moveit.com",
@@ -40,6 +39,9 @@ public class UserService {
                 false,
                 false
         ));
+
+        admin.setUserId(createdAdmin.getUserId());
+        userAuthRepository.save(admin);
     }
 
     public List<UserAuth> allUsers() {

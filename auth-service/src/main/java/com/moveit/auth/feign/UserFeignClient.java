@@ -1,6 +1,7 @@
 package com.moveit.auth.feign;
 
 import com.moveit.auth.dto.CreateUserRequest;
+import com.moveit.auth.dto.UserCreatedResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface UserFeignClient {
 
     @PostMapping("/users")
-    void createSpectator(@RequestBody CreateUserRequest request);
+    UserCreatedResponse createSpectator(@RequestBody CreateUserRequest request);
 
     @PostMapping("/users/admin")
-    void createAdmin(@RequestBody CreateUserRequest request);
+    UserCreatedResponse createAdmin(@RequestBody CreateUserRequest request);
 }

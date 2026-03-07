@@ -31,6 +31,9 @@ public class UserAuth implements UserDetails {
     @Column(nullable = false)
     private Integer id;
 
+    @Column(name = "user_id")
+    private Integer userId;
+
     @Column(unique = true, length = 50, nullable = false)
     private String nickname;
 
