@@ -67,6 +67,8 @@ public class GatewayConfiguration {
                 .before(uri(userServiceUrl))
                 .route(path("/tickets/**"), http())
                 .before(uri(userServiceUrl))
+                .route(path("/teams/**"), http())
+                .before(uri(userServiceUrl))
                 .build();
     }
 }
