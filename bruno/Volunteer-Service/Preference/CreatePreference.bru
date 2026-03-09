@@ -1,0 +1,25 @@
+meta {
+  name: CreatePreference
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/volunteer/preferences
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "userId": 1,
+    "taskTypeId": 1,
+    "preferenceOrder": 1,
+    "notes": "Je préfère les tâches d'arbitrage en priorité"
+  }
+}
+
