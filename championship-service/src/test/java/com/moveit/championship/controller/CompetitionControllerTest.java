@@ -136,6 +136,23 @@ class CompetitionControllerTest {
     }
 
     @Test
+    @DisplayName("Should create competition with assignedCommissaireId successfully.")
+    void testCreateCompetition_WithAssignedCommissaireId() throws Exception {
+        Competition competitionWithCommissaire = CompetitionMother.competition()
+                .withAssignedCommissaireId(7)
+                .build();
+        when(competitionService.createCompetition(any(Competition.class))).thenReturn(competitionWithCommissaire);
+
+        mockMvc.perform(post("/championships/competitions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(competitionWithCommissaire)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.assignedCommissaireId", equalTo(7)));
+
+        verify(competitionService, times(1)).createCompetition(any(Competition.class));
+    }
+
+    @Test
     @DisplayName("Should update competition successfully.")
     void testUpdateCompetition_Success() throws Exception {
         var updateDto = com.moveit.championship.dto.CompetitionUpdateDTOMother.validUpdate();

@@ -95,6 +95,23 @@ class CompetitionServiceTest {
     }
 
     @Test
+    @DisplayName("Should create competition with assignedCommissaireId.")
+    void shouldCreateCompetitionWithAssignedCommissaireId() {
+        Competition competition = CompetitionMother.competition()
+                .withAssignedCommissaireId(7)
+                .build();
+        Championship championship = competition.getChampionship();
+
+        when(championshipRepository.findById(championship.getId())).thenReturn(Optional.of(championship));
+        when(competitionRepository.save(any(Competition.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = competitionService.createCompetition(competition);
+
+        assertThat(result.getAssignedCommissaireId()).isEqualTo(7);
+        verify(competitionRepository, times(1)).save(competition);
+    }
+
+    @Test
     @DisplayName("Should update competition.")
     void shouldUpdateCompetition() {
         Competition existing = CompetitionMother.competition().build();
