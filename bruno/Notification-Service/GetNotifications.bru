@@ -1,0 +1,14 @@
+meta {
+  name: GetNotifications
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{URL}}/notifications?type=ALERT&targetType=GLOBAL&page=0&size=10&sortBy=createdAt&direction=DESC
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{TOKEN}}
+}
