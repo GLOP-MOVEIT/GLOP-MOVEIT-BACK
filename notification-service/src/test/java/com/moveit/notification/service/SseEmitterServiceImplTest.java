@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -167,17 +168,16 @@ class SseEmitterServiceImplTest {
     @Test
     @DisplayName("sendToUser should not fail when user has no active emitters")
     void sendToUser_noEmitters_shouldNotFail() {
-        sseEmitterService.sendToUser("unknownUser", globalDto);
-        // No exception thrown = success
+        assertDoesNotThrow(() -> sseEmitterService.sendToUser("unknownUser", globalDto));
     }
 
     @Test
     @DisplayName("sendToUser should send to user with active emitter")
     void sendToUser_withEmitter_shouldSend() {
-        sseEmitterService.subscribe("user1", null);
+        SseEmitter emitter = sseEmitterService.subscribe("user1", null);
 
-        // Should not throw
-        sseEmitterService.sendToUser("user1", globalDto);
+        assertThat(emitter).isNotNull();
+        assertDoesNotThrow(() -> sseEmitterService.sendToUser("user1", globalDto));
     }
 
     // ==================== replay filtering by subscription target ====================
