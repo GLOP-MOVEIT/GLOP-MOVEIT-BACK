@@ -75,6 +75,7 @@ public class CompetitionMapper {
                 .competitionType(competition.getCompetitionType())
                 .maxPerHeat(competition.getMaxPerHeat())
                 .participantType(competition.getParticipantType())
+                .assignedCommissaireId(competition.getAssignedCommissaireId())
                 .build();
     }
 
@@ -99,6 +100,7 @@ public class CompetitionMapper {
                 .competitionType(competition.getCompetitionType())
                 .maxPerHeat(competition.getMaxPerHeat())
                 .participantType(competition.getParticipantType())
+                .assignedCommissaireId(competition.getAssignedCommissaireId())
                 .build();
     }
 

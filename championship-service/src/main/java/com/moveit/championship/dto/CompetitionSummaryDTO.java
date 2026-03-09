@@ -27,4 +27,5 @@ public class CompetitionSummaryDTO {
     private CompetitionType competitionType;
     private Integer maxPerHeat;
     private ParticipantType participantType;
+    private Integer assignedCommissaireId;
 }

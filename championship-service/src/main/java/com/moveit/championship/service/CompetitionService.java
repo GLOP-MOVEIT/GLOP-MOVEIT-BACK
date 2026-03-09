@@ -59,6 +59,7 @@ public class CompetitionService {
         return competitionRepository.save(existing);
     }
 
+
     public void deleteCompetition(Integer id) {
         if (!competitionRepository.existsById(id)) {
             throw new CompetitionNotFoundException(id);
