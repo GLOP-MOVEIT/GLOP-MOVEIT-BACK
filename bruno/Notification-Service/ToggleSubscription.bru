@@ -1,0 +1,15 @@
+meta {
+  name: ToggleSubscription
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{URL}}/subscriptions/1/toggle
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{TOKEN}}
+}
+

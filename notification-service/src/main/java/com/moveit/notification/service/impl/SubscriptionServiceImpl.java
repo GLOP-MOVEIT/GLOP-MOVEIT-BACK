@@ -3,6 +3,7 @@ package com.moveit.notification.service.impl;
 import com.moveit.notification.dto.SubscriptionCreateDTO;
 import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.entity.Subscription;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.repository.SubscriptionRepository;
 import com.moveit.notification.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -19,19 +20,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public List<Subscription> getSubscriptions(String userId, NotificationType type) {
-        // Si aucun filtre, retourner tous
         if (userId == null && type == null) {
             return subscriptionRepository.findAll();
         }
-        // Si filtre par userId uniquement
         if (userId != null && type == null) {
             return subscriptionRepository.findByUserId(userId);
         }
-        // Si filtre par type uniquement
-        if (userId == null && type != null) {
+        if (userId == null) {
             return subscriptionRepository.findByNotificationType(type);
         }
-        // Les deux filtres : filtrer manuellement
         return subscriptionRepository.findByUserId(userId).stream()
                 .filter(s -> s.getNotificationType() == type)
                 .toList();
@@ -43,26 +40,34 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public Subscription createSubscription(SubscriptionCreateDTO subscription) {
-        // Vérifier si l'utilisateur est déjà abonné à ce type
+    public Subscription createSubscription(SubscriptionCreateDTO dto) {
+        validateTarget(dto.getTargetType(), dto.getTargetId());
+
+        // Vérifier si l'utilisateur est déjà abonné à ce type + target
         Optional<Subscription> existing = subscriptionRepository
-                .findByUserIdAndNotificationType(
-                        subscription.getUserId(),
-                        subscription.getNotificationType()
+                .findByUserIdAndNotificationTypeAndTargetTypeAndTargetId(
+                        dto.getUserId(),
+                        dto.getNotificationType(),
+                        dto.getTargetType(),
+                        dto.getTargetId()
                 );
-        
+
         if (existing.isPresent()) {
-            // Réactiver l'abonnement s'il était désactivé
             Subscription existingSub = existing.get();
-            existingSub.setActive(true);
-            return subscriptionRepository.save(existingSub);
+            if (!existingSub.getActive()) {
+                existingSub.setActive(true);
+                return subscriptionRepository.save(existingSub);
+            }
+            return existingSub;
         }
-        
+
         Subscription newSubscription = new Subscription();
-        newSubscription.setUserId(subscription.getUserId());
-        newSubscription.setNotificationType(subscription.getNotificationType());
+        newSubscription.setUserId(dto.getUserId());
+        newSubscription.setNotificationType(dto.getNotificationType());
+        newSubscription.setTargetType(dto.getTargetType());
+        newSubscription.setTargetId(dto.getTargetId());
         newSubscription.setActive(true);
-        
+
         return subscriptionRepository.save(newSubscription);
     }
 
@@ -81,5 +86,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     subscription.setActive(!subscription.getActive());
                     return subscriptionRepository.save(subscription);
                 });
+    }
+
+    private void validateTarget(TargetType targetType, Long targetId) {
+        if (targetType == TargetType.GLOBAL && targetId != null) {
+            throw new IllegalArgumentException("targetId must be null when targetType is GLOBAL");
+        }
+        if (targetType != TargetType.GLOBAL && targetId == null) {
+            throw new IllegalArgumentException("targetId is required when targetType is " + targetType);
+        }
     }
 }

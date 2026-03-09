@@ -34,6 +34,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Notification createNotification(NotificationCreateDTO dto) {
+        validateTarget(dto.getTargetType(), dto.getTargetId());
+
         Notification notification = new Notification();
         notification.setTitle(dto.getTitle());
         notification.setContent(dto.getContent());
@@ -42,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setTargetId(dto.getTargetId());
 
         Notification savedNotification = notificationRepository.save(notification);
-        
+
         sseEmitterService.broadcastToSubscribers(savedNotification);
 
         return savedNotification;
@@ -68,5 +70,14 @@ public class NotificationServiceImpl implements NotificationService {
                     }
                     return notificationRepository.save(notification);
                 });
+    }
+
+    private void validateTarget(TargetType targetType, Long targetId) {
+        if (targetType == TargetType.GLOBAL && targetId != null) {
+            throw new IllegalArgumentException("targetId must be null when targetType is GLOBAL");
+        }
+        if (targetType != TargetType.GLOBAL && targetId == null) {
+            throw new IllegalArgumentException("targetId is required when targetType is " + targetType);
+        }
     }
 }

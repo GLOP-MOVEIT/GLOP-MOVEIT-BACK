@@ -2,6 +2,8 @@ package com.moveit.notification.service.impl;
 
 import com.moveit.notification.dto.NotificationResponseDTO;
 import com.moveit.notification.entity.Notification;
+import com.moveit.notification.entity.Subscription;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.repository.NotificationRepository;
 import com.moveit.notification.repository.SubscriptionRepository;
@@ -95,11 +97,22 @@ public class SseEmitterServiceImpl implements SseEmitterService {
 
     @Override
     public void broadcastToSubscribers(Notification notification) {
-        List<String> activeUserIds = subscriptionRepository
-                .findActiveUserIdsByNotificationType(notification.getNotificationType());
+        List<String> activeUserIds;
+
+        if (notification.getTargetType() == TargetType.GLOBAL) {
+            // Notif globale : envoyer aux abonnés GLOBAL de ce type
+            activeUserIds = subscriptionRepository.findActiveUserIdsForGlobal(notification.getNotificationType());
+        } else {
+            // Notif ciblée : envoyer aux abonnés de ce target + aux abonnés GLOBAL du même type
+            activeUserIds = subscriptionRepository.findActiveUserIdsForTarget(
+                    notification.getNotificationType(),
+                    notification.getTargetType(),
+                    notification.getTargetId());
+        }
 
         if (activeUserIds.isEmpty()) {
-            log.debug("No active subscribers for notification type {}", notification.getNotificationType());
+            log.debug("No active subscribers for notification type={} target={}",
+                    notification.getNotificationType(), notification.getTargetType());
             return;
         }
 
@@ -113,13 +126,13 @@ public class SseEmitterServiceImpl implements SseEmitterService {
     }
 
     private void replayMissedNotifications(String userId, Long lastEventId, SseEmitter emitter) {
-        var activeTypes = subscriptionRepository.findActiveNotificationTypesByUserId(userId);
-        if (activeTypes.isEmpty()) return;
+        List<Subscription> activeSubscriptions = subscriptionRepository.findActiveSubscriptionsByUserId(userId);
+        if (activeSubscriptions.isEmpty()) return;
 
         List<NotificationResponseDTO> missed = notificationRepository
                 .findByIdGreaterThanOrderByIdAsc(lastEventId)
                 .stream()
-                .filter(n -> activeTypes.contains(n.getNotificationType()))
+                .filter(n -> matchesAnySubscription(n, activeSubscriptions))
                 .map(notificationMapper::toResponseDTO)
                 .toList();
 
@@ -136,6 +149,25 @@ public class SseEmitterServiceImpl implements SseEmitterService {
                 break;
             }
         }
+    }
+
+    /**
+     * Vérifie si une notification correspond à au moins une subscription.
+     * Un abonnement GLOBAL matche toutes les notifs du même type.
+     * Un abonnement ciblé matche seulement si targetType + targetId correspondent.
+     */
+    private boolean matchesAnySubscription(Notification notification, List<Subscription> subscriptions) {
+        return subscriptions.stream().anyMatch(sub -> {
+            if (sub.getNotificationType() != notification.getNotificationType()) {
+                return false;
+            }
+            if (sub.getTargetType() == TargetType.GLOBAL) {
+                return true;
+            }
+            return sub.getTargetType() == notification.getTargetType()
+                    && sub.getTargetId() != null
+                    && sub.getTargetId().equals(notification.getTargetId());
+        });
     }
 
     private void removeEmitter(String userId, SseEmitter emitter) {

@@ -154,3 +154,4 @@ class SubscriptionControllerTest {
         verify(subscriptionService, times(1)).deleteSubscription(1L);
     }
 }
+

@@ -43,4 +43,11 @@ public class SubscriptionController {
         subscriptionService.deleteSubscription(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Subscription> getSubscriptionById(@PathVariable Long id) {
+        return subscriptionService.getSubscriptionById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
