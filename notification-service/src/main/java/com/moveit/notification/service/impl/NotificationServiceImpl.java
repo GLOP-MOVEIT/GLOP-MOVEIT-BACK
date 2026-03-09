@@ -6,8 +6,8 @@ import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.repository.NotificationRepository;
-import com.moveit.notification.service.NotificationDispatcherService;
 import com.moveit.notification.service.NotificationService;
+import com.moveit.notification.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final NotificationDispatcherService dispatcherService;
+    private final SseEmitterService sseEmitterService;
 
     @Override
     public Page<Notification> getNotifications(NotificationType type, TargetType targetType, Long targetId, Pageable pageable) {
@@ -43,8 +43,8 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification savedNotification = notificationRepository.save(notification);
         
-        dispatcherService.dispatch(savedNotification);
-        
+        sseEmitterService.broadcastToSubscribers(savedNotification);
+
         return savedNotification;
     }
 
