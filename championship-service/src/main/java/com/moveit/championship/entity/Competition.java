@@ -74,4 +74,7 @@ public class Competition {
     @Enumerated(EnumType.STRING)
     @Column(name = "participant_type", nullable = false)
     private ParticipantType participantType = ParticipantType.INDIVIDUAL;
+
+    @Column(name = "assigned_commissaire_id")
+    private Integer assignedCommissaireId;
 }

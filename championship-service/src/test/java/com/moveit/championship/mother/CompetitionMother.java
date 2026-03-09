@@ -37,6 +37,7 @@ public class CompetitionMother {
         private CompetitionType competitionType = CompetitionType.SINGLE_ELIMINATION;
         private Integer maxPerHeat = null;
         private ParticipantType participantType = ParticipantType.INDIVIDUAL;
+        private Integer assignedCommissaireId = null;
 
         public Competition build() {
                 return new Competition(
@@ -53,7 +54,8 @@ public class CompetitionMother {
                     nbManches,
                     competitionType,
                     maxPerHeat,
-                    participantType
+                    participantType,
+                    assignedCommissaireId
                 );
         }
     }
