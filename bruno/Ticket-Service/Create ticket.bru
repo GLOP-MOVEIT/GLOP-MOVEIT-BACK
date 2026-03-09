@@ -1,0 +1,27 @@
+meta {
+  name: Create ticket
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{URL}}/tickets/:userId
+  body: json
+  auth: bearer
+}
+
+params:path {
+  userId: 
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "ticketNumber":"6542",
+    "seatInformation":"Place 15",
+    "eventDate":""
+  }
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Get ticket
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{URL}}/tickets/:ticketId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  ticketId: 
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "nickname": "Julien",
+    "password": "password"
+  }
+}

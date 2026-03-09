@@ -1,0 +1,14 @@
+meta {
+  name: GetTrialsByCompetitionId
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{URL}}/trials/competition/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}

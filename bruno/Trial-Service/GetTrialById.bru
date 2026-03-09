@@ -1,0 +1,14 @@
+meta {
+  name: GetTrialById
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{URL}}/trials/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}

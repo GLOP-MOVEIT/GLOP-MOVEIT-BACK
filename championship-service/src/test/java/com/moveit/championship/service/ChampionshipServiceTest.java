@@ -1,6 +1,8 @@
 package com.moveit.championship.service;
 
+import com.moveit.championship.dto.ChampionshipUpdateDTO;
 import com.moveit.championship.entity.Championship;
+import com.moveit.championship.entity.Status;
 import com.moveit.championship.exception.ChampionshipNotFoundException;
 import com.moveit.championship.mother.ChampionshipMother;
 import com.moveit.championship.repository.ChampionshipRepository;
@@ -82,18 +84,23 @@ class ChampionshipServiceTest {
     @DisplayName("Should update championship.")
     void shouldUpdateChampionship() {
         var existingChampionship = ChampionshipMother.championship().build();
-        var updatedChampionship = ChampionshipMother.championship()
-                .withName("Updated Championship")
-                .build();
+        var dto = new ChampionshipUpdateDTO(
+                "Updated Championship",
+                existingChampionship.getDescription(),
+                existingChampionship.getStartDate(),
+                existingChampionship.getEndDate(),
+                existingChampionship.getStatus()
+        );
 
         when(championshipRepository.findById(existingChampionship.getId()))
                 .thenReturn(Optional.of(existingChampionship));
         when(championshipRepository.save(any(Championship.class)))
-                .thenReturn(updatedChampionship);
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        var result = championshipService.updateChampionship(existingChampionship.getId(), updatedChampionship);
+        var result = championshipService.updateChampionship(existingChampionship.getId(), dto);
 
-        assertThat(result).isEqualTo(updatedChampionship);
+        assertThat(result.getName()).isEqualTo("Updated Championship");
+        assertThat(result.getId()).isEqualTo(existingChampionship.getId());
         verify(championshipRepository, times(1)).save(any(Championship.class));
     }
 
@@ -102,11 +109,18 @@ class ChampionshipServiceTest {
     void shouldThrowExceptionWhenUpdatingNonExistentChampionship() {
         var championship = ChampionshipMother.championship().build();
         var championshipId = championship.getId();
+        var dto = new ChampionshipUpdateDTO(
+                "Updated",
+                "Desc",
+                championship.getStartDate(),
+                championship.getEndDate(),
+                Status.PLANNED
+        );
 
         when(championshipRepository.findById(championshipId))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> championshipService.updateChampionship(championshipId, championship))
+        assertThatThrownBy(() -> championshipService.updateChampionship(championshipId, dto))
                 .isInstanceOf(ChampionshipNotFoundException.class)
                 .hasMessageContaining("Championship with id " + championshipId + " not found");
 

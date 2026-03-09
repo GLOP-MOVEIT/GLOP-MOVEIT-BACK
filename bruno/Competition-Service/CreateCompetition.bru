@@ -1,0 +1,32 @@
+meta {
+  name: CreateCompetition
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/championships/competitions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "competitionSport": "Football",
+    "competitionName": "Coupe Nationale",
+    "competitionStartDate": "2024-07-01",
+    "competitionEndDate": "2024-09-01",
+    "competitionDescription": "Phase finale",
+    "competitionStatus": "PLANNED",
+    "nbManches": 3,
+    "competitionType": "SINGLE_ELIMINATION",
+    "participantType": "INDIVIDUAL",
+    "championship": {
+      "id": 1
+    }
+  }
+}

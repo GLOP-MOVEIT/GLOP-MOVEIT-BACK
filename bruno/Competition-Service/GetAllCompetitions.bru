@@ -1,0 +1,14 @@
+meta {
+  name: GetAllCompetitions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{URL}}/championships/competitions
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}

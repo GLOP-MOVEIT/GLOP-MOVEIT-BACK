@@ -1,0 +1,31 @@
+meta {
+  name: UpdateCompetition
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{URL}}/championships/competitions/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "competitionSport": "Football",
+    "competitionName": "Coupe Nationale - Mise à jour",
+    "competitionStartDate": "2024-07-01",
+    "competitionEndDate": "2024-09-15",
+    "competitionDescription": "Phase finale mise à jour",
+    "competitionStatus": "ONGOING",
+    "nbManches": 3,
+    "competitionType": "SINGLE_ELIMINATION",
+    "championship": {
+      "id": 1
+    }
+  }
+}

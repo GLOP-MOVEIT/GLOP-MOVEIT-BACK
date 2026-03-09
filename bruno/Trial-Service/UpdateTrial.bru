@@ -1,0 +1,28 @@
+meta {
+  name: UpdateTrial
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{URL}}/trials/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "trialName": "Manche 1 - Qualification Mise à jour",
+    "trialStartDate": "2024-03-05",
+    "trialEndDate": "2024-03-06",
+    "trialDescription": "Première manche de qualification - Modifiée",
+    "trialStatus": "ONGOING",
+    "locationId": 1,
+    "roundNumber": 1,
+    "position": 1
+  }
+}

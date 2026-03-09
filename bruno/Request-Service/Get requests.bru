@@ -1,0 +1,15 @@
+meta {
+  name: Get requests
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{URL}}/requests
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: token
+}

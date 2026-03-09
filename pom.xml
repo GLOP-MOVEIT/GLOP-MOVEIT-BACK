@@ -12,8 +12,10 @@
 
     <modules>
         <module>auth-service</module>
+        <module>user-service</module>
         <module>championship-service</module>
         <module>gateway</module>
+        <module>location-service</module>
         <module>notification-service</module>
     </modules>
 
@@ -34,6 +36,10 @@
         <jacoco.version>0.8.14</jacoco.version>
         <sonar.version>5.5.0.6356</sonar.version>
         <maven-surefire.version>3.5.4</maven-surefire.version>
+        <sonar.coverage.exclusions>
+            **/configuration/**,
+            **/*Application.java
+        </sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
@@ -153,6 +159,14 @@
                             <goals>
                                 <goal>report</goal>
                             </goals>
+                            <configuration>
+                                <excludes>
+                                    <!-- main() jamais appelé en test -->
+                                    <exclude>**/*Application.class</exclude>
+                                    <!-- Beans Spring jamais chargés en @WebMvcTest -->
+                                    <exclude>**/configuration/**</exclude>
+                                </excludes>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>

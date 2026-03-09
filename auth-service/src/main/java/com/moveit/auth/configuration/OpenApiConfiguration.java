@@ -21,7 +21,7 @@ public class OpenApiConfiguration {
                 .info(new Info()
                         .title("Auth Service API")
                         .version("1.0.0")
-                        .description("API de gestion de l'authentification et des utilisateurs")
+                        .description("API de gestion de l'authentification")
                         .contact(new Contact()
                                 .name("MoveIt Team")
                                 .email("contact@moveit.com"))

@@ -12,6 +12,10 @@ scrape_configs:
     static_configs:
       - targets: ['auth-service:8082']
 
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service:8086']
   - job_name: 'notification-service'
     metrics_path: '/actuator/prometheus'
     static_configs:

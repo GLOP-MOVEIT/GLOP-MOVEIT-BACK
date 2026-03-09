@@ -18,10 +18,14 @@ spring:
 server:
   port: 8083
 
+location:
+  service:
+    url: http://localhost:8084
+
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
+    path: /championships/v3/api-docs
   swagger-ui:
     enabled: false
 

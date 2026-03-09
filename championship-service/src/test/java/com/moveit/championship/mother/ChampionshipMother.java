@@ -7,8 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ChampionshipMother {
@@ -24,8 +23,8 @@ public class ChampionshipMother {
         private List<Competition> competitions = List.of();
         private String name = "Championship Name";
         private String description = "Championship Description";
-        private Date startDate = new Date(2026, Calendar.JANUARY,1);
-        private Date endDate = new Date(2026, Calendar.APRIL,2);
+        private LocalDateTime startDate = LocalDateTime.of(2026, 1, 1, 0, 0);
+        private LocalDateTime endDate = LocalDateTime.of(2026, 4, 2, 0, 0);
         private Status status = Status.PLANNED;
 
         public Championship build() {
