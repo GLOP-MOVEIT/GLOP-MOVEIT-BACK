@@ -4,6 +4,7 @@ import com.moveit.notification.dto.NotificationCreateDTO;
 import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.repository.NotificationRepository;
 import com.moveit.notification.service.impl.NotificationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
@@ -46,15 +47,16 @@ class NotificationServiceImplTest {
         NotificationCreateDTO dto = new NotificationCreateDTO(
             "Titre", 
             "Contenu", 
-            NotificationType.SYSTEM, 
-            Collections.emptySet(), 
-            Collections.emptySet()
+            NotificationType.ASSIGNMENT,
+            TargetType.GLOBAL,
+            null
         );
         Notification notif = new Notification();
         notif.setId(1L);
         notif.setTitle(dto.getTitle());
         notif.setContent(dto.getContent());
         notif.setNotificationType(dto.getNotificationType());
+        notif.setTargetType(dto.getTargetType());
         when(notificationRepository.save(any(Notification.class))).thenReturn(notif);
 
         // When
@@ -64,57 +66,59 @@ class NotificationServiceImplTest {
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getTitle()).isEqualTo("Titre");
         assertThat(result.getContent()).isEqualTo("Contenu");
-        assertThat(result.getNotificationType()).isEqualTo(NotificationType.SYSTEM);
+        assertThat(result.getNotificationType()).isEqualTo(NotificationType.ASSIGNMENT);
         verify(notificationRepository, times(1)).save(any(Notification.class));
     }
 
     @Test
-    void testCreateNotificationWithIncidentIds() {
+    void testCreateNotificationWithTarget() {
         // Given
-        Set<Long> incidentIds = Set.of(1L, 2L);
         NotificationCreateDTO dto = new NotificationCreateDTO(
-            "Incident Alert", 
-            "Content", 
-            NotificationType.INCIDENT, 
-            incidentIds, 
-            Collections.emptySet()
+            "Competition Alert",
+            "Content",
+            NotificationType.START,
+            TargetType.COMPETITION,
+            42L
         );
         Notification notif = new Notification();
         notif.setId(10L);
         notif.setTitle(dto.getTitle());
-        notif.setIncidentIds(incidentIds);
+        notif.setTargetType(TargetType.COMPETITION);
+        notif.setTargetId(42L);
         when(notificationRepository.save(any(Notification.class))).thenReturn(notif);
 
         // When
         Notification result = notificationService.createNotification(dto);
 
         // Then
-        assertThat(result.getIncidentIds()).containsExactlyInAnyOrder(1L, 2L);
+        assertThat(result.getTargetType()).isEqualTo(TargetType.COMPETITION);
+        assertThat(result.getTargetId()).isEqualTo(42L);
         verify(notificationRepository, times(1)).save(any(Notification.class));
     }
 
     @Test
-    void testCreateNotificationWithEventIds() {
+    void testCreateNotificationWithChampionshipTarget() {
         // Given
-        Set<Long> eventIds = Set.of(5L, 6L);
         NotificationCreateDTO dto = new NotificationCreateDTO(
-            "Event Alert", 
-            "Content", 
-            NotificationType.EVENT, 
-            Collections.emptySet(), 
-            eventIds
+            "Championship Alert",
+            "Content",
+            NotificationType.RESULT,
+            TargetType.CHAMPIONSHIP,
+            99L
         );
         Notification notif = new Notification();
         notif.setId(11L);
         notif.setTitle(dto.getTitle());
-        notif.setEventIds(eventIds);
+        notif.setTargetType(TargetType.CHAMPIONSHIP);
+        notif.setTargetId(99L);
         when(notificationRepository.save(any(Notification.class))).thenReturn(notif);
 
         // When
         Notification result = notificationService.createNotification(dto);
 
         // Then
-        assertThat(result.getEventIds()).containsExactlyInAnyOrder(5L, 6L);
+        assertThat(result.getTargetType()).isEqualTo(TargetType.CHAMPIONSHIP);
+        assertThat(result.getTargetId()).isEqualTo(99L);
         verify(notificationRepository, times(1)).save(any(Notification.class));
     }
 
@@ -154,7 +158,7 @@ class NotificationServiceImplTest {
         // Given
         Notification notif = new Notification();
         notif.setId(3L);
-        notif.setNotificationType(NotificationType.SYSTEM);
+        notif.setNotificationType(NotificationType.REMINDER);
         List<Notification> notifList = List.of(notif);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(notifList, pageable, 1);
@@ -190,31 +194,33 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void testGetNotificationsByIncidentId() {
+    void testGetNotificationsByTargetType() {
         // Given
         Notification notif = new Notification();
         notif.setId(5L);
-        notif.setIncidentIds(Set.of(100L));
+        notif.setTargetType(TargetType.COMPETITION);
+        notif.setTargetId(100L);
         List<Notification> notifList = List.of(notif);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(notifList, pageable, 1);
-        when(notificationRepository.findByFilters(null, 100L, null, pageable)).thenReturn(page);
+        when(notificationRepository.findByFilters(null, TargetType.COMPETITION, null, pageable)).thenReturn(page);
 
         // When
-        Page<Notification> result = notificationService.getNotifications(null, 100L, null, pageable);
+        Page<Notification> result = notificationService.getNotifications(null, TargetType.COMPETITION, null, pageable);
 
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).getIncidentIds()).contains(100L);
-        verify(notificationRepository, times(1)).findByFilters(null, 100L, null, pageable);
+        assertThat(result.getContent().get(0).getTargetType()).isEqualTo(TargetType.COMPETITION);
+        verify(notificationRepository, times(1)).findByFilters(null, TargetType.COMPETITION, null, pageable);
     }
 
     @Test
-    void testGetNotificationsByEventId() {
+    void testGetNotificationsByTargetId() {
         // Given
         Notification notif = new Notification();
         notif.setId(6L);
-        notif.setEventIds(Set.of(200L));
+        notif.setTargetType(TargetType.CHAMPIONSHIP);
+        notif.setTargetId(200L);
         List<Notification> notifList = List.of(notif);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(notifList, pageable, 1);
@@ -225,7 +231,7 @@ class NotificationServiceImplTest {
 
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent().get(0).getEventIds()).contains(200L);
+        assertThat(result.getContent().get(0).getTargetId()).isEqualTo(200L);
         verify(notificationRepository, times(1)).findByFilters(null, null, 200L, pageable);
     }
 
@@ -234,22 +240,23 @@ class NotificationServiceImplTest {
         // Given
         Notification notif1 = new Notification();
         notif1.setId(7L);
-        notif1.setNotificationType(NotificationType.INCIDENT);
-        notif1.setIncidentIds(Set.of(100L));
-        
+        notif1.setNotificationType(NotificationType.ASSIGNMENT);
+        notif1.setTargetType(TargetType.COMPETITION);
+        notif1.setTargetId(100L);
+
         List<Notification> filteredNotifs = List.of(notif1);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Notification> page = new PageImpl<>(filteredNotifs, pageable, 1);
-        when(notificationRepository.findByFilters(NotificationType.INCIDENT, 100L, null, pageable)).thenReturn(page);
+        when(notificationRepository.findByFilters(NotificationType.ASSIGNMENT, TargetType.COMPETITION, null, pageable)).thenReturn(page);
 
         // When
-        Page<Notification> result = notificationService.getNotifications(NotificationType.INCIDENT, 100L, null, pageable);
+        Page<Notification> result = notificationService.getNotifications(NotificationType.ASSIGNMENT, TargetType.COMPETITION, null, pageable);
 
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getId()).isEqualTo(7L);
-        assertThat(result.getContent().get(0).getNotificationType()).isEqualTo(NotificationType.INCIDENT);
-        verify(notificationRepository, times(1)).findByFilters(NotificationType.INCIDENT, 100L, null, pageable);
+        assertThat(result.getContent().get(0).getNotificationType()).isEqualTo(NotificationType.ASSIGNMENT);
+        verify(notificationRepository, times(1)).findByFilters(NotificationType.ASSIGNMENT, TargetType.COMPETITION, null, pageable);
     }
 
     @Test
@@ -300,50 +307,6 @@ class NotificationServiceImplTest {
         assertThat(result).isPresent();
         assertThat(result.get().getTitle()).isEqualTo("Updated Title");
         assertThat(result.get().getContent()).isEqualTo("Old Content"); // Inchangé
-        verify(notificationRepository, times(1)).save(any(Notification.class));
-    }
-
-    @Test
-    void testUpdateNotificationWithIncidentIds() {
-        // Given
-        Notification existingNotif = new Notification();
-        existingNotif.setId(12L);
-        existingNotif.setIncidentIds(new HashSet<>(Set.of(1L)));
-        
-        NotificationUpdateDTO dto = new NotificationUpdateDTO();
-        dto.setIncidentIds(Set.of(1L, 2L, 3L));
-        
-        when(notificationRepository.findById(12L)).thenReturn(Optional.of(existingNotif));
-        when(notificationRepository.save(any(Notification.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        // When
-        Optional<Notification> result = notificationService.updateNotification(12L, dto);
-
-        // Then
-        assertThat(result).isPresent();
-        assertThat(result.get().getIncidentIds()).containsExactlyInAnyOrder(1L, 2L, 3L);
-        verify(notificationRepository, times(1)).save(any(Notification.class));
-    }
-
-    @Test
-    void testUpdateNotificationWithEventIds() {
-        // Given
-        Notification existingNotif = new Notification();
-        existingNotif.setId(13L);
-        existingNotif.setEventIds(new HashSet<>(Set.of(10L)));
-        
-        NotificationUpdateDTO dto = new NotificationUpdateDTO();
-        dto.setEventIds(Set.of(10L, 20L));
-        
-        when(notificationRepository.findById(13L)).thenReturn(Optional.of(existingNotif));
-        when(notificationRepository.save(any(Notification.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        // When
-        Optional<Notification> result = notificationService.updateNotification(13L, dto);
-
-        // Then
-        assertThat(result).isPresent();
-        assertThat(result.get().getEventIds()).containsExactlyInAnyOrder(10L, 20L);
         verify(notificationRepository, times(1)).save(any(Notification.class));
     }
 

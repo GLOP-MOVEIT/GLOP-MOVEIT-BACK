@@ -6,8 +6,10 @@ import com.moveit.notification.dto.NotificationCreateDTO;
 import com.moveit.notification.dto.NotificationResponseDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
+import com.moveit.notification.service.SseEmitterService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,9 @@ class NotificationControllerTest {
     @MockitoBean
     private NotificationMapper notificationMapper;
 
+    @MockitoBean
+    private SseEmitterService sseEmitterService;
+
     @Test
     @DisplayName("GET /notifications should return paginated notifications")
     void testGetNotifications() throws Exception {
@@ -55,14 +60,16 @@ class NotificationControllerTest {
         notification.setId(1L);
         notification.setTitle("Test Notification");
         notification.setContent("Test Content");
-        notification.setNotificationType(NotificationType.INCIDENT);
+        notification.setNotificationType(NotificationType.ALERT);
+        notification.setTargetType(TargetType.GLOBAL);
         notification.setCreatedAt(LocalDateTime.now());
 
         NotificationResponseDTO dto = new NotificationResponseDTO();
         dto.setId(1L);
         dto.setTitle("Test Notification");
         dto.setContent("Test Content");
-        dto.setNotificationType(NotificationType.INCIDENT);
+        dto.setNotificationType(NotificationType.ALERT);
+        dto.setTargetType(TargetType.GLOBAL);
         dto.setCreatedAt(LocalDateTime.now());
 
         Page<Notification> page = new PageImpl<>(Arrays.asList(notification), PageRequest.of(0, 10), 1);
@@ -86,28 +93,31 @@ class NotificationControllerTest {
     void testGetNotificationsWithFilters() throws Exception {
         Notification notification = new Notification();
         notification.setId(1L);
-        notification.setTitle("Incident Notification");
-        notification.setNotificationType(NotificationType.INCIDENT);
-        notification.setIncidentIds(new HashSet<>(Set.of(100L)));
+        notification.setTitle("Assignment Notification");
+        notification.setNotificationType(NotificationType.ASSIGNMENT);
+        notification.setTargetType(TargetType.COMPETITION);
+        notification.setTargetId(100L);
 
         NotificationResponseDTO dto = new NotificationResponseDTO();
         dto.setId(1L);
-        dto.setTitle("Incident Notification");
-        dto.setNotificationType(NotificationType.INCIDENT);
-        dto.setIncidentIds(new HashSet<>(Set.of(100L)));
+        dto.setTitle("Assignment Notification");
+        dto.setNotificationType(NotificationType.ASSIGNMENT);
+        dto.setTargetType(TargetType.COMPETITION);
+        dto.setTargetId(100L);
 
         Page<Notification> page = new PageImpl<>(Arrays.asList(notification), PageRequest.of(0, 10), 1);
         when(notificationService.getNotifications(any(), any(), any(), any())).thenReturn(page);
         when(notificationMapper.toResponseDTO(notification)).thenReturn(dto);
 
         mockMvc.perform(get("/notifications")
-                        .param("type", "INCIDENT")
-                        .param("incidentId", "100")
+                        .param("type", "ASSIGNMENT")
+                        .param("targetType", "COMPETITION")
+                        .param("targetId", "100")
                         .param("page", "0")
                         .param("size", "10")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].notificationType").value("INCIDENT"));
+                .andExpect(jsonPath("$.content[0].notificationType").value("ASSIGNMENT"));
 
         verify(notificationService, times(1)).getNotifications(any(), any(), any(), any());
     }
@@ -119,7 +129,7 @@ class NotificationControllerTest {
         notification.setId(1L);
         notification.setTitle("Test Notification");
         notification.setContent("Test Content");
-        notification.setNotificationType(NotificationType.INCIDENT);
+        notification.setNotificationType(NotificationType.REMINDER);
 
         NotificationResponseDTO dto = new NotificationResponseDTO();
         dto.setId(1L);
@@ -158,7 +168,7 @@ class NotificationControllerTest {
         notification.setId(1L);
         notification.setTitle("New Notification");
         notification.setContent("New Content");
-        notification.setNotificationType(NotificationType.EVENT);
+        notification.setNotificationType(NotificationType.RESULT);
 
         NotificationResponseDTO dto = new NotificationResponseDTO();
         dto.setId(1L);
@@ -167,7 +177,8 @@ class NotificationControllerTest {
         NotificationCreateDTO createDTO = new NotificationCreateDTO();
         createDTO.setTitle("New Notification");
         createDTO.setContent("New Content");
-        createDTO.setNotificationType(NotificationType.EVENT);
+        createDTO.setNotificationType(NotificationType.RESULT);
+        createDTO.setTargetType(TargetType.GLOBAL);
 
         when(notificationService.createNotification(any(NotificationCreateDTO.class))).thenReturn(notification);
         when(notificationMapper.toResponseDTO(notification)).thenReturn(dto);
@@ -189,7 +200,7 @@ class NotificationControllerTest {
         updatedNotification.setId(1L);
         updatedNotification.setTitle("Updated Title");
         updatedNotification.setContent("Updated Content");
-        updatedNotification.setNotificationType(NotificationType.INCIDENT);
+        updatedNotification.setNotificationType(NotificationType.ALERT);
 
         NotificationResponseDTO dto = new NotificationResponseDTO();
         dto.setId(1L);
@@ -233,7 +244,7 @@ class NotificationControllerTest {
         verify(notificationService, times(1)).deleteNotification(1L);
     }
 
-    // ============ Point 5 - Input Validation Tests ============
+    // ============ Input Validation Tests ============
 
     @Test
     @DisplayName("POST with blank title should return 400 validation error")
@@ -241,9 +252,9 @@ class NotificationControllerTest {
         NotificationCreateDTO dto = new NotificationCreateDTO(
             "   ",
             "Valid content",
-            NotificationType.INCIDENT,
-            new HashSet<>(),
-            new HashSet<>()
+            NotificationType.ASSIGNMENT,
+            TargetType.GLOBAL,
+            null
         );
 
         mockMvc.perform(post("/notifications")
@@ -259,9 +270,9 @@ class NotificationControllerTest {
         NotificationCreateDTO dto = new NotificationCreateDTO(
             "AB",
             "Valid content",
-            NotificationType.INCIDENT,
-            new HashSet<>(),
-            new HashSet<>()
+            NotificationType.ASSIGNMENT,
+            TargetType.GLOBAL,
+            null
         );
 
         mockMvc.perform(post("/notifications")
@@ -278,9 +289,9 @@ class NotificationControllerTest {
         NotificationCreateDTO dto = new NotificationCreateDTO(
             longTitle,
             "Valid content",
-            NotificationType.INCIDENT,
-            new HashSet<>(),
-            new HashSet<>()
+            NotificationType.ASSIGNMENT,
+            TargetType.GLOBAL,
+            null
         );
 
         mockMvc.perform(post("/notifications")
@@ -296,9 +307,9 @@ class NotificationControllerTest {
         NotificationCreateDTO dto = new NotificationCreateDTO(
             "Valid Title",
             longContent,
-            NotificationType.INCIDENT,
-            new HashSet<>(),
-            new HashSet<>()
+            NotificationType.ASSIGNMENT,
+            TargetType.GLOBAL,
+            null
         );
 
         mockMvc.perform(post("/notifications")

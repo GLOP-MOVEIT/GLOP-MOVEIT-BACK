@@ -3,6 +3,7 @@ package com.moveit.notification.controller;
 import com.moveit.notification.config.PaginationConfig;
 import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
+import com.moveit.notification.service.SseEmitterService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,6 +38,9 @@ class NotificationControllerSortValidationTest {
     
     @MockitoBean
     private NotificationMapper notificationMapper;
+
+    @MockitoBean
+    private SseEmitterService sseEmitterService;
 
     @ParameterizedTest
     @ValueSource(strings = {"createdAt", "id", "title", "notificationType"})

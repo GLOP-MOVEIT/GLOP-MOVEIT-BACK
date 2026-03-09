@@ -11,14 +11,15 @@ post {
 }
 
 auth:bearer {
-  token: eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ0ZXN0QHRlc3QuZnIiLCJpYXQiOjE3Njg4NDA0OTgsImV4cCI6MTc2ODkyNjg5OH0.ZS5KH5vVN6zptTo32V3GHgbHqBmFtj3_56gJD8ReX4how4Xt7JF3He040QAi2T-m
+  token: {{TOKEN}}
 }
 
 body:json {
   {
-    "userId": "123",
-    "content": "Test notification Bruno",
     "title": "Titre de la notif",
-    "notificationType": "ALERT"
+    "content": "Test notification Bruno",
+    "notificationType": "ALERT",
+    "targetType": "GLOBAL",
+    "targetId": null
   }
 }

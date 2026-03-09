@@ -5,11 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
-
 /**
  * DTO pour mettre à jour une notification.
- * Point 5 - Validation des contraintes d'entrée avec min/max pour éviter les données invalides.
  */
 @Data
 @NoArgsConstructor
@@ -21,8 +18,4 @@ public class NotificationUpdateDTO {
 
     @Size(min = 0, max = 5000, message = "Content must not exceed 5000 characters if provided")
     private String content;
-
-    private Set<Long> incidentIds;
-
-    private Set<Long> eventIds;
 }

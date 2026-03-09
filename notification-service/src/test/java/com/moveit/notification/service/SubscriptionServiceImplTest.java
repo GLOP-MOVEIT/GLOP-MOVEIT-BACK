@@ -36,7 +36,7 @@ class SubscriptionServiceImplTest {
     @Test
     void testGetSubscriptionsWithoutFilters() {
         // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.INCIDENT, true);
+        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
         Subscription sub2 = new Subscription(2L, "user2", NotificationType.ALERT, true);
         List<Subscription> allSubs = List.of(sub1, sub2);
         when(subscriptionRepository.findAll()).thenReturn(allSubs);
@@ -52,7 +52,7 @@ class SubscriptionServiceImplTest {
     @Test
     void testGetSubscriptionsByUserId() {
         // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.INCIDENT, true);
+        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
         Subscription sub2 = new Subscription(2L, "user1", NotificationType.ALERT, true);
         when(subscriptionRepository.findByUserId("user1")).thenReturn(List.of(sub1, sub2));
 
@@ -69,44 +69,44 @@ class SubscriptionServiceImplTest {
     @Test
     void testGetSubscriptionsByType() {
         // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.INCIDENT, true);
-        Subscription sub2 = new Subscription(2L, "user2", NotificationType.INCIDENT, true);
-        when(subscriptionRepository.findByNotificationType(NotificationType.INCIDENT))
+        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
+        Subscription sub2 = new Subscription(2L, "user2", NotificationType.ASSIGNMENT, true);
+        when(subscriptionRepository.findByNotificationType(NotificationType.ASSIGNMENT))
             .thenReturn(List.of(sub1, sub2));
 
         // When
-        List<Subscription> result = subscriptionService.getSubscriptions(null, NotificationType.INCIDENT);
+        List<Subscription> result = subscriptionService.getSubscriptions(null, NotificationType.ASSIGNMENT);
 
         // Then
         assertThat(result)
                 .hasSize(2)
-                .allMatch(s -> s.getNotificationType() == NotificationType.INCIDENT);
-        verify(subscriptionRepository, times(1)).findByNotificationType(NotificationType.INCIDENT);
+                .allMatch(s -> s.getNotificationType() == NotificationType.ASSIGNMENT);
+        verify(subscriptionRepository, times(1)).findByNotificationType(NotificationType.ASSIGNMENT);
     }
 
     @Test
     void testGetSubscriptionsByUserIdAndType() {
         // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.INCIDENT, true);
+        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
         Subscription sub2 = new Subscription(2L, "user1", NotificationType.ALERT, true);
         when(subscriptionRepository.findByUserId("user1")).thenReturn(List.of(sub1, sub2));
 
         // When
-        List<Subscription> result = subscriptionService.getSubscriptions("user1", NotificationType.INCIDENT);
+        List<Subscription> result = subscriptionService.getSubscriptions("user1", NotificationType.ASSIGNMENT);
 
         // Then
         assertThat(result)
                 .hasSize(1);
         assertThat(result.get(0))
                 .extracting(Subscription::getUserId, Subscription::getNotificationType)
-                .containsExactly("user1", NotificationType.INCIDENT);
+                .containsExactly("user1", NotificationType.ASSIGNMENT);
         verify(subscriptionRepository, times(1)).findByUserId("user1");
     }
 
     @Test
     void testGetSubscriptionById() {
         // Given
-        Subscription sub = new Subscription(10L, "user1", NotificationType.SYSTEM, true);
+        Subscription sub = new Subscription(10L, "user1", NotificationType.REMINDER, true);
         when(subscriptionRepository.findById(10L)).thenReturn(Optional.of(sub));
 
         // When
@@ -137,10 +137,10 @@ class SubscriptionServiceImplTest {
     @Test
     void testCreateSubscription_NewSubscription() {
         // Given
-        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user1", NotificationType.INCIDENT);
-        Subscription savedSub = new Subscription(1L, "user1", NotificationType.INCIDENT, true);
-        
-        when(subscriptionRepository.findByUserIdAndNotificationType("user1", NotificationType.INCIDENT))
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user1", NotificationType.ASSIGNMENT);
+        Subscription savedSub = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
+
+        when(subscriptionRepository.findByUserIdAndNotificationType("user1", NotificationType.ASSIGNMENT))
             .thenReturn(Optional.empty());
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(savedSub);
 
@@ -150,8 +150,8 @@ class SubscriptionServiceImplTest {
         // Then
         assertThat(result)
                 .extracting(Subscription::getId, Subscription::getUserId, Subscription::getNotificationType, Subscription::getActive)
-                .containsExactly(1L, "user1", NotificationType.INCIDENT, true);
-        verify(subscriptionRepository, times(1)).findByUserIdAndNotificationType("user1", NotificationType.INCIDENT);
+                .containsExactly(1L, "user1", NotificationType.ASSIGNMENT, true);
+        verify(subscriptionRepository, times(1)).findByUserIdAndNotificationType("user1", NotificationType.ASSIGNMENT);
         verify(subscriptionRepository, times(1)).save(any(Subscription.class));
     }
 
@@ -180,10 +180,10 @@ class SubscriptionServiceImplTest {
     @Test
     void testCreateSubscription_AlreadyActiveDoesNothing() {
         // Given
-        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user3", NotificationType.SYSTEM);
-        Subscription existingSub = new Subscription(10L, "user3", NotificationType.SYSTEM, true);
-        
-        when(subscriptionRepository.findByUserIdAndNotificationType("user3", NotificationType.SYSTEM))
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user3", NotificationType.REMINDER);
+        Subscription existingSub = new Subscription(10L, "user3", NotificationType.REMINDER, true);
+
+        when(subscriptionRepository.findByUserIdAndNotificationType("user3", NotificationType.REMINDER))
             .thenReturn(Optional.of(existingSub));
         when(subscriptionRepository.save(existingSub)).thenReturn(existingSub);
 
@@ -200,7 +200,7 @@ class SubscriptionServiceImplTest {
     @Test
     void testToggleSubscription_ActivateToInactive() {
         // Given
-        Subscription sub = new Subscription(20L, "user1", NotificationType.EVENT, true);
+        Subscription sub = new Subscription(20L, "user1", NotificationType.RESULT, true);
         when(subscriptionRepository.findById(20L)).thenReturn(Optional.of(sub));
         when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(i -> i.getArguments()[0]);
 
@@ -220,7 +220,7 @@ class SubscriptionServiceImplTest {
     @Test
     void testToggleSubscription_InactiveToActive() {
         // Given
-        Subscription sub = new Subscription(21L, "user2", NotificationType.MAINTENANCE, false);
+        Subscription sub = new Subscription(21L, "user2", NotificationType.CANCELLATION, false);
         when(subscriptionRepository.findById(21L)).thenReturn(Optional.of(sub));
         when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(i -> i.getArguments()[0]);
 

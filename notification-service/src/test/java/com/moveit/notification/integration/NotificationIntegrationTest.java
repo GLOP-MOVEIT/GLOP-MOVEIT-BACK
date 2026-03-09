@@ -5,6 +5,7 @@ import com.moveit.notification.dto.NotificationCreateDTO;
 import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,8 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Point 8 - Integration tests with real database (H2)
- * Tests the full application flow end-to-end without mocks
+ * Integration tests with real database (H2)
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -57,6 +57,7 @@ class NotificationIntegrationTest {
         notification.setTitle(title);
         notification.setContent(content);
         notification.setNotificationType(type);
+        notification.setTargetType(TargetType.GLOBAL);
         notification.setCreatedAt(LocalDateTime.now());
         return notificationRepository.save(notification);
     }
@@ -66,20 +67,21 @@ class NotificationIntegrationTest {
         dto.setTitle(title);
         dto.setContent(content);
         dto.setNotificationType(type);
+        dto.setTargetType(TargetType.GLOBAL);
         return dto;
     }
 
     @Test
     @DisplayName("Create notification and retrieve it end-to-end")
     void testCreateAndRetrieveNotification() throws Exception {
-        NotificationCreateDTO createDTO = createDTO("Integration Test", "Content", NotificationType.INCIDENT);
+        NotificationCreateDTO createDTO = createDTO("Integration Test", "Content", NotificationType.ASSIGNMENT);
 
         mockMvc.perform(post("/notifications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDTO)))
-                .andExpect(status().isOk())  // Le controlleur retourne 200
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Integration Test"))
-                .andExpect(jsonPath("$.notificationType").value("INCIDENT"));
+                .andExpect(jsonPath("$.notificationType").value("ASSIGNMENT"));
 
         assertThat(notificationRepository.count()).isEqualTo(1);
     }
@@ -88,7 +90,7 @@ class NotificationIntegrationTest {
     @DisplayName("Retrieve all notifications with pagination")
     void testGetAllNotificationsWithPagination() throws Exception {
         for (int i = 0; i < 15; i++) {
-            createNotification("Notification " + i, "Content " + i, NotificationType.EVENT);
+            createNotification("Notification " + i, "Content " + i, NotificationType.RESULT);
         }
 
         mockMvc.perform(get("/notifications")
@@ -106,7 +108,8 @@ class NotificationIntegrationTest {
         Notification first = new Notification();
         first.setTitle("First");
         first.setContent("Content 1");
-        first.setNotificationType(NotificationType.SYSTEM);
+        first.setNotificationType(NotificationType.REMINDER);
+        first.setTargetType(TargetType.GLOBAL);
         first.setCreatedAt(LocalDateTime.of(2020, 1, 1, 10, 0));
         notificationRepository.save(first);
 
@@ -114,6 +117,7 @@ class NotificationIntegrationTest {
         second.setTitle("Second");
         second.setContent("Content 2");
         second.setNotificationType(NotificationType.ALERT);
+        second.setTargetType(TargetType.GLOBAL);
         second.setCreatedAt(LocalDateTime.of(2025, 1, 1, 10, 0));
         notificationRepository.save(second);
 
@@ -127,7 +131,7 @@ class NotificationIntegrationTest {
     @Test
     @DisplayName("Validation error on empty title")
     void testCreateNotificationWithoutTitle() throws Exception {
-        NotificationCreateDTO createDTO = createDTO("", "Valid content", NotificationType.INCIDENT);
+        NotificationCreateDTO createDTO = createDTO("", "Valid content", NotificationType.ASSIGNMENT);
 
         mockMvc.perform(post("/notifications")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -145,7 +149,7 @@ class NotificationIntegrationTest {
     @Test
     @DisplayName("Update notification with new content")
     void testUpdateNotificationContent() throws Exception {
-        Notification saved = createNotification("Original", "Original Content", NotificationType.INCIDENT);
+        Notification saved = createNotification("Original", "Original Content", NotificationType.ASSIGNMENT);
 
         NotificationUpdateDTO updateDTO = new NotificationUpdateDTO();
         updateDTO.setTitle("Updated Title");
@@ -165,7 +169,7 @@ class NotificationIntegrationTest {
     @Test
     @DisplayName("Delete notification removes it from database")
     void testDeleteNotification() throws Exception {
-        Notification saved = createNotification("To Delete", "Delete me", NotificationType.SYSTEM);
+        Notification saved = createNotification("To Delete", "Delete me", NotificationType.CANCELLATION);
 
         mockMvc.perform(delete("/notifications/" + saved.getId()))
                 .andExpect(status().isNoContent());
@@ -176,14 +180,14 @@ class NotificationIntegrationTest {
     @Test
     @DisplayName("Filter by notification type")
     void testGetNotificationsByType() throws Exception {
-        createNotification("Info Notification", "Info content", NotificationType.EVENT);
-        createNotification("Warning Notification", "Warning content", NotificationType.ALERT);
+        createNotification("Result Notification", "Result content", NotificationType.RESULT);
+        createNotification("Alert Notification", "Alert content", NotificationType.ALERT);
 
         mockMvc.perform(get("/notifications")
-                        .param("type", "EVENT"))
+                        .param("type", "RESULT"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.content[0].notificationType").value("EVENT"));
+                .andExpect(jsonPath("$.content[0].notificationType").value("RESULT"));
     }
 
     @Test

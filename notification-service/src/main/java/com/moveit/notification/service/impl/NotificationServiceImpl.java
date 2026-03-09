@@ -4,6 +4,7 @@ import com.moveit.notification.dto.NotificationCreateDTO;
 import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.repository.NotificationRepository;
 import com.moveit.notification.service.NotificationDispatcherService;
 import com.moveit.notification.service.NotificationService;
@@ -12,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,10 +23,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationDispatcherService dispatcherService;
 
     @Override
-    public Page<Notification> getNotifications(NotificationType type, Long incidentId, Long eventId, Pageable pageable) {
-        // Utilise la query optimisée qui gère tous les cas de filtrage en SQL
-        // Évite de charger toutes les notifications en mémoire
-        return notificationRepository.findByFilters(type, incidentId, eventId, pageable);
+    public Page<Notification> getNotifications(NotificationType type, TargetType targetType, Long targetId, Pageable pageable) {
+        return notificationRepository.findByFilters(type, targetType, targetId, pageable);
     }
 
     @Override
@@ -40,13 +38,11 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setTitle(dto.getTitle());
         notification.setContent(dto.getContent());
         notification.setNotificationType(dto.getNotificationType());
-        notification.setIncidentIds(dto.getIncidentIds());
-        notification.setEventIds(dto.getEventIds());
-        
-        // Save to database
+        notification.setTargetType(dto.getTargetType());
+        notification.setTargetId(dto.getTargetId());
+
         Notification savedNotification = notificationRepository.save(notification);
         
-        // Dispatch notification to subscribed users via WebSocket
         dispatcherService.dispatch(savedNotification);
         
         return savedNotification;
@@ -69,12 +65,6 @@ public class NotificationServiceImpl implements NotificationService {
                     }
                     if (dto.getContent() != null) {
                         notification.setContent(dto.getContent());
-                    }
-                    if (dto.getIncidentIds() != null) {
-                        notification.setIncidentIds(dto.getIncidentIds());
-                    }
-                    if (dto.getEventIds() != null) {
-                        notification.setEventIds(dto.getEventIds());
                     }
                     return notificationRepository.save(notification);
                 });

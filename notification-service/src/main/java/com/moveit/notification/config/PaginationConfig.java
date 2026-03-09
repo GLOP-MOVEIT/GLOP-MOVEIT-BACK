@@ -1,7 +1,6 @@
 package com.moveit.notification.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -9,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
  * Point 10 - Évite les requêtes massives en limitant la taille des pages.
  */
 @Configuration
-@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "pagination")
 public class PaginationConfig {
     

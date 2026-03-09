@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
@@ -17,9 +18,16 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     Optional<Subscription> findByUserIdAndNotificationType(String userId, NotificationType notificationType);
 
     /**
-     * Point P1 - Query optimisée : récupère directement les userIds actifs
-     * Évite de charger toutes les entités Subscription en mémoire
+     * Récupère les userIds actifs pour un type de notification donné.
+     * Utilisé par le dispatcher pour savoir à qui envoyer la notif en temps réel.
      */
     @Query("SELECT s.userId FROM Subscription s WHERE s.notificationType = :type AND s.active = true")
     List<String> findActiveUserIdsByNotificationType(@Param("type") NotificationType type);
+
+    /**
+     * Récupère les types de notification actifs pour un userId donné.
+     * Utilisé à la reconnexion SSE pour filtrer les notifs manquées.
+     */
+    @Query("SELECT s.notificationType FROM Subscription s WHERE s.userId = :userId AND s.active = true")
+    Set<NotificationType> findActiveNotificationTypesByUserId(@Param("userId") String userId);
 }

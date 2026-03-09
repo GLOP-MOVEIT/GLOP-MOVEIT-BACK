@@ -6,18 +6,22 @@ import com.moveit.notification.dto.NotificationResponseDTO;
 import com.moveit.notification.dto.NotificationUpdateDTO;
 import com.moveit.notification.entity.Notification;
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.exception.InvalidPaginationException;
 import com.moveit.notification.exception.InvalidSortFieldException;
 import com.moveit.notification.mapper.NotificationMapper;
 import com.moveit.notification.service.NotificationService;
+import com.moveit.notification.service.SseEmitterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Set;
 
@@ -29,8 +33,8 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
     private final PaginationConfig paginationConfig;
-    
-    // Whitelist des champs autorisés pour le tri (sécurité contre injection SQL)
+    private final SseEmitterService sseEmitterService;
+
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
         "id", "title", "notificationType", "createdAt"
     );
@@ -38,36 +42,30 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<Page<NotificationResponseDTO>> getNotifications(
             @RequestParam(required = false) NotificationType type,
-            @RequestParam(required = false) Long incidentId,
-            @RequestParam(required = false) Long eventId,
+            @RequestParam(required = false) TargetType targetType,
+            @RequestParam(required = false) Long targetId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String direction) {
         
-        // Validation du champ de tri (Point 7 - Sécurité)
         if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
             throw new InvalidSortFieldException(
                 "Invalid sort field: '" + sortBy + "'. Allowed fields: " + ALLOWED_SORT_FIELDS
             );
         }
         
-        // Validation de la pagination (Point 10 - Limites)
         validatePagination(page, size);
         
         Sort.Direction sortDirection = direction.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
         
-        Page<Notification> notifications = notificationService.getNotifications(type, incidentId, eventId, pageable);
+        Page<Notification> notifications = notificationService.getNotifications(type, targetType, targetId, pageable);
         Page<NotificationResponseDTO> response = notifications.map(notificationMapper::toResponseDTO);
         
         return ResponseEntity.ok(response);
     }
     
-    /**
-     * Valide les paramètres de pagination.
-     * Point 10 - Évite les requêtes massives en limitant la taille des pages.
-     */
     private void validatePagination(int page, int size) {
         if (page < 0) {
             throw new InvalidPaginationException("Page number must be >= 0, got: " + page);
@@ -102,6 +100,13 @@ public class NotificationController {
                 .map(notificationMapper::toResponseDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping(value = "/stream/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamNotifications(
+            @PathVariable String userId,
+            @RequestHeader(name = "Last-Event-ID", required = false) Long lastEventId) {
+        return sseEmitterService.subscribe(userId, lastEventId);
     }
 
     @DeleteMapping("/{id}")

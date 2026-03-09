@@ -27,20 +27,23 @@ class NotificationTypeControllerTest {
         mockMvc.perform(get("/notification-types")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
-                .andExpect(jsonPath("$[0]").value("INCIDENT"))
-                .andExpect(jsonPath("$[1]").value("EVENT"))
-                .andExpect(jsonPath("$[2]").value("SYSTEM"))
-                .andExpect(jsonPath("$[3]").value("MAINTENANCE"))
-                .andExpect(jsonPath("$[4]").value("ALERT"));
+                .andExpect(jsonPath("$", hasSize(8)))
+                .andExpect(jsonPath("$[0]").value("ASSIGNMENT"))
+                .andExpect(jsonPath("$[1]").value("RESULT"))
+                .andExpect(jsonPath("$[2]").value("SCHEDULE_CHANGE"))
+                .andExpect(jsonPath("$[3]").value("REGISTRATION"))
+                .andExpect(jsonPath("$[4]").value("CANCELLATION"))
+                .andExpect(jsonPath("$[5]").value("REMINDER"))
+                .andExpect(jsonPath("$[6]").value("START"))
+                .andExpect(jsonPath("$[7]").value("ALERT"));
     }
 
     @Test
     @DisplayName("GET /notification-types/{type} should return specific type")
     void testGetType() throws Exception {
-        mockMvc.perform(get("/notification-types/INCIDENT")
+        mockMvc.perform(get("/notification-types/ASSIGNMENT")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value("INCIDENT"));
+                .andExpect(jsonPath("$").value("ASSIGNMENT"));
     }
 }

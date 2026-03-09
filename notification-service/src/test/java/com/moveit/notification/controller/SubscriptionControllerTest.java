@@ -47,12 +47,12 @@ class SubscriptionControllerTest {
         subscription = new Subscription();
         subscription.setId(1L);
         subscription.setUserId("user123");
-        subscription.setNotificationType(NotificationType.INCIDENT);
+        subscription.setNotificationType(NotificationType.ASSIGNMENT);
         subscription.setActive(true);
 
         createDTO = new SubscriptionCreateDTO();
         createDTO.setUserId("user123");
-        createDTO.setNotificationType(NotificationType.EVENT);
+        createDTO.setNotificationType(NotificationType.RESULT);
     }
 
     @Test
@@ -66,7 +66,7 @@ class SubscriptionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].userId").value("user123"))
-                .andExpect(jsonPath("$[0].notificationType").value("INCIDENT"));
+                .andExpect(jsonPath("$[0].notificationType").value("ASSIGNMENT"));
 
         verify(subscriptionService, times(1)).getSubscriptions(null, null);
     }
@@ -90,15 +90,15 @@ class SubscriptionControllerTest {
     @DisplayName("GET /subscriptions with type filter should return filtered subscriptions")
     void testGetSubscriptionsWithType() throws Exception {
         List<Subscription> subscriptions = Arrays.asList(subscription);
-        when(subscriptionService.getSubscriptions(null, NotificationType.INCIDENT)).thenReturn(subscriptions);
+        when(subscriptionService.getSubscriptions(null, NotificationType.ASSIGNMENT)).thenReturn(subscriptions);
 
         mockMvc.perform(get("/subscriptions")
-                        .param("type", "INCIDENT")
+                        .param("type", "ASSIGNMENT")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].notificationType").value("INCIDENT"));
+                .andExpect(jsonPath("$[0].notificationType").value("ASSIGNMENT"));
 
-        verify(subscriptionService, times(1)).getSubscriptions(null, NotificationType.INCIDENT);
+        verify(subscriptionService, times(1)).getSubscriptions(null, NotificationType.ASSIGNMENT);
     }
 
     @Test
@@ -111,7 +111,7 @@ class SubscriptionControllerTest {
                         .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value("user123"))
-                .andExpect(jsonPath("$.notificationType").value("INCIDENT"));
+                .andExpect(jsonPath("$.notificationType").value("ASSIGNMENT"));
 
         verify(subscriptionService, times(1)).createSubscription(any(SubscriptionCreateDTO.class));
     }

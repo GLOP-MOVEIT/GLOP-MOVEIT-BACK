@@ -1,6 +1,7 @@
 package com.moveit.notification.dto;
 
 import com.moveit.notification.entity.NotificationType;
+import com.moveit.notification.entity.TargetType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -8,12 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * DTO pour créer une notification.
- * Point 5 - Validation des contraintes d'entrée avec min/max pour éviter les données invalides.
  */
 @Data
 @NoArgsConstructor
@@ -30,7 +27,8 @@ public class NotificationCreateDTO {
     @NotNull(message = "Notification type is required")
     private NotificationType notificationType;
 
-    private Set<Long> incidentIds = new HashSet<>();
+    @NotNull(message = "Target type is required")
+    private TargetType targetType = TargetType.GLOBAL;
 
-    private Set<Long> eventIds = new HashSet<>();
+    private Long targetId;
 }
