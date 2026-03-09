@@ -6,6 +6,7 @@ import com.moveit.location.dto.LocationDTO;
 import com.moveit.location.entity.Location;
 import com.moveit.location.mapper.LocationMapper;
 import com.moveit.location.service.LocationService;
+import com.moveit.location.service.LocationLocatorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,14 +20,17 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
+import com.moveit.location.dto.LocateRequest;
+import com.moveit.location.dto.LocateResponse;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/locations")
 @Tag(name = "Lieux", description = "API de gestion des lieux")
 public class LocationController {
-
     private final LocationService locationService;
     private final LocationMapper locationMapper;
+    private final LocationLocatorService locatorService;
 
     @Operation(summary = "Récupérer tous les lieux")
     @ApiResponses(value = {
@@ -91,5 +95,19 @@ public class LocationController {
     public ResponseEntity<Void> deleteLocation(@PathVariable Integer id) {
         locationService.deleteLocation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Localiser un utilisateur (spectateur ou athlète)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Position renvoyée", content = @Content(schema = @Schema(implementation = LocateResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate")
+    public ResponseEntity<LocateResponse> locateUser(@RequestBody LocateRequest request,
+                                                     @RequestHeader(value = "Authorization", required = false) String authorization) {
+        LocateResponse response = locatorService.locate(request, authorization);
+        return ResponseEntity.ok(response);
     }
 }
