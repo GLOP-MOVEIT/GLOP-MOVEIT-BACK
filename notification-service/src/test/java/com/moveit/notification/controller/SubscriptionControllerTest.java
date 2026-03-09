@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.notification.dto.SubscriptionCreateDTO;
 import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.entity.Subscription;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.service.SubscriptionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,34 +48,37 @@ class SubscriptionControllerTest {
         subscription.setId(1L);
         subscription.setUserId("user123");
         subscription.setNotificationType(NotificationType.ASSIGNMENT);
+        subscription.setTargetType(TargetType.GLOBAL);
+        subscription.setTargetId(null);
         subscription.setActive(true);
 
         createDTO = new SubscriptionCreateDTO();
         createDTO.setUserId("user123");
         createDTO.setNotificationType(NotificationType.RESULT);
+        createDTO.setTargetType(TargetType.GLOBAL);
+        createDTO.setTargetId(null);
     }
 
     @Test
     @DisplayName("GET /subscriptions should return all subscriptions")
     void testGetSubscriptions() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(subscription);
-        when(subscriptionService.getSubscriptions(null, null)).thenReturn(subscriptions);
+        when(subscriptionService.getSubscriptions(null, null)).thenReturn(List.of(subscription));
 
         mockMvc.perform(get("/subscriptions")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].userId").value("user123"))
-                .andExpect(jsonPath("$[0].notificationType").value("ASSIGNMENT"));
+                .andExpect(jsonPath("$[0].notificationType").value("ASSIGNMENT"))
+                .andExpect(jsonPath("$[0].targetType").value("GLOBAL"));
 
-        verify(subscriptionService, times(1)).getSubscriptions(null, null);
+        verify(subscriptionService).getSubscriptions(null, null);
     }
 
     @Test
-    @DisplayName("GET /subscriptions with userId filter should return filtered subscriptions")
+    @DisplayName("GET /subscriptions with userId filter")
     void testGetSubscriptionsWithUserId() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(subscription);
-        when(subscriptionService.getSubscriptions("user123", null)).thenReturn(subscriptions);
+        when(subscriptionService.getSubscriptions("user123", null)).thenReturn(List.of(subscription));
 
         mockMvc.perform(get("/subscriptions")
                         .param("userId", "user123")
@@ -83,14 +86,13 @@ class SubscriptionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].userId").value("user123"));
 
-        verify(subscriptionService, times(1)).getSubscriptions("user123", null);
+        verify(subscriptionService).getSubscriptions("user123", null);
     }
 
     @Test
-    @DisplayName("GET /subscriptions with type filter should return filtered subscriptions")
+    @DisplayName("GET /subscriptions with type filter")
     void testGetSubscriptionsWithType() throws Exception {
-        List<Subscription> subscriptions = Arrays.asList(subscription);
-        when(subscriptionService.getSubscriptions(null, NotificationType.ASSIGNMENT)).thenReturn(subscriptions);
+        when(subscriptionService.getSubscriptions(null, NotificationType.ASSIGNMENT)).thenReturn(List.of(subscription));
 
         mockMvc.perform(get("/subscriptions")
                         .param("type", "ASSIGNMENT")
@@ -98,7 +100,33 @@ class SubscriptionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].notificationType").value("ASSIGNMENT"));
 
-        verify(subscriptionService, times(1)).getSubscriptions(null, NotificationType.ASSIGNMENT);
+        verify(subscriptionService).getSubscriptions(null, NotificationType.ASSIGNMENT);
+    }
+
+    @Test
+    @DisplayName("GET /subscriptions/{id} should return subscription when found")
+    void testGetSubscriptionById_Found() throws Exception {
+        when(subscriptionService.getSubscriptionById(1L)).thenReturn(Optional.of(subscription));
+
+        mockMvc.perform(get("/subscriptions/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.userId").value("user123"));
+
+        verify(subscriptionService).getSubscriptionById(1L);
+    }
+
+    @Test
+    @DisplayName("GET /subscriptions/{id} should return 404 when not found")
+    void testGetSubscriptionById_NotFound() throws Exception {
+        when(subscriptionService.getSubscriptionById(999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/subscriptions/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(subscriptionService).getSubscriptionById(999L);
     }
 
     @Test
@@ -113,7 +141,7 @@ class SubscriptionControllerTest {
                 .andExpect(jsonPath("$.userId").value("user123"))
                 .andExpect(jsonPath("$.notificationType").value("ASSIGNMENT"));
 
-        verify(subscriptionService, times(1)).createSubscription(any(SubscriptionCreateDTO.class));
+        verify(subscriptionService).createSubscription(any(SubscriptionCreateDTO.class));
     }
 
     @Test
@@ -127,7 +155,7 @@ class SubscriptionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
 
-        verify(subscriptionService, times(1)).toggleSubscription(1L);
+        verify(subscriptionService).toggleSubscription(1L);
     }
 
     @Test
@@ -139,7 +167,7 @@ class SubscriptionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
 
-        verify(subscriptionService, times(1)).toggleSubscription(999L);
+        verify(subscriptionService).toggleSubscription(999L);
     }
 
     @Test
@@ -151,7 +179,7 @@ class SubscriptionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(subscriptionService, times(1)).deleteSubscription(1L);
+        verify(subscriptionService).deleteSubscription(1L);
     }
 }
 

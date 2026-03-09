@@ -31,7 +31,7 @@ class NotificationServiceImplTest {
     private NotificationRepository notificationRepository;
 
     @Mock
-    private NotificationDispatcherService dispatcherService;
+    private SseEmitterService sseEmitterService;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;

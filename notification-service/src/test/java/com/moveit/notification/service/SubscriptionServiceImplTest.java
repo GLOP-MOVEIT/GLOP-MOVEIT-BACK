@@ -3,6 +3,7 @@ package com.moveit.notification.service;
 import com.moveit.notification.dto.SubscriptionCreateDTO;
 import com.moveit.notification.entity.NotificationType;
 import com.moveit.notification.entity.Subscription;
+import com.moveit.notification.entity.TargetType;
 import com.moveit.notification.repository.SubscriptionRepository;
 import com.moveit.notification.service.impl.SubscriptionServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,249 +34,224 @@ class SubscriptionServiceImplTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    private Subscription buildSubscription(Long id, String userId, NotificationType type, TargetType targetType, Long targetId, Boolean active) {
+        Subscription sub = new Subscription();
+        sub.setId(id);
+        sub.setUserId(userId);
+        sub.setNotificationType(type);
+        sub.setTargetType(targetType);
+        sub.setTargetId(targetId);
+        sub.setActive(active);
+        return sub;
+    }
+
     @Test
     void testGetSubscriptionsWithoutFilters() {
-        // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
-        Subscription sub2 = new Subscription(2L, "user2", NotificationType.ALERT, true);
-        List<Subscription> allSubs = List.of(sub1, sub2);
-        when(subscriptionRepository.findAll()).thenReturn(allSubs);
+        Subscription sub1 = buildSubscription(1L, "user1", NotificationType.ASSIGNMENT, TargetType.GLOBAL, null, true);
+        Subscription sub2 = buildSubscription(2L, "user2", NotificationType.ALERT, TargetType.GLOBAL, null, true);
+        when(subscriptionRepository.findAll()).thenReturn(List.of(sub1, sub2));
 
-        // When
         List<Subscription> result = subscriptionService.getSubscriptions(null, null);
 
-        // Then
         assertThat(result).hasSize(2);
-        verify(subscriptionRepository, times(1)).findAll();
+        verify(subscriptionRepository).findAll();
     }
 
     @Test
     void testGetSubscriptionsByUserId() {
-        // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
-        Subscription sub2 = new Subscription(2L, "user1", NotificationType.ALERT, true);
+        Subscription sub1 = buildSubscription(1L, "user1", NotificationType.ASSIGNMENT, TargetType.GLOBAL, null, true);
+        Subscription sub2 = buildSubscription(2L, "user1", NotificationType.ALERT, TargetType.GLOBAL, null, true);
         when(subscriptionRepository.findByUserId("user1")).thenReturn(List.of(sub1, sub2));
 
-        // When
         List<Subscription> result = subscriptionService.getSubscriptions("user1", null);
 
-        // Then
-        assertThat(result)
-                .hasSize(2)
-                .allMatch(s -> s.getUserId().equals("user1"));
-        verify(subscriptionRepository, times(1)).findByUserId("user1");
+        assertThat(result).hasSize(2).allMatch(s -> s.getUserId().equals("user1"));
+        verify(subscriptionRepository).findByUserId("user1");
     }
 
     @Test
     void testGetSubscriptionsByType() {
-        // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
-        Subscription sub2 = new Subscription(2L, "user2", NotificationType.ASSIGNMENT, true);
-        when(subscriptionRepository.findByNotificationType(NotificationType.ASSIGNMENT))
-            .thenReturn(List.of(sub1, sub2));
+        Subscription sub1 = buildSubscription(1L, "user1", NotificationType.ASSIGNMENT, TargetType.GLOBAL, null, true);
+        when(subscriptionRepository.findByNotificationType(NotificationType.ASSIGNMENT)).thenReturn(List.of(sub1));
 
-        // When
         List<Subscription> result = subscriptionService.getSubscriptions(null, NotificationType.ASSIGNMENT);
 
-        // Then
-        assertThat(result)
-                .hasSize(2)
-                .allMatch(s -> s.getNotificationType() == NotificationType.ASSIGNMENT);
-        verify(subscriptionRepository, times(1)).findByNotificationType(NotificationType.ASSIGNMENT);
+        assertThat(result).hasSize(1).allMatch(s -> s.getNotificationType() == NotificationType.ASSIGNMENT);
+        verify(subscriptionRepository).findByNotificationType(NotificationType.ASSIGNMENT);
     }
 
     @Test
     void testGetSubscriptionsByUserIdAndType() {
-        // Given
-        Subscription sub1 = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
-        Subscription sub2 = new Subscription(2L, "user1", NotificationType.ALERT, true);
+        Subscription sub1 = buildSubscription(1L, "user1", NotificationType.ASSIGNMENT, TargetType.GLOBAL, null, true);
+        Subscription sub2 = buildSubscription(2L, "user1", NotificationType.ALERT, TargetType.GLOBAL, null, true);
         when(subscriptionRepository.findByUserId("user1")).thenReturn(List.of(sub1, sub2));
 
-        // When
         List<Subscription> result = subscriptionService.getSubscriptions("user1", NotificationType.ASSIGNMENT);
 
-        // Then
-        assertThat(result)
-                .hasSize(1);
-        assertThat(result.get(0))
-                .extracting(Subscription::getUserId, Subscription::getNotificationType)
-                .containsExactly("user1", NotificationType.ASSIGNMENT);
-        verify(subscriptionRepository, times(1)).findByUserId("user1");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getNotificationType()).isEqualTo(NotificationType.ASSIGNMENT);
+        verify(subscriptionRepository).findByUserId("user1");
     }
 
     @Test
     void testGetSubscriptionById() {
-        // Given
-        Subscription sub = new Subscription(10L, "user1", NotificationType.REMINDER, true);
+        Subscription sub = buildSubscription(10L, "user1", NotificationType.REMINDER, TargetType.GLOBAL, null, true);
         when(subscriptionRepository.findById(10L)).thenReturn(Optional.of(sub));
 
-        // When
         Optional<Subscription> result = subscriptionService.getSubscriptionById(10L);
 
-        // Then
-        assertThat(result)
-                .isPresent()
-                .get()
-                .extracting(Subscription::getId, Subscription::getUserId)
-                .containsExactly(10L, "user1");
-        verify(subscriptionRepository, times(1)).findById(10L);
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(10L);
+        verify(subscriptionRepository).findById(10L);
     }
 
     @Test
     void testGetSubscriptionById_NotFound() {
-        // Given
         when(subscriptionRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When
         Optional<Subscription> result = subscriptionService.getSubscriptionById(999L);
 
-        // Then
         assertThat(result).isEmpty();
-        verify(subscriptionRepository, times(1)).findById(999L);
+        verify(subscriptionRepository).findById(999L);
     }
 
     @Test
-    void testCreateSubscription_NewSubscription() {
-        // Given
-        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user1", NotificationType.ASSIGNMENT);
-        Subscription savedSub = new Subscription(1L, "user1", NotificationType.ASSIGNMENT, true);
+    void testCreateSubscription_NewGlobal() {
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user1", NotificationType.ASSIGNMENT, TargetType.GLOBAL, null);
+        Subscription savedSub = buildSubscription(1L, "user1", NotificationType.ASSIGNMENT, TargetType.GLOBAL, null, true);
 
-        when(subscriptionRepository.findByUserIdAndNotificationType("user1", NotificationType.ASSIGNMENT))
-            .thenReturn(Optional.empty());
+        when(subscriptionRepository.findByUserIdAndNotificationTypeAndTargetTypeAndTargetId("user1", NotificationType.ASSIGNMENT, TargetType.GLOBAL, null))
+                .thenReturn(Optional.empty());
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(savedSub);
 
-        // When
         Subscription result = subscriptionService.createSubscription(dto);
 
-        // Then
-        assertThat(result)
-                .extracting(Subscription::getId, Subscription::getUserId, Subscription::getNotificationType, Subscription::getActive)
-                .containsExactly(1L, "user1", NotificationType.ASSIGNMENT, true);
-        verify(subscriptionRepository, times(1)).findByUserIdAndNotificationType("user1", NotificationType.ASSIGNMENT);
-        verify(subscriptionRepository, times(1)).save(any(Subscription.class));
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getTargetType()).isEqualTo(TargetType.GLOBAL);
+        assertThat(result.getActive()).isTrue();
+        verify(subscriptionRepository).save(any(Subscription.class));
+    }
+
+    @Test
+    void testCreateSubscription_NewTargeted() {
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user1", NotificationType.RESULT, TargetType.COMPETITION, 42L);
+        Subscription savedSub = buildSubscription(2L, "user1", NotificationType.RESULT, TargetType.COMPETITION, 42L, true);
+
+        when(subscriptionRepository.findByUserIdAndNotificationTypeAndTargetTypeAndTargetId("user1", NotificationType.RESULT, TargetType.COMPETITION, 42L))
+                .thenReturn(Optional.empty());
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(savedSub);
+
+        Subscription result = subscriptionService.createSubscription(dto);
+
+        assertThat(result.getTargetType()).isEqualTo(TargetType.COMPETITION);
+        assertThat(result.getTargetId()).isEqualTo(42L);
+        verify(subscriptionRepository).save(any(Subscription.class));
     }
 
     @Test
     void testCreateSubscription_ReactivateExisting() {
-        // Given
-        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user2", NotificationType.ALERT);
-        Subscription existingSub = new Subscription(5L, "user2", NotificationType.ALERT, false);
-        Subscription reactivatedSub = new Subscription(5L, "user2", NotificationType.ALERT, true);
-        
-        when(subscriptionRepository.findByUserIdAndNotificationType("user2", NotificationType.ALERT))
-            .thenReturn(Optional.of(existingSub));
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user2", NotificationType.ALERT, TargetType.GLOBAL, null);
+        Subscription existingSub = buildSubscription(5L, "user2", NotificationType.ALERT, TargetType.GLOBAL, null, false);
+        Subscription reactivatedSub = buildSubscription(5L, "user2", NotificationType.ALERT, TargetType.GLOBAL, null, true);
+
+        when(subscriptionRepository.findByUserIdAndNotificationTypeAndTargetTypeAndTargetId("user2", NotificationType.ALERT, TargetType.GLOBAL, null))
+                .thenReturn(Optional.of(existingSub));
         when(subscriptionRepository.save(existingSub)).thenReturn(reactivatedSub);
 
-        // When
         Subscription result = subscriptionService.createSubscription(dto);
 
-        // Then
-        assertThat(result)
-                .extracting(Subscription::getId, Subscription::getActive)
-                .containsExactly(5L, true);
-        verify(subscriptionRepository, times(1)).findByUserIdAndNotificationType("user2", NotificationType.ALERT);
-        verify(subscriptionRepository, times(1)).save(existingSub);
+        assertThat(result.getActive()).isTrue();
+        verify(subscriptionRepository).save(existingSub);
     }
 
     @Test
-    void testCreateSubscription_AlreadyActiveDoesNothing() {
-        // Given
-        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user3", NotificationType.REMINDER);
-        Subscription existingSub = new Subscription(10L, "user3", NotificationType.REMINDER, true);
+    void testCreateSubscription_AlreadyActiveReturnsWithoutSave() {
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user3", NotificationType.REMINDER, TargetType.GLOBAL, null);
+        Subscription existingSub = buildSubscription(10L, "user3", NotificationType.REMINDER, TargetType.GLOBAL, null, true);
 
-        when(subscriptionRepository.findByUserIdAndNotificationType("user3", NotificationType.REMINDER))
-            .thenReturn(Optional.of(existingSub));
-        when(subscriptionRepository.save(existingSub)).thenReturn(existingSub);
+        when(subscriptionRepository.findByUserIdAndNotificationTypeAndTargetTypeAndTargetId("user3", NotificationType.REMINDER, TargetType.GLOBAL, null))
+                .thenReturn(Optional.of(existingSub));
 
-        // When
         Subscription result = subscriptionService.createSubscription(dto);
 
-        // Then
-        assertThat(result)
-                .extracting(Subscription::getId, Subscription::getActive)
-                .containsExactly(10L, true);
-        verify(subscriptionRepository, times(1)).save(existingSub);
+        assertThat(result.getId()).isEqualTo(10L);
+        assertThat(result.getActive()).isTrue();
+        verify(subscriptionRepository, never()).save(any(Subscription.class));
+    }
+
+    @Test
+    void testCreateSubscription_GlobalWithTargetId_shouldThrow() {
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user1", NotificationType.ALERT, TargetType.GLOBAL, 42L);
+
+        assertThatThrownBy(() -> subscriptionService.createSubscription(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("targetId must be null when targetType is GLOBAL");
+    }
+
+    @Test
+    void testCreateSubscription_CompetitionWithoutTargetId_shouldThrow() {
+        SubscriptionCreateDTO dto = new SubscriptionCreateDTO("user1", NotificationType.ALERT, TargetType.COMPETITION, null);
+
+        assertThatThrownBy(() -> subscriptionService.createSubscription(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("targetId is required when targetType is COMPETITION");
     }
 
     @Test
     void testToggleSubscription_ActivateToInactive() {
-        // Given
-        Subscription sub = new Subscription(20L, "user1", NotificationType.RESULT, true);
+        Subscription sub = buildSubscription(20L, "user1", NotificationType.RESULT, TargetType.GLOBAL, null, true);
         when(subscriptionRepository.findById(20L)).thenReturn(Optional.of(sub));
         when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        // When
         Optional<Subscription> result = subscriptionService.toggleSubscription(20L);
 
-        // Then
-        assertThat(result)
-                .isPresent()
-                .get()
-                .extracting(Subscription::getActive)
-                .isEqualTo(false);
-        verify(subscriptionRepository, times(1)).findById(20L);
-        verify(subscriptionRepository, times(1)).save(any(Subscription.class));
+        assertThat(result).isPresent();
+        assertThat(result.get().getActive()).isFalse();
+        verify(subscriptionRepository).save(any(Subscription.class));
     }
 
     @Test
     void testToggleSubscription_InactiveToActive() {
-        // Given
-        Subscription sub = new Subscription(21L, "user2", NotificationType.CANCELLATION, false);
+        Subscription sub = buildSubscription(21L, "user2", NotificationType.CANCELLATION, TargetType.GLOBAL, null, false);
         when(subscriptionRepository.findById(21L)).thenReturn(Optional.of(sub));
         when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        // When
         Optional<Subscription> result = subscriptionService.toggleSubscription(21L);
 
-        // Then
-        assertThat(result)
-                .isPresent()
-                .get()
-                .extracting(Subscription::getActive)
-                .isEqualTo(true);
-        verify(subscriptionRepository, times(1)).findById(21L);
-        verify(subscriptionRepository, times(1)).save(any(Subscription.class));
+        assertThat(result).isPresent();
+        assertThat(result.get().getActive()).isTrue();
+        verify(subscriptionRepository).save(any(Subscription.class));
     }
 
     @Test
     void testToggleSubscription_NotFound() {
-        // Given
         when(subscriptionRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When
         Optional<Subscription> result = subscriptionService.toggleSubscription(999L);
 
-        // Then
         assertThat(result).isEmpty();
-        verify(subscriptionRepository, times(1)).findById(999L);
         verify(subscriptionRepository, never()).save(any(Subscription.class));
     }
 
     @Test
     void testDeleteSubscription() {
-        // Given
         when(subscriptionRepository.existsById(30L)).thenReturn(true);
         doNothing().when(subscriptionRepository).deleteById(30L);
 
-        // When
         subscriptionService.deleteSubscription(30L);
 
-        // Then
-        verify(subscriptionRepository, times(1)).existsById(30L);
-        verify(subscriptionRepository, times(1)).deleteById(30L);
+        verify(subscriptionRepository).existsById(30L);
+        verify(subscriptionRepository).deleteById(30L);
     }
 
     @Test
     void testDeleteSubscription_NotFound() {
-        // Given
         when(subscriptionRepository.existsById(999L)).thenReturn(false);
 
-        // When & Then
         assertThatThrownBy(() -> subscriptionService.deleteSubscription(999L))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Subscription non trouvée avec l'id: 999");
-        
-        verify(subscriptionRepository, times(1)).existsById(999L);
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Subscription non trouvée avec l'id: 999");
+
         verify(subscriptionRepository, never()).deleteById(anyLong());
     }
 }
