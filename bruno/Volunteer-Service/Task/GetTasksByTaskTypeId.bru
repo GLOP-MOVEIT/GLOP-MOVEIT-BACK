@@ -1,0 +1,15 @@
+meta {
+  name: GetTasksByTaskTypeId
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{URL}}/volunteer/tasks/type/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
