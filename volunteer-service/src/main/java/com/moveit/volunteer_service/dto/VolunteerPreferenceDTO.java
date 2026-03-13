@@ -12,5 +12,4 @@ public class VolunteerPreferenceDTO {
     private Long userId;
     private Long taskTypeId;
     private Integer preferenceOrder;
-    private String notes;
 }

@@ -78,7 +78,7 @@ class VolunteerPreferenceControllerTest {
     @Test
     @DisplayName("Should create a preference and return 201")
     void shouldCreatePreference() throws Exception {
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1, null);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1);
         var saved = VolunteerPreferenceMother.defaultPreference();
         when(volunteerPreferenceService.createPreference(any(CreateVolunteerPreferenceRequest.class)))
                 .thenReturn(saved);
@@ -93,7 +93,7 @@ class VolunteerPreferenceControllerTest {
     @Test
     @DisplayName("Should update a preference")
     void shouldUpdatePreference() throws Exception {
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 2, null);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 2);
         var updated = VolunteerPreferenceMother.defaultPreference();
         updated.setPreferenceOrder(2);
         when(volunteerPreferenceService.updatePreference(eq(1L), any(CreateVolunteerPreferenceRequest.class)))

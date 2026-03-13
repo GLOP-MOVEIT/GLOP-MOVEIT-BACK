@@ -14,8 +14,7 @@ public class VolunteerPreferenceMapper {
                 entity.getId(),
                 entity.getUserId(),
                 entity.getTaskType().getId(),
-                entity.getPreferenceOrder(),
-                null
+            entity.getPreferenceOrder()
         );
     }
 

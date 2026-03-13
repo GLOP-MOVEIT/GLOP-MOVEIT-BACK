@@ -73,7 +73,7 @@ class VolunteerPreferenceServiceTest {
     @DisplayName("Should create a preference")
     void shouldCreatePreference() {
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1, null);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1);
         var saved = VolunteerPreferenceMother.defaultPreference();
 
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
@@ -91,7 +91,7 @@ class VolunteerPreferenceServiceTest {
     void shouldThrowExceptionWhenCreatingDuplicatePreference() {
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
         var existing = VolunteerPreferenceMother.defaultPreference();
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1, null);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1);
 
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
         when(volunteerPreferenceRepository.findByUserIdAndTaskType_Id(10L, 1L)).thenReturn(Optional.of(existing));
@@ -104,7 +104,7 @@ class VolunteerPreferenceServiceTest {
     @Test
     @DisplayName("Should throw exception when creating preference with non-existing task type")
     void shouldThrowExceptionWhenCreatingPreferenceWithNonExistingType() {
-        var request = new CreateVolunteerPreferenceRequest(10L, 99L, 1, null);
+        var request = new CreateVolunteerPreferenceRequest(10L, 99L, 1);
         when(volunteerTaskTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> volunteerPreferenceService.createPreference(request))
@@ -116,7 +116,7 @@ class VolunteerPreferenceServiceTest {
     void shouldUpdatePreference() {
         var existing = VolunteerPreferenceMother.defaultPreference();
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 2, null);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 2);
 
         when(volunteerPreferenceRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
