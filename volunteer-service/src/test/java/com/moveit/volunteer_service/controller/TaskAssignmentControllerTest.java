@@ -3,7 +3,6 @@ package com.moveit.volunteer_service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
-import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
 import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.dto.VolunteerIdsRequest;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
@@ -135,27 +134,12 @@ class TaskAssignmentControllerTest {
     }
 
     @Test
-    @DisplayName("Should update assignment status")
-    void shouldUpdateAssignmentStatus() throws Exception {
-        var request = new UpdateTaskAssignmentStatusRequest(AssignmentStatus.ACCEPTED, "Validé");
-        var updated = TaskAssignmentMother.defaultAssignment();
-        updated.setStatus(AssignmentStatus.ACCEPTED);
-        when(taskAssignmentService.updateAssignmentStatus(eq(1L), any(UpdateTaskAssignmentStatusRequest.class)))
-                .thenReturn(updated);
-
-        mockMvc.perform(patch("/volunteer/assignments/1/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", equalTo("ACCEPTED")));
-    }
-
-    @Test
     @DisplayName("Volunteer should respond to assignment")
     void shouldRespondToAssignment() throws Exception {
-        var request = new VolunteerAssignmentResponseRequest(10L, AssignmentStatus.REFUSED, "Je refuse la tâche");
+        var request = new VolunteerAssignmentResponseRequest(10L, AssignmentStatus.REFUSED, "Je ne suis pas disponible");
         var updated = TaskAssignmentMother.defaultAssignment();
         updated.setStatus(AssignmentStatus.REFUSED);
+        updated.setComment("Je ne suis pas disponible");
         when(taskAssignmentService.respondToAssignment(eq(1L), any(VolunteerAssignmentResponseRequest.class)))
                 .thenReturn(updated);
 
@@ -164,7 +148,8 @@ class TaskAssignmentControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo("REFUSED")))
-                .andExpect(jsonPath("$.volunteerId", equalTo(10)));
+                .andExpect(jsonPath("$.volunteerId", equalTo(10)))
+                .andExpect(jsonPath("$.comment", equalTo("Je ne suis pas disponible")));
     }
 
     @Test

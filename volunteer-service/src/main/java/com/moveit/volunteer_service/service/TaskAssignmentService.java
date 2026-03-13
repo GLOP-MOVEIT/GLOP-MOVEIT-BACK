@@ -1,7 +1,6 @@
 package com.moveit.volunteer_service.service;
 
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
-import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
 import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.entity.TaskAssignment;
 import com.moveit.volunteer_service.entity.VolunteerTask;
@@ -123,16 +122,6 @@ public class TaskAssignmentService {
         }
 
         return firstStart.isBefore(secondEnd) && firstEnd.isAfter(secondStart);
-    }
-
-    public TaskAssignment updateAssignmentStatus(Long id, UpdateTaskAssignmentStatusRequest request) {
-        TaskAssignment existing = taskAssignmentRepository.findById(id)
-                .orElseThrow(() -> new TaskAssignmentNotFoundException(id));
-        existing.setStatus(request.getStatus());
-        if (request.getComment() != null) {
-            existing.setComment(request.getComment());
-        }
-        return taskAssignmentRepository.save(existing);
     }
 
     public TaskAssignment respondToAssignment(Long id, VolunteerAssignmentResponseRequest request) {

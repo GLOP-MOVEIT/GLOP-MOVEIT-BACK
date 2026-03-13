@@ -1,7 +1,6 @@
 package com.moveit.volunteer_service.service;
 
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
-import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
 import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.entity.TaskAssignment;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
@@ -213,20 +212,6 @@ class TaskAssignmentServiceTest {
     }
 
     @Test
-    @DisplayName("Should update assignment status")
-    void shouldUpdateAssignmentStatus() {
-        var existing = TaskAssignmentMother.defaultAssignment();
-        var request = new UpdateTaskAssignmentStatusRequest(AssignmentStatus.ACCEPTED, "Accepted");
-
-        when(taskAssignmentRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(taskAssignmentRepository.save(any(TaskAssignment.class))).thenReturn(existing);
-
-        var result = taskAssignmentService.updateAssignmentStatus(1L, request);
-
-        assertThat(result.getStatus()).isEqualTo(AssignmentStatus.ACCEPTED);
-    }
-
-    @Test
     @DisplayName("Volunteer should be able to refuse assignment")
     void volunteerShouldRefuseAssignment() {
         var existing = TaskAssignmentMother.defaultAssignment();
@@ -238,6 +223,7 @@ class TaskAssignmentServiceTest {
         var result = taskAssignmentService.respondToAssignment(1L, request);
 
         assertThat(result.getStatus()).isEqualTo(AssignmentStatus.REFUSED);
+        assertThat(result.getComment()).isEqualTo("Je ne suis pas disponible");
         verify(taskAssignmentRepository).save(existing);
     }
 
@@ -245,7 +231,7 @@ class TaskAssignmentServiceTest {
     @DisplayName("Should reject volunteer response for another volunteer")
     void shouldRejectVolunteerResponseForAnotherVolunteer() {
         var existing = TaskAssignmentMother.defaultAssignment();
-        var request = new VolunteerAssignmentResponseRequest(99L, AssignmentStatus.REFUSED, "No");
+        var request = new VolunteerAssignmentResponseRequest(99L, AssignmentStatus.REFUSED, null);
 
         when(taskAssignmentRepository.findById(1L)).thenReturn(Optional.of(existing));
 
@@ -258,7 +244,7 @@ class TaskAssignmentServiceTest {
     @DisplayName("Should reject volunteer response with pending status")
     void shouldRejectVolunteerResponseWithPendingStatus() {
         var existing = TaskAssignmentMother.defaultAssignment();
-        var request = new VolunteerAssignmentResponseRequest(10L, AssignmentStatus.PENDING, "No");
+        var request = new VolunteerAssignmentResponseRequest(10L, AssignmentStatus.PENDING, null);
 
         when(taskAssignmentRepository.findById(1L)).thenReturn(Optional.of(existing));
 

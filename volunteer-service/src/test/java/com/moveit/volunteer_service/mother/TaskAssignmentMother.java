@@ -15,7 +15,7 @@ public class TaskAssignmentMother {
         assignment.setVolunteerId(10L);
         assignment.setTask(VolunteerTaskMother.defaultTask());
         assignment.setStatus(AssignmentStatus.PENDING);
-        assignment.setComment("Disponible toute la journée");
+        assignment.setComment(null);
         assignment.setAssignedAt(LocalDateTime.now());
         assignment.setUpdatedAt(LocalDateTime.now());
         return assignment;

@@ -3,7 +3,6 @@ package com.moveit.volunteer_service.controller;
 import org.springframework.web.bind.annotation.*;
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
 import com.moveit.volunteer_service.dto.TaskAssignmentDTO;
-import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
 import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.dto.VolunteerIdsRequest;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
@@ -63,14 +62,6 @@ public class TaskAssignmentController {
             @Valid @RequestBody CreateTaskAssignmentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 TaskAssignmentMapper.toDTO(taskAssignmentService.createAssignment(request)));
-    }
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<TaskAssignmentDTO> updateAssignmentStatus(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateTaskAssignmentStatusRequest request) {
-        return ResponseEntity.ok(
-                TaskAssignmentMapper.toDTO(taskAssignmentService.updateAssignmentStatus(id, request)));
     }
 
     @PatchMapping("/{id}/volunteer-response")
