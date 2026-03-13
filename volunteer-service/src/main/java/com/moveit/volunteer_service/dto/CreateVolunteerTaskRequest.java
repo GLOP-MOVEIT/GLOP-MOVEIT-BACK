@@ -1,5 +1,6 @@
 package com.moveit.volunteer_service.dto;
 
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,7 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateVolunteerTaskRequest {
-    private Long eventlId;
+    @NotNull
+    private TaskTargetType targetType;
+
+    @NotNull
+    private Long targetId;
+
     @NotBlank
     private String title;
     private String description;

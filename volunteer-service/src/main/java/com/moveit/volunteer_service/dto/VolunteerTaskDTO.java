@@ -1,6 +1,7 @@
 package com.moveit.volunteer_service.dto;
 
 import com.moveit.volunteer_service.enums.TaskStatus;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class VolunteerTaskDTO {
     private Long id;
-    private Long championshipId;
+    private TaskTargetType targetType;
+    private Long targetId;
     private String title;
     private String description;
     private Long taskTypeId;

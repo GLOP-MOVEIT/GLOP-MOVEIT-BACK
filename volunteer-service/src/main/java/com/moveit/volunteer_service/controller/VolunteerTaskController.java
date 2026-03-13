@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
 import com.moveit.volunteer_service.dto.VolunteerTaskDTO;
 import com.moveit.volunteer_service.enums.TaskStatus;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import com.moveit.volunteer_service.mapper.VolunteerTaskMapper;
 import com.moveit.volunteer_service.service.VolunteerTaskService;
 import jakarta.validation.Valid;
@@ -32,11 +33,12 @@ public class VolunteerTaskController {
                 VolunteerTaskMapper.toDTO(volunteerTaskService.getTaskById(id)));
     }
 
-    @GetMapping("/championship/{championshipId}")
-    public ResponseEntity<List<VolunteerTaskDTO>> getTasksByChampionshipId(
-            @PathVariable Long championshipId) {
+    @GetMapping("/target/{targetType}/{targetId}")
+    public ResponseEntity<List<VolunteerTaskDTO>> getTasksByTarget(
+            @PathVariable TaskTargetType targetType,
+            @PathVariable Long targetId) {
         return ResponseEntity.ok(
-                VolunteerTaskMapper.toDTOList(volunteerTaskService.getTasksByChampionshipId(championshipId)));
+                VolunteerTaskMapper.toDTOList(volunteerTaskService.getTasksByTarget(targetType, targetId)));
     }
 
     @GetMapping("/type/{taskTypeId}")

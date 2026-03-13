@@ -1,6 +1,7 @@
 package com.moveit.volunteer_service.repository;
 
 import com.moveit.volunteer_service.entity.VolunteerTask;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
@@ -9,5 +10,5 @@ import java.util.List;
 public interface VolunteerTaskRepository extends JpaRepository<VolunteerTask, Long> {
 	List<VolunteerTask> findByTaskType_Id(Long taskTypeId);
 	List<VolunteerTask> findByStartDateBetween(LocalDateTime start, LocalDateTime end);
-	List<VolunteerTask> findByChampionshipId(Long championshipId);
+	List<VolunteerTask> findByTargetTypeAndTargetId(TaskTargetType targetType, Long targetId);
 }

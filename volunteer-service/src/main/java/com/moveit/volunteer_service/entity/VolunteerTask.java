@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.moveit.volunteer_service.enums.TaskStatus;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,8 +22,12 @@ public class VolunteerTask {
     private Long id;
 
 
-    @Column(name = "championship_id")
-    private Long championshipId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_type")
+    private TaskTargetType targetType;
+
+    @Column(name = "target_id")
+    private Long targetId;
 
     @Column(nullable = false)
     private String title;

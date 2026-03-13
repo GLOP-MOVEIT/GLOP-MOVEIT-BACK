@@ -4,6 +4,7 @@ import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
 import com.moveit.volunteer_service.entity.VolunteerTask;
 import com.moveit.volunteer_service.entity.VolunteerTaskType;
 import com.moveit.volunteer_service.enums.TaskStatus;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import com.moveit.volunteer_service.exception.VolunteerTaskNotFoundException;
 import com.moveit.volunteer_service.exception.VolunteerTaskTypeNotFoundException;
 import com.moveit.volunteer_service.repository.VolunteerTaskRepository;
@@ -29,8 +30,8 @@ public class VolunteerTaskService {
                 .orElseThrow(() -> new VolunteerTaskNotFoundException(id));
     }
 
-    public List<VolunteerTask> getTasksByChampionshipId(Long championshipId) {
-        return volunteerTaskRepository.findByChampionshipId(championshipId);
+    public List<VolunteerTask> getTasksByTarget(TaskTargetType targetType, Long targetId) {
+        return volunteerTaskRepository.findByTargetTypeAndTargetId(targetType, targetId);
     }
 
     public List<VolunteerTask> getTasksByTaskTypeId(Long taskTypeId) {
@@ -42,7 +43,8 @@ public class VolunteerTaskService {
                 .orElseThrow(() -> new VolunteerTaskTypeNotFoundException(request.getTaskTypeId()));
 
         VolunteerTask task = new VolunteerTask();
-        task.setChampionshipId(request.getEventlId());
+        task.setTargetType(request.getTargetType());
+        task.setTargetId(request.getTargetId());
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setTaskType(taskType);
@@ -60,7 +62,8 @@ public class VolunteerTaskService {
         VolunteerTaskType taskType = volunteerTaskTypeRepository.findById(request.getTaskTypeId())
                 .orElseThrow(() -> new VolunteerTaskTypeNotFoundException(request.getTaskTypeId()));
 
-        existing.setChampionshipId(request.getEventlId());
+        existing.setTargetType(request.getTargetType());
+        existing.setTargetId(request.getTargetId());
         existing.setTitle(request.getTitle());
         existing.setDescription(request.getDescription());
         existing.setTaskType(taskType);

@@ -12,7 +12,8 @@ public class VolunteerTaskMapper {
     public static VolunteerTaskDTO toDTO(VolunteerTask entity) {
         return new VolunteerTaskDTO(
                 entity.getId(),
-                entity.getChampionshipId(),
+                entity.getTargetType(),
+                entity.getTargetId(),
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getTaskType().getId(),
