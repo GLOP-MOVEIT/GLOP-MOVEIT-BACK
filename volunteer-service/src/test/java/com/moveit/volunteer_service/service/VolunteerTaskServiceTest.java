@@ -3,6 +3,7 @@ package com.moveit.volunteer_service.service;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
 import com.moveit.volunteer_service.entity.VolunteerTask;
 import com.moveit.volunteer_service.enums.TaskStatus;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import com.moveit.volunteer_service.exception.VolunteerTaskNotFoundException;
 import com.moveit.volunteer_service.exception.VolunteerTaskTypeNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerTaskMother;
@@ -71,12 +72,12 @@ class VolunteerTaskServiceTest {
     }
 
     @Test
-    @DisplayName("Should retrieve tasks by championship id")
-    void shouldGetTasksByChampionshipId() {
+    @DisplayName("Should retrieve tasks by target")
+    void shouldGetTasksByTarget() {
         var task = VolunteerTaskMother.defaultTask();
-        when(volunteerTaskRepository.findByChampionshipId(1L)).thenReturn(List.of(task));
+        when(volunteerTaskRepository.findByTargetTypeAndTargetId(TaskTargetType.CHAMPIONSHIP, 1L)).thenReturn(List.of(task));
 
-        var result = volunteerTaskService.getTasksByChampionshipId(1L);
+        var result = volunteerTaskService.getTasksByTarget(TaskTargetType.CHAMPIONSHIP, 1L);
 
         assertThat(result).hasSize(1);
     }
@@ -97,7 +98,7 @@ class VolunteerTaskServiceTest {
     void shouldCreateTask() {
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
         var request = new CreateVolunteerTaskRequest(
-                1L, "Nouvelle tâche", "Description", 1L,
+                TaskTargetType.CHAMPIONSHIP, 1L, "Nouvelle tâche", "Description", 1L,
                 LocalDateTime.of(2026, 6, 1, 8, 0),
                 LocalDateTime.of(2026, 6, 1, 12, 0),
                 5, "Stade"
@@ -116,7 +117,7 @@ class VolunteerTaskServiceTest {
     @DisplayName("Should throw exception when creating task with non-existing task type")
     void shouldThrowExceptionWhenCreatingTaskWithNonExistingType() {
         var request = new CreateVolunteerTaskRequest(
-                1L, "Tâche", "Desc", 99L, null, null, 5, null
+            TaskTargetType.CHAMPIONSHIP, 1L, "Tâche", "Desc", 99L, null, null, 5, null
         );
         when(volunteerTaskTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -130,7 +131,7 @@ class VolunteerTaskServiceTest {
         var existing = VolunteerTaskMother.defaultTask();
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
         var request = new CreateVolunteerTaskRequest(
-                1L, "Tâche mise à jour", "Nouvelle description", 1L,
+                TaskTargetType.CHAMPIONSHIP, 1L, "Tâche mise à jour", "Nouvelle description", 1L,
                 LocalDateTime.of(2026, 7, 1, 8, 0),
                 LocalDateTime.of(2026, 7, 1, 12, 0),
                 10, "Gymnase"

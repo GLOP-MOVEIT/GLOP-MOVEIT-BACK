@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
 import com.moveit.volunteer_service.enums.TaskStatus;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 import com.moveit.volunteer_service.exception.VolunteerTaskNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerTaskMother;
 import com.moveit.volunteer_service.service.VolunteerTaskService;
@@ -78,12 +79,12 @@ class VolunteerTaskControllerTest {
     }
 
     @Test
-    @DisplayName("Should return tasks by championship id")
-    void shouldGetTasksByChampionshipId() throws Exception {
+        @DisplayName("Should return tasks by target")
+        void shouldGetTasksByTarget() throws Exception {
         var task = VolunteerTaskMother.defaultTask();
-        when(volunteerTaskService.getTasksByChampionshipId(1L)).thenReturn(List.of(task));
+                when(volunteerTaskService.getTasksByTarget(TaskTargetType.CHAMPIONSHIP, 1L)).thenReturn(List.of(task));
 
-        mockMvc.perform(get("/volunteer/tasks/championship/1")
+                mockMvc.perform(get("/volunteer/tasks/target/CHAMPIONSHIP/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
@@ -105,7 +106,7 @@ class VolunteerTaskControllerTest {
     @DisplayName("Should create a task and return 201")
     void shouldCreateTask() throws Exception {
         var request = new CreateVolunteerTaskRequest(
-                1L, "Nouvelle tâche", "Description", 1L,
+                                TaskTargetType.CHAMPIONSHIP, 1L, "Nouvelle tâche", "Description", 1L,
                 LocalDateTime.of(2026, 6, 1, 8, 0),
                 LocalDateTime.of(2026, 6, 1, 12, 0),
                 5, "Stade"
@@ -124,7 +125,7 @@ class VolunteerTaskControllerTest {
     @DisplayName("Should update a task")
     void shouldUpdateTask() throws Exception {
         var request = new CreateVolunteerTaskRequest(
-                1L, "Tâche mise à jour", "Desc", 1L,
+                                TaskTargetType.CHAMPIONSHIP, 1L, "Tâche mise à jour", "Desc", 1L,
                 LocalDateTime.of(2026, 7, 1, 8, 0),
                 LocalDateTime.of(2026, 7, 1, 12, 0),
                 10, "Gymnase"

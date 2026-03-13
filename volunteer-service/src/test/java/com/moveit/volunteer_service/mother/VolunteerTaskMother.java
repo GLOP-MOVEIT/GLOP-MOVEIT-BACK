@@ -3,6 +3,7 @@ package com.moveit.volunteer_service.mother;
 import com.moveit.volunteer_service.entity.VolunteerTask;
 import com.moveit.volunteer_service.entity.VolunteerTaskType;
 import com.moveit.volunteer_service.enums.TaskStatus;
+import com.moveit.volunteer_service.enums.TaskTargetType;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -14,7 +15,8 @@ public class VolunteerTaskMother {
     public static VolunteerTask defaultTask() {
         VolunteerTask task = new VolunteerTask();
         task.setId(1L);
-        task.setChampionshipId(1L);
+        task.setTargetType(TaskTargetType.CHAMPIONSHIP);
+        task.setTargetId(1L);
         task.setTitle("Bénévolat accueil");
         task.setDescription("Accueillir les participants à l'entrée");
         task.setTaskType(VolunteerTaskTypeMother.defaultTaskType());
