@@ -38,6 +38,12 @@ public class VolunteerPreferenceService {
                             "Preference already exists for user " + request.getUserId() + " and task type " + request.getTaskTypeId());
                 });
 
+        volunteerPreferenceRepository.findByUserIdAndPreferenceOrder(request.getUserId(), request.getPreferenceOrder())
+            .ifPresent(existing -> {
+                throw new IllegalArgumentException(
+                    "Preference order " + request.getPreferenceOrder() + " already exists for user " + request.getUserId());
+            });
+
         VolunteerPreference preference = new VolunteerPreference();
         preference.setUserId(request.getUserId());
         preference.setTaskType(taskType);
@@ -50,6 +56,13 @@ public class VolunteerPreferenceService {
                 .orElseThrow(() -> new VolunteerPreferenceNotFoundException(id));
         VolunteerTaskType taskType = volunteerTaskTypeRepository.findById(request.getTaskTypeId())
                 .orElseThrow(() -> new VolunteerTaskTypeNotFoundException(request.getTaskTypeId()));
+
+        volunteerPreferenceRepository.findByUserIdAndPreferenceOrderAndIdNot(
+                request.getUserId(), request.getPreferenceOrder(), id)
+            .ifPresent(other -> {
+                throw new IllegalArgumentException(
+                    "Preference order " + request.getPreferenceOrder() + " already exists for user " + request.getUserId());
+            });
 
         existing.setUserId(request.getUserId());
         existing.setTaskType(taskType);

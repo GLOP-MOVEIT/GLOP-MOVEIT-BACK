@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "volunteer_preferences", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "task_type_id"})
+    @UniqueConstraint(columnNames = {"user_id", "task_type_id"}),
+    @UniqueConstraint(columnNames = {"user_id", "preference_order"})
 })
 @Data
 @NoArgsConstructor
