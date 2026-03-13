@@ -108,7 +108,6 @@ public class TaskAssignmentService {
         assignment.setVolunteerId(request.getVolunteerId());
         assignment.setTask(task);
         assignment.setStatus(AssignmentStatus.PENDING);
-        assignment.setComment(request.getComment());
         return taskAssignmentRepository.save(assignment);
     }
 

@@ -123,7 +123,7 @@ class TaskAssignmentControllerTest {
     @Test
     @DisplayName("Should create an assignment and return 201")
     void shouldCreateAssignment() throws Exception {
-        var request = new CreateTaskAssignmentRequest(10L, 1L, "Disponible");
+                var request = new CreateTaskAssignmentRequest(10L, 1L);
         var saved = TaskAssignmentMother.defaultAssignment();
         when(taskAssignmentService.createAssignment(any(CreateTaskAssignmentRequest.class))).thenReturn(saved);
 

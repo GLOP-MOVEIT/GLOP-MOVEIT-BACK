@@ -125,7 +125,7 @@ class TaskAssignmentServiceTest {
     @DisplayName("Should create an assignment")
     void shouldCreateAssignment() {
         var task = VolunteerTaskMother.defaultTask();
-        var request = new CreateTaskAssignmentRequest(10L, 1L, "Comment");
+        var request = new CreateTaskAssignmentRequest(10L, 1L);
         var saved = TaskAssignmentMother.defaultAssignment();
 
         when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
@@ -144,7 +144,7 @@ class TaskAssignmentServiceTest {
     void shouldThrowExceptionWhenCreatingDuplicateAssignment() {
         var task = VolunteerTaskMother.defaultTask();
         var existing = TaskAssignmentMother.defaultAssignment();
-        var request = new CreateTaskAssignmentRequest(10L, 1L, "Comment");
+        var request = new CreateTaskAssignmentRequest(10L, 1L);
 
         when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskAssignmentRepository.findByVolunteerIdAndTaskId(10L, 1L)).thenReturn(Optional.of(existing));
@@ -172,7 +172,7 @@ class TaskAssignmentServiceTest {
         existingAssignment.setTask(conflictingTask);
         existingAssignment.setStatus(AssignmentStatus.ACCEPTED);
 
-        var request = new CreateTaskAssignmentRequest(20L, 1L, "Comment");
+        var request = new CreateTaskAssignmentRequest(20L, 1L);
 
         when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskAssignmentRepository.findByVolunteerIdAndTaskId(20L, 1L)).thenReturn(Optional.empty());
@@ -190,7 +190,7 @@ class TaskAssignmentServiceTest {
         task.setMaxVolunteers(1);
         var existingAssignment = TaskAssignmentMother.defaultAssignment();
         existingAssignment.setStatus(AssignmentStatus.ACCEPTED);
-        var request = new CreateTaskAssignmentRequest(20L, 1L, "Comment");
+        var request = new CreateTaskAssignmentRequest(20L, 1L);
 
         when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskAssignmentRepository.findByVolunteerIdAndTaskId(20L, 1L)).thenReturn(Optional.empty());
@@ -205,7 +205,7 @@ class TaskAssignmentServiceTest {
     @Test
     @DisplayName("Should throw exception when creating assignment with non-existing task")
     void shouldThrowExceptionWhenCreatingAssignmentWithNonExistingTask() {
-        var request = new CreateTaskAssignmentRequest(10L, 99L, "Comment");
+        var request = new CreateTaskAssignmentRequest(10L, 99L);
         when(volunteerTaskRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> taskAssignmentService.createAssignment(request))
