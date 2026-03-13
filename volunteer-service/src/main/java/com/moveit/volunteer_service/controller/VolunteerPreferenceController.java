@@ -1,8 +1,10 @@
 package com.moveit.volunteer_service.controller;
 
 import org.springframework.web.bind.annotation.*;
+import com.moveit.volunteer_service.dto.CheckVolunteerPreferencesRequest;
 import com.moveit.volunteer_service.dto.CreateVolunteerPreferenceRequest;
 import com.moveit.volunteer_service.dto.VolunteerPreferenceDTO;
+import com.moveit.volunteer_service.dto.VolunteerWithPreferenceDTO;
 import com.moveit.volunteer_service.mapper.VolunteerPreferenceMapper;
 import com.moveit.volunteer_service.service.VolunteerPreferenceService;
 import jakarta.validation.Valid;
@@ -38,6 +40,13 @@ public class VolunteerPreferenceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 VolunteerPreferenceMapper.toDTO(volunteerPreferenceService.createPreference(request)));
     }
+
+        @PostMapping("/check")
+        public ResponseEntity<List<VolunteerWithPreferenceDTO>> checkVolunteerPreferences(
+            @Valid @RequestBody CheckVolunteerPreferencesRequest request) {
+        return ResponseEntity.ok(
+            volunteerPreferenceService.checkVolunteerPreferences(request.getTaskTypeId(), request.getVolunteerIds()));
+        }
 
     @PutMapping("/{id}")
     public ResponseEntity<VolunteerPreferenceDTO> updatePreference(

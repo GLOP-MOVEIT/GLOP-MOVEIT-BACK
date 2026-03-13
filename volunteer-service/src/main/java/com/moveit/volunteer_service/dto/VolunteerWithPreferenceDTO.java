@@ -10,6 +10,4 @@ import lombok.NoArgsConstructor;
 public class VolunteerWithPreferenceDTO {
     private Long volunteerId;
     private Boolean hasPreference;
-    private Integer preferenceOrder;
-    private String preferenceComment;
 }
