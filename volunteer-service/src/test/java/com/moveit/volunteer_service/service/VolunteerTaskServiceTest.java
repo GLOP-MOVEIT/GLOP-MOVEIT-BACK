@@ -125,6 +125,21 @@ class VolunteerTaskServiceTest {
                 .isInstanceOf(VolunteerTaskTypeNotFoundException.class);
     }
 
+        @Test
+        @DisplayName("Should reject task creation when start date is after or equal to end date")
+        void shouldRejectTaskCreationWithInvalidDateRange() {
+        var request = new CreateVolunteerTaskRequest(
+            TaskTargetType.CHAMPIONSHIP, 1L, "Nouvelle tâche", "Description", 1L,
+            LocalDateTime.of(2026, 6, 1, 12, 0),
+            LocalDateTime.of(2026, 6, 1, 12, 0),
+            5, 1L, "Stade"
+        );
+
+        assertThatThrownBy(() -> volunteerTaskService.createTask(request))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("startDate");
+        }
+
     @Test
     @DisplayName("Should update a task")
     void shouldUpdateTask() {
@@ -156,6 +171,21 @@ class VolunteerTaskServiceTest {
         var result = volunteerTaskService.updateTaskStatus(1L, TaskStatus.IN_PROGRESS);
 
         assertThat(result.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
+    }
+
+    @Test
+    @DisplayName("Should reject task update when start date is after end date")
+    void shouldRejectTaskUpdateWithInvalidDateRange() {
+        var request = new CreateVolunteerTaskRequest(
+                TaskTargetType.CHAMPIONSHIP, 1L, "Tâche mise à jour", "Description", 1L,
+                LocalDateTime.of(2026, 7, 1, 13, 0),
+                LocalDateTime.of(2026, 7, 1, 12, 0),
+                10, 1L, "Gymnase"
+        );
+
+        assertThatThrownBy(() -> volunteerTaskService.updateTask(1L, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("startDate");
     }
 
     @Test

@@ -12,6 +12,7 @@ import com.moveit.volunteer_service.repository.VolunteerTaskTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -39,6 +40,8 @@ public class VolunteerTaskService {
     }
 
     public VolunteerTask createTask(CreateVolunteerTaskRequest request) {
+        validateDateRange(request.getStartDate(), request.getEndDate());
+
         VolunteerTaskType taskType = volunteerTaskTypeRepository.findById(request.getTaskTypeId())
                 .orElseThrow(() -> new VolunteerTaskTypeNotFoundException(request.getTaskTypeId()));
 
@@ -58,6 +61,8 @@ public class VolunteerTaskService {
     }
 
     public VolunteerTask updateTask(Long id, CreateVolunteerTaskRequest request) {
+        validateDateRange(request.getStartDate(), request.getEndDate());
+
         VolunteerTask existing = volunteerTaskRepository.findById(id)
                 .orElseThrow(() -> new VolunteerTaskNotFoundException(id));
         VolunteerTaskType taskType = volunteerTaskTypeRepository.findById(request.getTaskTypeId())
@@ -74,6 +79,12 @@ public class VolunteerTaskService {
         existing.setLocationId(request.getLocationId());
         existing.setLocation(request.getLocation());
         return volunteerTaskRepository.save(existing);
+    }
+
+    private void validateDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
+            throw new IllegalArgumentException("Task startDate must be before endDate");
+        }
     }
 
     public VolunteerTask updateTaskStatus(Long id, TaskStatus status) {
