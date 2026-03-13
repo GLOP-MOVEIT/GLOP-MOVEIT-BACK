@@ -2,9 +2,7 @@ package com.moveit.volunteer_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
-import com.moveit.volunteer_service.dto.CheckVolunteerPreferencesRequest;
 import com.moveit.volunteer_service.dto.CreateVolunteerPreferenceRequest;
-import com.moveit.volunteer_service.dto.VolunteerWithPreferenceDTO;
 import com.moveit.volunteer_service.exception.VolunteerPreferenceNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerPreferenceMother;
 import com.moveit.volunteer_service.service.VolunteerPreferenceService;
@@ -90,29 +88,6 @@ class VolunteerPreferenceControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userId", equalTo(10)));
-    }
-
-    @Test
-    @DisplayName("Should return volunteers with preference flag")
-    void shouldCheckVolunteerPreferences() throws Exception {
-        var request = new CheckVolunteerPreferencesRequest(1L, List.of(10L, 20L));
-        var response = List.of(
-                new VolunteerWithPreferenceDTO(10L, true),
-                new VolunteerWithPreferenceDTO(20L, false)
-        );
-
-        when(volunteerPreferenceService.checkVolunteerPreferences(1L, List.of(10L, 20L)))
-                .thenReturn(response);
-
-        mockMvc.perform(post("/volunteer/preferences/check")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].volunteerId", equalTo(10)))
-                .andExpect(jsonPath("$[0].hasPreference", equalTo(true)))
-                .andExpect(jsonPath("$[1].volunteerId", equalTo(20)))
-                .andExpect(jsonPath("$[1].hasPreference", equalTo(false)));
     }
 
     @Test

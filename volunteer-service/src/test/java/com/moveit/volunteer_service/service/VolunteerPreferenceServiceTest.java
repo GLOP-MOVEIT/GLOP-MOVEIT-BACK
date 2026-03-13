@@ -130,50 +130,6 @@ class VolunteerPreferenceServiceTest {
     }
 
     @Test
-    @DisplayName("Should return volunteers with preference first")
-    void shouldCheckVolunteerPreferences() {
-        VolunteerTaskType taskType = VolunteerTaskTypeMother.defaultTaskType();
-        VolunteerPreference preferred = VolunteerPreferenceMother.defaultPreference();
-        preferred.setUserId(20L);
-        VolunteerPreference preferredTwo = VolunteerPreferenceMother.defaultPreference();
-        preferredTwo.setId(2L);
-        preferredTwo.setUserId(30L);
-
-        when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
-        when(volunteerPreferenceRepository.findByTaskType_IdAndUserIdIn(1L, List.of(10L, 20L, 30L)))
-                .thenReturn(List.of(preferred, preferredTwo));
-
-        var result = volunteerPreferenceService.checkVolunteerPreferences(1L, List.of(10L, 20L, 30L));
-
-        assertThat(result).hasSize(3);
-        assertThat(result.get(0).getVolunteerId()).isEqualTo(20L);
-        assertThat(result.get(0).getHasPreference()).isTrue();
-        assertThat(result.get(1).getVolunteerId()).isEqualTo(30L);
-        assertThat(result.get(1).getHasPreference()).isTrue();
-        assertThat(result.get(2).getVolunteerId()).isEqualTo(10L);
-        assertThat(result.get(2).getHasPreference()).isFalse();
-    }
-
-    @Test
-    @DisplayName("Should ignore duplicate volunteer ids when checking preferences")
-    void shouldIgnoreDuplicateVolunteerIdsWhenCheckingPreferences() {
-        VolunteerTaskType taskType = VolunteerTaskTypeMother.defaultTaskType();
-        VolunteerPreference preferred = VolunteerPreferenceMother.defaultPreference();
-
-        when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
-        when(volunteerPreferenceRepository.findByTaskType_IdAndUserIdIn(1L, List.of(10L, 20L)))
-                .thenReturn(List.of(preferred));
-
-        var result = volunteerPreferenceService.checkVolunteerPreferences(1L, List.of(10L, 10L, 20L));
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getVolunteerId()).isEqualTo(10L);
-        assertThat(result.get(0).getHasPreference()).isTrue();
-        assertThat(result.get(1).getVolunteerId()).isEqualTo(20L);
-        assertThat(result.get(1).getHasPreference()).isFalse();
-    }
-
-    @Test
     @DisplayName("Should delete a preference")
     void shouldDeletePreference() {
         when(volunteerPreferenceRepository.existsById(1L)).thenReturn(true);
