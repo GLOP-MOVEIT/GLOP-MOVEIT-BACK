@@ -1,13 +1,16 @@
 package com.moveit.volunteer_service.service;
 
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
+import com.moveit.volunteer_service.dto.VolunteerWithPreferenceDTO;
 import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.entity.TaskAssignment;
+import com.moveit.volunteer_service.entity.VolunteerPreference;
 import com.moveit.volunteer_service.entity.VolunteerTask;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
 import com.moveit.volunteer_service.exception.TaskAssignmentNotFoundException;
 import com.moveit.volunteer_service.exception.VolunteerTaskNotFoundException;
 import com.moveit.volunteer_service.repository.TaskAssignmentRepository;
+import com.moveit.volunteer_service.repository.VolunteerPreferenceRepository;
 import com.moveit.volunteer_service.repository.VolunteerTaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ public class TaskAssignmentService {
 
     private final TaskAssignmentRepository taskAssignmentRepository;
     private final VolunteerTaskRepository volunteerTaskRepository;
+    private final VolunteerPreferenceRepository volunteerPreferenceRepository;
 
     public List<TaskAssignment> getAssignmentsByVolunteerId(Long volunteerId) {
         return taskAssignmentRepository.findByVolunteerId(volunteerId);
@@ -62,6 +66,34 @@ public class TaskAssignmentService {
                 .filter(volunteerId -> !busyVolunteerIds.contains(volunteerId))
                 .toList();
     }
+
+        public List<VolunteerWithPreferenceDTO> getAvailableVolunteersWithPreferenceForTask(Long taskId, List<Long> volunteerIds) {
+        VolunteerTask task = volunteerTaskRepository.findById(taskId)
+            .orElseThrow(() -> new VolunteerTaskNotFoundException(taskId));
+
+        List<Long> availableVolunteerIds = getAvailableVolunteersForTask(taskId, volunteerIds);
+        if (availableVolunteerIds.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Long> preferredVolunteerIds = volunteerPreferenceRepository
+            .findByTaskType_IdAndUserIdIn(task.getTaskType().getId(), availableVolunteerIds)
+            .stream()
+            .map(VolunteerPreference::getUserId)
+            .collect(java.util.stream.Collectors.toSet());
+
+        List<VolunteerWithPreferenceDTO> preferred = availableVolunteerIds.stream()
+            .filter(preferredVolunteerIds::contains)
+            .map(volunteerId -> new VolunteerWithPreferenceDTO(volunteerId, true))
+            .toList();
+
+        List<VolunteerWithPreferenceDTO> others = availableVolunteerIds.stream()
+            .filter(volunteerId -> !preferredVolunteerIds.contains(volunteerId))
+            .map(volunteerId -> new VolunteerWithPreferenceDTO(volunteerId, false))
+            .toList();
+
+        return java.util.stream.Stream.concat(preferred.stream(), others.stream()).toList();
+        }
 
     public List<TaskAssignment> getAssignmentsByStatus(AssignmentStatus status) {
         return taskAssignmentRepository.findByStatus(status);

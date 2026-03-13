@@ -5,6 +5,7 @@ import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
 import com.moveit.volunteer_service.dto.TaskAssignmentDTO;
 import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.dto.VolunteerIdsRequest;
+import com.moveit.volunteer_service.dto.VolunteerWithPreferenceDTO;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
 import com.moveit.volunteer_service.mapper.TaskAssignmentMapper;
 import com.moveit.volunteer_service.service.TaskAssignmentService;
@@ -42,6 +43,14 @@ public class TaskAssignmentController {
             @Valid @RequestBody VolunteerIdsRequest request) {
         return ResponseEntity.ok(
                 taskAssignmentService.getAvailableVolunteersForTask(taskId, request.getVolunteerIds()));
+    }
+
+    @PostMapping("/task/{taskId}/available-volunteers-with-preference")
+    public ResponseEntity<List<VolunteerWithPreferenceDTO>> getAvailableVolunteersWithPreferenceForTask(
+            @PathVariable Long taskId,
+            @Valid @RequestBody VolunteerIdsRequest request) {
+        return ResponseEntity.ok(
+                taskAssignmentService.getAvailableVolunteersWithPreferenceForTask(taskId, request.getVolunteerIds()));
     }
 
     @GetMapping("/status/{status}")

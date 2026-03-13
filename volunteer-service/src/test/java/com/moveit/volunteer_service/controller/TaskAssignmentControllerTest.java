@@ -5,6 +5,7 @@ import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
 import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.dto.VolunteerIdsRequest;
+import com.moveit.volunteer_service.dto.VolunteerWithPreferenceDTO;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
 import com.moveit.volunteer_service.exception.TaskAssignmentNotFoundException;
 import com.moveit.volunteer_service.mother.TaskAssignmentMother;
@@ -81,6 +82,28 @@ class TaskAssignmentControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0]", equalTo(10)))
                 .andExpect(jsonPath("$[1]", equalTo(30)));
+    }
+
+    @Test
+    @DisplayName("Should return available volunteers with preference for task")
+    void shouldGetAvailableVolunteersWithPreferenceForTask() throws Exception {
+        var request = new VolunteerIdsRequest(List.of(10L, 20L, 30L));
+        var response = List.of(
+                new VolunteerWithPreferenceDTO(10L, true),
+                new VolunteerWithPreferenceDTO(30L, false)
+        );
+        when(taskAssignmentService.getAvailableVolunteersWithPreferenceForTask(1L, List.of(10L, 20L, 30L)))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/volunteer/assignments/task/1/available-volunteers-with-preference")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].volunteerId", equalTo(10)))
+                .andExpect(jsonPath("$[0].hasPreference", equalTo(true)))
+                .andExpect(jsonPath("$[1].volunteerId", equalTo(30)))
+                .andExpect(jsonPath("$[1].hasPreference", equalTo(false)));
     }
 
     @Test
