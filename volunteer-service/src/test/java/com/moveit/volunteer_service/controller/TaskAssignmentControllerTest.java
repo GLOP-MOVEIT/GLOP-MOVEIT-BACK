@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
 import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
+import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
+import com.moveit.volunteer_service.dto.VolunteerIdsRequest;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
 import com.moveit.volunteer_service.exception.TaskAssignmentNotFoundException;
 import com.moveit.volunteer_service.mother.TaskAssignmentMother;
@@ -64,6 +66,22 @@ class TaskAssignmentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("Should return available volunteers for task")
+    void shouldGetAvailableVolunteersForTask() throws Exception {
+        var request = new VolunteerIdsRequest(List.of(10L, 20L, 30L));
+        when(taskAssignmentService.getAvailableVolunteersForTask(1L, List.of(10L, 20L, 30L)))
+                .thenReturn(List.of(10L, 30L));
+
+        mockMvc.perform(post("/volunteer/assignments/task/1/available-volunteers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0]", equalTo(10)))
+                .andExpect(jsonPath("$[1]", equalTo(30)));
     }
 
     @Test
@@ -130,6 +148,23 @@ class TaskAssignmentControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo("ACCEPTED")));
+    }
+
+    @Test
+    @DisplayName("Volunteer should respond to assignment")
+    void shouldRespondToAssignment() throws Exception {
+        var request = new VolunteerAssignmentResponseRequest(10L, AssignmentStatus.REFUSED, "Je refuse la tâche");
+        var updated = TaskAssignmentMother.defaultAssignment();
+        updated.setStatus(AssignmentStatus.REFUSED);
+        when(taskAssignmentService.respondToAssignment(eq(1L), any(VolunteerAssignmentResponseRequest.class)))
+                .thenReturn(updated);
+
+        mockMvc.perform(patch("/volunteer/assignments/1/volunteer-response")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo("REFUSED")))
+                .andExpect(jsonPath("$.volunteerId", equalTo(10)));
     }
 
     @Test

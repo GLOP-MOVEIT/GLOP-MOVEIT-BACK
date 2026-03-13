@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.*;
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
 import com.moveit.volunteer_service.dto.TaskAssignmentDTO;
 import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
+import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
+import com.moveit.volunteer_service.dto.VolunteerIdsRequest;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
 import com.moveit.volunteer_service.mapper.TaskAssignmentMapper;
 import com.moveit.volunteer_service.service.TaskAssignmentService;
@@ -35,6 +37,14 @@ public class TaskAssignmentController {
                 TaskAssignmentMapper.toDTOList(taskAssignmentService.getAssignmentsByTaskId(taskId)));
     }
 
+    @PostMapping("/task/{taskId}/available-volunteers")
+    public ResponseEntity<List<Long>> getAvailableVolunteersForTask(
+            @PathVariable Long taskId,
+            @Valid @RequestBody VolunteerIdsRequest request) {
+        return ResponseEntity.ok(
+                taskAssignmentService.getAvailableVolunteersForTask(taskId, request.getVolunteerIds()));
+    }
+
     @GetMapping("/status/{status}")
     public ResponseEntity<List<TaskAssignmentDTO>> getAssignmentsByStatus(
             @PathVariable AssignmentStatus status) {
@@ -61,6 +71,14 @@ public class TaskAssignmentController {
             @Valid @RequestBody UpdateTaskAssignmentStatusRequest request) {
         return ResponseEntity.ok(
                 TaskAssignmentMapper.toDTO(taskAssignmentService.updateAssignmentStatus(id, request)));
+    }
+
+    @PatchMapping("/{id}/volunteer-response")
+    public ResponseEntity<TaskAssignmentDTO> respondToAssignment(
+            @PathVariable Long id,
+            @Valid @RequestBody VolunteerAssignmentResponseRequest request) {
+        return ResponseEntity.ok(
+                TaskAssignmentMapper.toDTO(taskAssignmentService.respondToAssignment(id, request)));
     }
 
     @DeleteMapping("/{id}")

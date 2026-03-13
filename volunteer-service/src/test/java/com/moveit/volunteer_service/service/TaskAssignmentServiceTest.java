@@ -2,6 +2,7 @@ package com.moveit.volunteer_service.service;
 
 import com.moveit.volunteer_service.dto.CreateTaskAssignmentRequest;
 import com.moveit.volunteer_service.dto.UpdateTaskAssignmentStatusRequest;
+import com.moveit.volunteer_service.dto.VolunteerAssignmentResponseRequest;
 import com.moveit.volunteer_service.entity.TaskAssignment;
 import com.moveit.volunteer_service.enums.AssignmentStatus;
 import com.moveit.volunteer_service.exception.TaskAssignmentNotFoundException;
@@ -17,13 +18,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TaskAssignmentServiceTest {
@@ -57,6 +60,33 @@ class TaskAssignmentServiceTest {
         var result = taskAssignmentService.getAssignmentsByTaskId(1L);
 
         assertThat(result).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Should return only available volunteers for task")
+    void shouldReturnOnlyAvailableVolunteersForTask() {
+        var task = VolunteerTaskMother.defaultTask();
+        task.setId(1L);
+        task.setStartDate(LocalDateTime.of(2026, 6, 1, 8, 0));
+        task.setEndDate(LocalDateTime.of(2026, 6, 1, 12, 0));
+
+        var conflictingTask = VolunteerTaskMother.defaultTask();
+        conflictingTask.setId(2L);
+        conflictingTask.setStartDate(LocalDateTime.of(2026, 6, 1, 9, 0));
+        conflictingTask.setEndDate(LocalDateTime.of(2026, 6, 1, 11, 0));
+
+        var busyAssignment = TaskAssignmentMother.defaultAssignment();
+        busyAssignment.setVolunteerId(20L);
+        busyAssignment.setTask(conflictingTask);
+        busyAssignment.setStatus(AssignmentStatus.ACCEPTED);
+
+        when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskAssignmentRepository.findByVolunteerIdIn(List.of(10L, 20L, 30L)))
+                .thenReturn(List.of(busyAssignment));
+
+        var result = taskAssignmentService.getAvailableVolunteersForTask(1L, List.of(10L, 20L, 30L));
+
+        assertThat(result).containsExactly(10L, 30L);
     }
 
     @Test
@@ -100,13 +130,13 @@ class TaskAssignmentServiceTest {
 
         when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskAssignmentRepository.findByVolunteerIdAndTaskId(10L, 1L)).thenReturn(Optional.empty());
+        when(taskAssignmentRepository.findByVolunteerId(10L)).thenReturn(List.of());
         when(taskAssignmentRepository.findByTaskId(1L)).thenReturn(List.of());
         when(taskAssignmentRepository.save(any(TaskAssignment.class))).thenReturn(saved);
 
         var result = taskAssignmentService.createAssignment(request);
 
         assertThat(result).isNotNull();
-        verify(taskAssignmentRepository).save(any(TaskAssignment.class));
     }
 
     @Test
@@ -125,6 +155,35 @@ class TaskAssignmentServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when volunteer has overlapping assignment")
+    void shouldThrowExceptionWhenVolunteerHasOverlappingAssignment() {
+        var task = VolunteerTaskMother.defaultTask();
+        task.setId(1L);
+        task.setStartDate(LocalDateTime.of(2026, 6, 1, 8, 0));
+        task.setEndDate(LocalDateTime.of(2026, 6, 1, 12, 0));
+
+        var conflictingTask = VolunteerTaskMother.defaultTask();
+        conflictingTask.setId(2L);
+        conflictingTask.setStartDate(LocalDateTime.of(2026, 6, 1, 11, 0));
+        conflictingTask.setEndDate(LocalDateTime.of(2026, 6, 1, 14, 0));
+
+        var existingAssignment = TaskAssignmentMother.defaultAssignment();
+        existingAssignment.setVolunteerId(20L);
+        existingAssignment.setTask(conflictingTask);
+        existingAssignment.setStatus(AssignmentStatus.ACCEPTED);
+
+        var request = new CreateTaskAssignmentRequest(20L, 1L, "Comment");
+
+        when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskAssignmentRepository.findByVolunteerIdAndTaskId(20L, 1L)).thenReturn(Optional.empty());
+        when(taskAssignmentRepository.findByVolunteerId(20L)).thenReturn(List.of(existingAssignment));
+
+        assertThatThrownBy(() -> taskAssignmentService.createAssignment(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("time slot");
+    }
+
+    @Test
     @DisplayName("Should throw exception when task is full")
     void shouldThrowExceptionWhenTaskIsFull() {
         var task = VolunteerTaskMother.defaultTask();
@@ -135,6 +194,7 @@ class TaskAssignmentServiceTest {
 
         when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(task));
         when(taskAssignmentRepository.findByVolunteerIdAndTaskId(20L, 1L)).thenReturn(Optional.empty());
+        when(taskAssignmentRepository.findByVolunteerId(20L)).thenReturn(List.of());
         when(taskAssignmentRepository.findByTaskId(1L)).thenReturn(List.of(existingAssignment));
 
         assertThatThrownBy(() -> taskAssignmentService.createAssignment(request))
@@ -164,6 +224,47 @@ class TaskAssignmentServiceTest {
         var result = taskAssignmentService.updateAssignmentStatus(1L, request);
 
         assertThat(result.getStatus()).isEqualTo(AssignmentStatus.ACCEPTED);
+    }
+
+    @Test
+    @DisplayName("Volunteer should be able to refuse assignment")
+    void volunteerShouldRefuseAssignment() {
+        var existing = TaskAssignmentMother.defaultAssignment();
+        var request = new VolunteerAssignmentResponseRequest(10L, AssignmentStatus.REFUSED, "Je ne suis pas disponible");
+
+        when(taskAssignmentRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(taskAssignmentRepository.save(any(TaskAssignment.class))).thenReturn(existing);
+
+        var result = taskAssignmentService.respondToAssignment(1L, request);
+
+        assertThat(result.getStatus()).isEqualTo(AssignmentStatus.REFUSED);
+        verify(taskAssignmentRepository).save(existing);
+    }
+
+    @Test
+    @DisplayName("Should reject volunteer response for another volunteer")
+    void shouldRejectVolunteerResponseForAnotherVolunteer() {
+        var existing = TaskAssignmentMother.defaultAssignment();
+        var request = new VolunteerAssignmentResponseRequest(99L, AssignmentStatus.REFUSED, "No");
+
+        when(taskAssignmentRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> taskAssignmentService.respondToAssignment(1L, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("own assignment");
+    }
+
+    @Test
+    @DisplayName("Should reject volunteer response with pending status")
+    void shouldRejectVolunteerResponseWithPendingStatus() {
+        var existing = TaskAssignmentMother.defaultAssignment();
+        var request = new VolunteerAssignmentResponseRequest(10L, AssignmentStatus.PENDING, "No");
+
+        when(taskAssignmentRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> taskAssignmentService.respondToAssignment(1L, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("ACCEPTED or REFUSED");
     }
 
     @Test

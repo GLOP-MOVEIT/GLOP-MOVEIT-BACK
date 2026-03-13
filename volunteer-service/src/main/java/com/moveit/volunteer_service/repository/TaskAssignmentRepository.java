@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
 	List<TaskAssignment> findByVolunteerId(Long volunteerId);
+	List<TaskAssignment> findByVolunteerIdIn(List<Long> volunteerIds);
 	List<TaskAssignment> findByTaskId(Long taskId);
 	List<TaskAssignment> findByStatus(AssignmentStatus status);
 	Optional<TaskAssignment> findByVolunteerIdAndTaskId(Long volunteerId, Long taskId);
