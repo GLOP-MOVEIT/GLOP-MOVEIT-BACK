@@ -21,6 +21,7 @@ public class VolunteerTaskMapper {
                 entity.getStartDate(),
                 entity.getEndDate(),
                 entity.getMaxVolunteers(),
+                entity.getLocationId(),
                 entity.getLocation()
         );
     }

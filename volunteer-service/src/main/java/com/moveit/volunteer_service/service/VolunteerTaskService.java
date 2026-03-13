@@ -52,6 +52,7 @@ public class VolunteerTaskService {
         task.setStartDate(request.getStartDate());
         task.setEndDate(request.getEndDate());
         task.setMaxVolunteers(request.getMaxVolunteers());
+        task.setLocationId(request.getLocationId());
         task.setLocation(request.getLocation());
         return volunteerTaskRepository.save(task);
     }
@@ -70,6 +71,7 @@ public class VolunteerTaskService {
         existing.setStartDate(request.getStartDate());
         existing.setEndDate(request.getEndDate());
         existing.setMaxVolunteers(request.getMaxVolunteers());
+        existing.setLocationId(request.getLocationId());
         existing.setLocation(request.getLocation());
         return volunteerTaskRepository.save(existing);
     }

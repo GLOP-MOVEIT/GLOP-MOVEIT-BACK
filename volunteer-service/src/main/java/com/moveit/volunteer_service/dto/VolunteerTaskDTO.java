@@ -22,5 +22,6 @@ public class VolunteerTaskDTO {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private Integer maxVolunteers;
+    private Long locationId;
     private String location;
 }

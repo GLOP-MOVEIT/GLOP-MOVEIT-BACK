@@ -109,7 +109,7 @@ class VolunteerTaskControllerTest {
                                 TaskTargetType.CHAMPIONSHIP, 1L, "Nouvelle tâche", "Description", 1L,
                 LocalDateTime.of(2026, 6, 1, 8, 0),
                 LocalDateTime.of(2026, 6, 1, 12, 0),
-                5, "Stade"
+                5, 1L, "Stade"
         );
         var saved = VolunteerTaskMother.defaultTask();
         when(volunteerTaskService.createTask(any(CreateVolunteerTaskRequest.class))).thenReturn(saved);
@@ -128,7 +128,7 @@ class VolunteerTaskControllerTest {
                                 TaskTargetType.CHAMPIONSHIP, 1L, "Tâche mise à jour", "Desc", 1L,
                 LocalDateTime.of(2026, 7, 1, 8, 0),
                 LocalDateTime.of(2026, 7, 1, 12, 0),
-                10, "Gymnase"
+                10, 1L, "Gymnase"
         );
         var updated = VolunteerTaskMother.defaultTask();
         updated.setTitle("Tâche mise à jour");

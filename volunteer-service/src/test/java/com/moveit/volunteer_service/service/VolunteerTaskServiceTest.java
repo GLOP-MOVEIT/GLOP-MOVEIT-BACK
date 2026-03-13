@@ -101,7 +101,7 @@ class VolunteerTaskServiceTest {
                 TaskTargetType.CHAMPIONSHIP, 1L, "Nouvelle tâche", "Description", 1L,
                 LocalDateTime.of(2026, 6, 1, 8, 0),
                 LocalDateTime.of(2026, 6, 1, 12, 0),
-                5, "Stade"
+            5, 1L, "Stade"
         );
         var saved = VolunteerTaskMother.defaultTask();
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
@@ -117,7 +117,7 @@ class VolunteerTaskServiceTest {
     @DisplayName("Should throw exception when creating task with non-existing task type")
     void shouldThrowExceptionWhenCreatingTaskWithNonExistingType() {
         var request = new CreateVolunteerTaskRequest(
-            TaskTargetType.CHAMPIONSHIP, 1L, "Tâche", "Desc", 99L, null, null, 5, null
+            TaskTargetType.CHAMPIONSHIP, 1L, "Tâche", "Desc", 99L, null, null, 5, 1L, null
         );
         when(volunteerTaskTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -134,7 +134,7 @@ class VolunteerTaskServiceTest {
                 TaskTargetType.CHAMPIONSHIP, 1L, "Tâche mise à jour", "Nouvelle description", 1L,
                 LocalDateTime.of(2026, 7, 1, 8, 0),
                 LocalDateTime.of(2026, 7, 1, 12, 0),
-                10, "Gymnase"
+            10, 1L, "Gymnase"
         );
         when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));

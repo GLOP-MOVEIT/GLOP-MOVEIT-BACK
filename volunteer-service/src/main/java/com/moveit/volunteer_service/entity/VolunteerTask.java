@@ -52,6 +52,9 @@ public class VolunteerTask {
     @Column(name = "max_volunteers")
     private Integer maxVolunteers;
 
+    @Column(name = "location_id")
+    private Long locationId;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "task_volunteers", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "user_id")

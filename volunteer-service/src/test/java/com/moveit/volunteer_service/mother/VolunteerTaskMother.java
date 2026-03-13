@@ -24,6 +24,7 @@ public class VolunteerTaskMother {
         task.setStartDate(LocalDateTime.of(2026, 6, 1, 8, 0));
         task.setEndDate(LocalDateTime.of(2026, 6, 1, 12, 0));
         task.setMaxVolunteers(5);
+        task.setLocationId(1L);
         task.setAssignedVolunteerIds(new HashSet<>());
         task.setLocation("Entrée principale");
         task.setCreatedAt(LocalDateTime.now());

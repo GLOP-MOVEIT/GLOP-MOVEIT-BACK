@@ -28,6 +28,8 @@ public class CreateVolunteerTaskRequest {
     private LocalDateTime endDate;
     @NotNull
     private Integer maxVolunteers;
+    @NotNull
+    private Long locationId;
     @Size(max = 500)
     private String location;
 }
