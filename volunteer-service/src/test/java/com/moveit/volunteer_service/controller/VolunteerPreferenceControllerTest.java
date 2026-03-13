@@ -80,7 +80,7 @@ class VolunteerPreferenceControllerTest {
     @Test
     @DisplayName("Should create a preference and return 201")
     void shouldCreatePreference() throws Exception {
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1);
+                var request = new CreateVolunteerPreferenceRequest(10L, 1L);
         var saved = VolunteerPreferenceMother.defaultPreference();
         when(volunteerPreferenceService.createPreference(any(CreateVolunteerPreferenceRequest.class)))
                 .thenReturn(saved);
@@ -118,9 +118,8 @@ class VolunteerPreferenceControllerTest {
     @Test
     @DisplayName("Should update a preference")
     void shouldUpdatePreference() throws Exception {
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 2);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L);
         var updated = VolunteerPreferenceMother.defaultPreference();
-        updated.setPreferenceOrder(2);
         when(volunteerPreferenceService.updatePreference(eq(1L), any(CreateVolunteerPreferenceRequest.class)))
                 .thenReturn(updated);
 
@@ -128,7 +127,7 @@ class VolunteerPreferenceControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.preferenceOrder", equalTo(2)));
+                .andExpect(jsonPath("$.taskTypeId", equalTo(1)));
     }
 
     @Test

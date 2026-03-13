@@ -23,7 +23,7 @@ public class VolunteerPreferenceService {
     private final VolunteerTaskTypeRepository volunteerTaskTypeRepository;
 
     public List<VolunteerPreference> getPreferencesByUserId(Long userId) {
-        return volunteerPreferenceRepository.findByUserIdOrderByPreferenceOrder(userId);
+        return volunteerPreferenceRepository.findByUserId(userId);
     }
 
     public VolunteerPreference getPreferenceById(Long id) {
@@ -41,16 +41,9 @@ public class VolunteerPreferenceService {
                             "Preference already exists for user " + request.getUserId() + " and task type " + request.getTaskTypeId());
                 });
 
-        volunteerPreferenceRepository.findByUserIdAndPreferenceOrder(request.getUserId(), request.getPreferenceOrder())
-            .ifPresent(existing -> {
-                throw new IllegalArgumentException(
-                    "Preference order " + request.getPreferenceOrder() + " already exists for user " + request.getUserId());
-            });
-
         VolunteerPreference preference = new VolunteerPreference();
         preference.setUserId(request.getUserId());
         preference.setTaskType(taskType);
-        preference.setPreferenceOrder(request.getPreferenceOrder());
         return volunteerPreferenceRepository.save(preference);
     }
 
@@ -60,16 +53,8 @@ public class VolunteerPreferenceService {
         VolunteerTaskType taskType = volunteerTaskTypeRepository.findById(request.getTaskTypeId())
                 .orElseThrow(() -> new VolunteerTaskTypeNotFoundException(request.getTaskTypeId()));
 
-        volunteerPreferenceRepository.findByUserIdAndPreferenceOrderAndIdNot(
-                request.getUserId(), request.getPreferenceOrder(), id)
-            .ifPresent(other -> {
-                throw new IllegalArgumentException(
-                    "Preference order " + request.getPreferenceOrder() + " already exists for user " + request.getUserId());
-            });
-
         existing.setUserId(request.getUserId());
         existing.setTaskType(taskType);
-        existing.setPreferenceOrder(request.getPreferenceOrder());
         return volunteerPreferenceRepository.save(existing);
     }
 

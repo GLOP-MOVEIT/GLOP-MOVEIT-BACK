@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "volunteer_preferences", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "task_type_id"}),
-    @UniqueConstraint(columnNames = {"user_id", "preference_order"})
+    @UniqueConstraint(columnNames = {"user_id", "task_type_id"})
 })
 @Data
 @NoArgsConstructor
@@ -27,9 +26,6 @@ public class VolunteerPreference {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_type_id", nullable = false)
     private VolunteerTaskType taskType;
-
-    @Column(name = "preference_order", nullable = false)
-    private Integer preferenceOrder;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

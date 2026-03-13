@@ -11,5 +11,4 @@ public class VolunteerPreferenceDTO {
     private Long id;
     private Long userId;
     private Long taskTypeId;
-    private Integer preferenceOrder;
 }

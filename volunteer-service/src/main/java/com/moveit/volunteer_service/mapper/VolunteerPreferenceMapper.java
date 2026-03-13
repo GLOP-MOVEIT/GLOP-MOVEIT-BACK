@@ -13,8 +13,7 @@ public class VolunteerPreferenceMapper {
         return new VolunteerPreferenceDTO(
                 entity.getId(),
                 entity.getUserId(),
-                entity.getTaskType().getId(),
-            entity.getPreferenceOrder()
+                entity.getTaskType().getId()
         );
     }
 

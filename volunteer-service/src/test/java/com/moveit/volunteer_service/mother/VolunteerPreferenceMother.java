@@ -13,7 +13,6 @@ public class VolunteerPreferenceMother {
         preference.setId(1L);
         preference.setUserId(10L);
         preference.setTaskType(VolunteerTaskTypeMother.defaultTaskType());
-        preference.setPreferenceOrder(1);
         preference.setCreatedAt(LocalDateTime.now());
         preference.setUpdatedAt(LocalDateTime.now());
         return preference;

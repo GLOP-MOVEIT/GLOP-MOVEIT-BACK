@@ -40,7 +40,7 @@ class VolunteerPreferenceServiceTest {
     @DisplayName("Should retrieve preferences by user id")
     void shouldGetPreferencesByUserId() {
         var preference = VolunteerPreferenceMother.defaultPreference();
-        when(volunteerPreferenceRepository.findByUserIdOrderByPreferenceOrder(10L))
+        when(volunteerPreferenceRepository.findByUserId(10L))
                 .thenReturn(List.of(preference));
 
         var result = volunteerPreferenceService.getPreferencesByUserId(10L);
@@ -74,12 +74,11 @@ class VolunteerPreferenceServiceTest {
     @DisplayName("Should create a preference")
     void shouldCreatePreference() {
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L);
         var saved = VolunteerPreferenceMother.defaultPreference();
 
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
         when(volunteerPreferenceRepository.findByUserIdAndTaskType_Id(10L, 1L)).thenReturn(Optional.empty());
-        when(volunteerPreferenceRepository.findByUserIdAndPreferenceOrder(10L, 1)).thenReturn(Optional.empty());
         when(volunteerPreferenceRepository.save(any(VolunteerPreference.class))).thenReturn(saved);
 
         var result = volunteerPreferenceService.createPreference(request);
@@ -93,7 +92,7 @@ class VolunteerPreferenceServiceTest {
     void shouldThrowExceptionWhenCreatingDuplicatePreference() {
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
         var existing = VolunteerPreferenceMother.defaultPreference();
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 1);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L);
 
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
         when(volunteerPreferenceRepository.findByUserIdAndTaskType_Id(10L, 1L)).thenReturn(Optional.of(existing));
@@ -104,25 +103,9 @@ class VolunteerPreferenceServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when creating duplicate preference order")
-    void shouldThrowExceptionWhenCreatingDuplicatePreferenceOrder() {
-        var taskType = VolunteerTaskTypeMother.defaultTaskType();
-        var existing = VolunteerPreferenceMother.defaultPreference();
-        var request = new CreateVolunteerPreferenceRequest(10L, 2L, 1);
-
-        when(volunteerTaskTypeRepository.findById(2L)).thenReturn(Optional.of(taskType));
-        when(volunteerPreferenceRepository.findByUserIdAndTaskType_Id(10L, 2L)).thenReturn(Optional.empty());
-        when(volunteerPreferenceRepository.findByUserIdAndPreferenceOrder(10L, 1)).thenReturn(Optional.of(existing));
-
-        assertThatThrownBy(() -> volunteerPreferenceService.createPreference(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Preference order");
-    }
-
-    @Test
     @DisplayName("Should throw exception when creating preference with non-existing task type")
     void shouldThrowExceptionWhenCreatingPreferenceWithNonExistingType() {
-        var request = new CreateVolunteerPreferenceRequest(10L, 99L, 1);
+        var request = new CreateVolunteerPreferenceRequest(10L, 99L);
         when(volunteerTaskTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> volunteerPreferenceService.createPreference(request))
@@ -134,16 +117,15 @@ class VolunteerPreferenceServiceTest {
     void shouldUpdatePreference() {
         var existing = VolunteerPreferenceMother.defaultPreference();
         var taskType = VolunteerTaskTypeMother.defaultTaskType();
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 2);
+        var request = new CreateVolunteerPreferenceRequest(10L, 1L);
 
         when(volunteerPreferenceRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
-        when(volunteerPreferenceRepository.findByUserIdAndPreferenceOrderAndIdNot(10L, 2, 1L)).thenReturn(Optional.empty());
         when(volunteerPreferenceRepository.save(any(VolunteerPreference.class))).thenReturn(existing);
 
         var result = volunteerPreferenceService.updatePreference(1L, request);
 
-        assertThat(result.getPreferenceOrder()).isEqualTo(2);
+        assertThat(result.getTaskType().getId()).isEqualTo(1L);
         verify(volunteerPreferenceRepository).save(existing);
     }
 
@@ -189,25 +171,6 @@ class VolunteerPreferenceServiceTest {
         assertThat(result.get(0).getHasPreference()).isTrue();
         assertThat(result.get(1).getVolunteerId()).isEqualTo(20L);
         assertThat(result.get(1).getHasPreference()).isFalse();
-    }
-
-    @Test
-    @DisplayName("Should throw exception when updating with duplicate preference order")
-    void shouldThrowExceptionWhenUpdatingWithDuplicatePreferenceOrder() {
-        var existing = VolunteerPreferenceMother.defaultPreference();
-        var taskType = VolunteerTaskTypeMother.defaultTaskType();
-        var other = VolunteerPreferenceMother.defaultPreference();
-        other.setId(2L);
-        var request = new CreateVolunteerPreferenceRequest(10L, 1L, 2);
-
-        when(volunteerPreferenceRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(volunteerTaskTypeRepository.findById(1L)).thenReturn(Optional.of(taskType));
-        when(volunteerPreferenceRepository.findByUserIdAndPreferenceOrderAndIdNot(10L, 2, 1L))
-                .thenReturn(Optional.of(other));
-
-        assertThatThrownBy(() -> volunteerPreferenceService.updatePreference(1L, request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Preference order");
     }
 
     @Test

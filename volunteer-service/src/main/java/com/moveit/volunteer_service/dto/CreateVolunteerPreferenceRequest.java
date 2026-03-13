@@ -13,6 +13,4 @@ public class CreateVolunteerPreferenceRequest {
     private Long userId;
     @NotNull
     private Long taskTypeId;
-    @NotNull
-    private Integer preferenceOrder;
 }
