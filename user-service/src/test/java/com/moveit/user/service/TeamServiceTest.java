@@ -3,9 +3,11 @@ package com.moveit.user.service;
 import com.moveit.user.dto.Team;
 import com.moveit.user.dto.TeamRequest;
 import com.moveit.user.dto.User;
+import com.moveit.user.entity.RoleEntity;
 import com.moveit.user.entity.TeamEntity;
 import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.TeamNotFoundException;
+import com.moveit.user.exception.UserNotAthleteException;
 import com.moveit.user.exception.UserNotFoundException;
 import com.moveit.user.mapper.TeamMapper;
 import com.moveit.user.repository.TeamRepository;
@@ -52,6 +54,10 @@ class TeamServiceTest {
 
     @BeforeEach
     void setUp() {
+        RoleEntity athleteRole = new RoleEntity();
+        athleteRole.setRoleId(1);
+        athleteRole.setName("ATHLETE");
+
         testAthlete = new UserEntity();
         testAthlete.setUserId(1);
         testAthlete.setFirstName("John");
@@ -59,6 +65,7 @@ class TeamServiceTest {
         testAthlete.setEmail("john.doe@example.com");
         testAthlete.setPhoneNumber("+33123456789");
         testAthlete.setLanguage("FR");
+        testAthlete.setRole(athleteRole);
 
         testAthleteDto = new User();
         testAthleteDto.setUserId(1);
@@ -193,6 +200,28 @@ class TeamServiceTest {
 
         verify(teamRepository).findById(1);
         verify(userService).getUserEntityById(999);
+        verify(teamRepository, never()).save(any());
+    }
+
+    @Test
+    void addAthlete_ShouldThrowUserNotAthleteException_WhenUserIsSpectator() {
+        RoleEntity spectatorRole = new RoleEntity();
+        spectatorRole.setRoleId(2);
+        spectatorRole.setName("SPECTATOR");
+
+        UserEntity spectator = new UserEntity();
+        spectator.setUserId(2);
+        spectator.setRole(spectatorRole);
+
+        when(teamRepository.findById(1)).thenReturn(Optional.of(testTeamEntity));
+        when(userService.getUserEntityById(2)).thenReturn(spectator);
+
+        assertThatThrownBy(() -> teamService.addAthlete(1, 2))
+                .isInstanceOf(UserNotAthleteException.class)
+                .hasMessage("User with id 2 is not an athlete");
+
+        verify(teamRepository).findById(1);
+        verify(userService).getUserEntityById(2);
         verify(teamRepository, never()).save(any());
     }
 

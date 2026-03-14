@@ -5,6 +5,7 @@ import com.moveit.user.dto.TeamRequest;
 import com.moveit.user.entity.TeamEntity;
 import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.TeamNotFoundException;
+import com.moveit.user.exception.UserNotAthleteException;
 import com.moveit.user.mapper.TeamMapper;
 import com.moveit.user.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,10 @@ public class TeamService {
     public Team addAthlete(Integer teamId, Integer athleteId) {
         TeamEntity team = getTeamEntityById(teamId);
         UserEntity athlete = this.userService.getUserEntityById(athleteId);
+
+        if(athlete.getRole().getName().equals("SPECTATOR")) {
+            throw new UserNotAthleteException("User with id " + athleteId + " is not an athlete");
+        }
 
         if (!team.getAthletes().contains(athlete)) {
             team.getAthletes().add(athlete);
