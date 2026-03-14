@@ -31,6 +31,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return createProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(), "The requested ticket does not exist");
     }
 
+    @ExceptionHandler(TeamNotFoundException.class)
+    public ProblemDetail handleTeamNotFoundException(TeamNotFoundException ex) {
+        return createProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(), "The requested team does not exist");
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         String message = ex.getMessage();

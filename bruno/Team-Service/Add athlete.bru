@@ -1,0 +1,20 @@
+meta {
+  name: Add athlete
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{URL}}/teams/:teamId/athletes/:athleteId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  teamId: 
+  athleteId: 
+}
+
+auth:bearer {
+  token: token
+}

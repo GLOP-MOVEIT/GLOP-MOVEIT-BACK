@@ -1,0 +1,21 @@
+meta {
+  name: Create team
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{URL}}/teams
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "name": "Team Alpha"
+  }
+}
