@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,16 @@ import org.springframework.web.bind.annotation.*;
 public class TeamController {
 
     private final TeamService teamService;
+
+    @Operation(summary = "Récupérer toutes les équipes avec pagination")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Équipes récupérées avec succès", content = @Content(schema = @Schema(implementation = Team.class))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping
+    public Page<Team> getAllTeams(Pageable pageable) {
+        return this.teamService.getAllTeams(pageable);
+    }
 
     @Operation(summary = "Créer une nouvelle équipe vide")
     @ApiResponses(value = {

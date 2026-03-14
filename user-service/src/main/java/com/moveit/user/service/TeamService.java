@@ -8,6 +8,8 @@ import com.moveit.user.exception.TeamNotFoundException;
 import com.moveit.user.mapper.TeamMapper;
 import com.moveit.user.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +19,11 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final UserService userService;
     private final TeamMapper teamMapper;
+
+    public Page<Team> getAllTeams(Pageable pageable) {
+        return this.teamRepository.findAll(pageable)
+                .map(this.teamMapper::toDto);
+    }
 
     public Team createTeam(TeamRequest teamRequest) {
         TeamEntity teamEntity = new TeamEntity();

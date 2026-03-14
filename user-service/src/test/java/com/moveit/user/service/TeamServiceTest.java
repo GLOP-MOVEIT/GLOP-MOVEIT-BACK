@@ -16,6 +16,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +103,26 @@ class TeamServiceTest {
         assertThat(captor.getValue().getName()).isEqualTo("Team Alpha");
 
         verify(teamMapper).toDto(savedEntity);
+    }
+
+    // --- getAllTeams ---
+
+    @Test
+    void getAllTeams_ShouldReturnPageOfTeams() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<TeamEntity> teamEntityPage = new PageImpl<>(List.of(testTeamEntity));
+
+        when(teamRepository.findAll(pageable)).thenReturn(teamEntityPage);
+        when(teamMapper.toDto(testTeamEntity)).thenReturn(testTeam);
+
+        Page<Team> result = teamService.getAllTeams(pageable);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getName()).isEqualTo("Team Alpha");
+
+        verify(teamRepository).findAll(pageable);
+        verify(teamMapper).toDto(testTeamEntity);
     }
 
     // --- addAthlete ---
