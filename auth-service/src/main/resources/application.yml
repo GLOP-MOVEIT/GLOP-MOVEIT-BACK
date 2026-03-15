@@ -43,3 +43,7 @@ management:
     metrics:
       export:
         enabled: true
+
+admin:
+  initial:
+    password: ${ADMIN_INITIAL_PASSWORD:123456}
