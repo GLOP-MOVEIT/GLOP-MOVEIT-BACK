@@ -6,7 +6,7 @@ meta {
 
 post {
   url: {{URL}}/requests/volunteer/:userId
-  body: none
+  body: json
   auth: bearer
 }
 
@@ -20,12 +20,6 @@ auth:bearer {
 
 body:json {
   {
-    "firstName":"Bob",
-    "surname":"Alice",
-    "email":"bob.alice@gmail.com",
-    "phoneNumber":"0123456789",
-    "language":"FR",
-    "acceptsNotifications": true,
-    "acceptsLocationSharing": false
+    "coverLetter":"J'aimerais bien être volontaire."
   }
 }
