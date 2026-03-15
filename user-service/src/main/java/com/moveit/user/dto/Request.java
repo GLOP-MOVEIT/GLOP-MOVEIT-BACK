@@ -13,4 +13,5 @@ public class Request {
     private RequestStatus requestStatus;
     private String requestRejectionReason;
     private Role role;
+    private String coverLetter;
 }
