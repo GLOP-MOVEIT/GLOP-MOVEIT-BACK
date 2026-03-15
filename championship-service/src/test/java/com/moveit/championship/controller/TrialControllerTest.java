@@ -6,7 +6,7 @@ import com.moveit.championship.dto.TrialDTO;
 import com.moveit.championship.dto.TrialRequestDTO;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
-import com.moveit.championship.mapper.CompetitionMapper;
+import com.moveit.championship.mapper.TrialMapper;
 import com.moveit.championship.service.TrialService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class TrialControllerTest {
     private TrialService trialService;
 
     @MockitoBean
-    private CompetitionMapper competitionMapper;
+    private TrialMapper trialMapper;
 
     private Trial trial;
 
@@ -52,7 +52,7 @@ class TrialControllerTest {
         trial.setTrialStatus(Status.PLANNED);
         trial.setLocationId(1);
 
-        when(competitionMapper.toTrialDTO(any(Trial.class))).thenAnswer(invocation -> {
+        when(trialMapper.toTrialDTO(any(Trial.class))).thenAnswer(invocation -> {
             Trial source = invocation.getArgument(0);
             return TrialDTO.builder()
                     .trialId(source.getTrialId())
@@ -68,7 +68,7 @@ class TrialControllerTest {
                     .build();
         });
 
-        when(competitionMapper.toTrialEntity(any(TrialRequestDTO.class))).thenAnswer(invocation -> {
+        when(trialMapper.toTrialEntity(any(TrialRequestDTO.class))).thenAnswer(invocation -> {
             TrialRequestDTO source = invocation.getArgument(0);
             Trial mapped = new Trial();
             mapped.setTrialName(source.getTrialName());
