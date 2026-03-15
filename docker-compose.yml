@@ -37,6 +37,8 @@ services:
         condition: service_healthy
       loki:
         condition: service_started
+      user-service:
+        condition: service_started
     networks:
       - moveit-network
     healthcheck:
