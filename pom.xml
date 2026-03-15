@@ -164,6 +164,8 @@
                                     <exclude>**/*Application.class</exclude>
                                     <!-- Beans Spring jamais chargés en @WebMvcTest -->
                                     <exclude>**/configuration/**</exclude>
+                                    <exclude>**/mapper/**</exclude>
+                                
                                 </excludes>
                             </configuration>
                         </execution>
