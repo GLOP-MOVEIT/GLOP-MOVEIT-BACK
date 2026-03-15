@@ -7,6 +7,7 @@ import com.moveit.user.dto.RequestStatus;
 import com.moveit.user.entity.RequestEntity;
 import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.RequestNotFoundException;
+import com.moveit.user.exception.UserNotASpectatorException;
 import com.moveit.user.mapper.RequestMapper;
 import com.moveit.user.repository.RequestRepository;
 import lombok.AllArgsConstructor;
@@ -35,17 +36,19 @@ public class RequestService {
     }
 
     public Request createAthleteRequest(Integer userId) {
+        var user = this.verifyUserIsASpectator(userId);
         RequestEntity entity = new RequestEntity();
         entity.setRequestStatus(RequestStatus.PENDING);
-        entity.setUser(this.userService.getUserEntityById(userId));
+        entity.setUser(user);
         entity.setRole(this.roleService.getRoleEntityByName("ATHLETE"));
         return this.requestMapper.toDto(this.requestRepository.save(entity));
     }
 
     public Request createVolunteerRequest(Integer userId, CoverLetter coverLetter) {
+        var user = this.verifyUserIsASpectator(userId);
         RequestEntity entity = new RequestEntity();
         entity.setRequestStatus(RequestStatus.PENDING);
-        entity.setUser(this.userService.getUserEntityById(userId));
+        entity.setUser(user);
         entity.setRole(this.roleService.getRoleEntityByName("VOLUNTEER"));
         entity.setCoverLetter(coverLetter.getCoverLetter());
         return this.requestMapper.toDto(this.requestRepository.save(entity));
@@ -75,8 +78,16 @@ public class RequestService {
     }
 
     public void promoteToReferee(Integer userId) {
-        UserEntity user = this.userService.getUserEntityById(userId);
+        var user = this.verifyUserIsASpectator(userId);
         user.setRole(this.roleService.getRoleEntityByName("REFEREE"));
         this.userService.saveUserEntity(user);
+    }
+
+    private UserEntity verifyUserIsASpectator(Integer userId) {
+        UserEntity user = this.userService.getUserEntityById(userId);
+        if(!user.getRole().getName().equals("SPECTATOR")) {
+            throw new UserNotASpectatorException("User with id " + userId + " is not a spectator");
+        }
+        return user;
     }
 }

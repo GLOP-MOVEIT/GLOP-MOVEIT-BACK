@@ -37,7 +37,7 @@ public class TeamService {
         TeamEntity team = getTeamEntityById(teamId);
         UserEntity athlete = this.userService.getUserEntityById(athleteId);
 
-        if(athlete.getRole().getName().equals("SPECTATOR")) {
+        if(!athlete.getRole().getName().equals("ATHLETE")) {
             throw new UserNotAthleteException("User with id " + athleteId + " is not an athlete");
         }
 
