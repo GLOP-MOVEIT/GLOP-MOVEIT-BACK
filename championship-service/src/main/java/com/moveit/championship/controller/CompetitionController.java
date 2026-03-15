@@ -5,7 +5,6 @@ import com.moveit.championship.dto.CompetitionCreateDTO;
 import com.moveit.championship.dto.CompetitionDTO;
 import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.dto.CompetitionUpdateDTO;
-import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.mapper.CompetitionMapper;
@@ -34,6 +33,7 @@ public class CompetitionController {
 
     private final CompetitionService competitionService;
     private final TreeGenerationService treeGenerationService;
+    private final CompetitionMapper competitionMapper;
 
     @Operation(summary = "Récupérer toutes les compétitions")
     @ApiResponses(value = {
@@ -43,7 +43,7 @@ public class CompetitionController {
     @GetMapping
     public ResponseEntity<List<CompetitionSummaryDTO>> getAllCompetitions() {
         List<Competition> competitions = competitionService.getAllCompetitions();
-        return ResponseEntity.ok(CompetitionMapper.toCompetitionSummaryDTOList(competitions));
+        return ResponseEntity.ok(competitionMapper.toCompetitionSummaryDTOList(competitions));
     }
 
     @Operation(summary = "Récupérer une compétition par ID")
@@ -55,7 +55,7 @@ public class CompetitionController {
     @GetMapping("/{id}")
     public ResponseEntity<CompetitionDTO> getCompetitionById(@PathVariable Integer id) {
         Competition competition = competitionService.getCompetitionById(id);
-        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
+        return ResponseEntity.ok(competitionMapper.toCompetitionDTO(competition));
     }
 
     @Operation(summary = "Créer une nouvelle compétition (Admin)")
@@ -67,9 +67,9 @@ public class CompetitionController {
     })
     @PostMapping
     public ResponseEntity<CompetitionDTO> createCompetition(@Valid @RequestBody CompetitionCreateDTO dto) {
-        Competition competition = toCompetitionEntity(dto);
+        Competition competition = competitionMapper.toCompetitionEntity(dto);
         Competition createdCompetition = competitionService.createCompetition(competition);
-        return ResponseEntity.status(HttpStatus.CREATED).body(CompetitionMapper.toCompetitionDTO(createdCompetition));
+        return ResponseEntity.status(HttpStatus.CREATED).body(competitionMapper.toCompetitionDTO(createdCompetition));
     }
 
     @Operation(summary = "Mettre à jour une compétition (Admin)")
@@ -83,7 +83,7 @@ public class CompetitionController {
     @PutMapping("/{id}")
     public ResponseEntity<CompetitionDTO> updateCompetition(@PathVariable Integer id, @Valid @RequestBody CompetitionUpdateDTO dto) {
         Competition updatedCompetition = competitionService.updateCompetition(id, dto);
-        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(updatedCompetition));
+        return ResponseEntity.ok(competitionMapper.toCompetitionDTO(updatedCompetition));
     }
 
     @Operation(summary = "Générer l'arbre complet d'une compétition (Admin)")
@@ -97,7 +97,7 @@ public class CompetitionController {
     @PostMapping("/{id}/generate-tree")
     public ResponseEntity<CompetitionDTO> generateTree(@PathVariable Integer id, @RequestBody List<Integer> participantIds) {
         Competition competition = treeGenerationService.generateTree(id, participantIds);
-        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
+        return ResponseEntity.ok(competitionMapper.toCompetitionDTO(competition));
     }
 
     @Operation(summary = "Assigner un lieu aux matchs d'une compétition (Admin)",
@@ -112,7 +112,7 @@ public class CompetitionController {
     @PutMapping("/{id}/assign-location")
     public ResponseEntity<CompetitionDTO> assignLocation(@PathVariable Integer id, @Valid @RequestBody AssignLocationDTO dto) {
         Competition competition = competitionService.assignLocation(id, dto.getLocationId(), dto.getRoundNumber());
-        return ResponseEntity.ok(CompetitionMapper.toCompetitionDTO(competition));
+        return ResponseEntity.ok(competitionMapper.toCompetitionDTO(competition));
     }
 
     @Operation(summary = "Supprimer une compétition (Admin)")
@@ -137,25 +137,5 @@ public class CompetitionController {
     public ResponseEntity<List<String>> getCompetitionTypes() {
         List<String> types = List.of(CompetitionType.values()).stream().map(Enum::name).toList();
         return ResponseEntity.ok(types);
-    }
-
-    private Competition toCompetitionEntity(CompetitionCreateDTO dto) {
-        Championship championship = new Championship();
-        championship.setId(dto.getChampionship().getId());
-
-        Competition competition = new Competition();
-        competition.setCompetitionSport(dto.getCompetitionSport());
-        competition.setCompetitionName(dto.getCompetitionName());
-        competition.setCompetitionStartDate(dto.getCompetitionStartDate());
-        competition.setCompetitionEndDate(dto.getCompetitionEndDate());
-        competition.setCompetitionDescription(dto.getCompetitionDescription());
-        competition.setCompetitionStatus(dto.getCompetitionStatus());
-        competition.setNbManches(dto.getNbManches());
-        competition.setCompetitionType(dto.getCompetitionType());
-        competition.setMaxPerHeat(dto.getMaxPerHeat());
-        competition.setParticipantType(dto.getParticipantType());
-        competition.setAssignedCommissaireId(dto.getAssignedCommissaireId());
-        competition.setChampionship(championship);
-        return competition;
     }
 }

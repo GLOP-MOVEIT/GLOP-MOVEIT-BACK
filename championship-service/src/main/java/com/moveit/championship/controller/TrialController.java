@@ -27,6 +27,7 @@ import java.util.List;
 public class TrialController {
 
     private final TrialService trialService;
+    private final CompetitionMapper competitionMapper;
 
     @Operation(summary = "Récupérer une manche par ID")
     @ApiResponses(value = {
@@ -37,7 +38,7 @@ public class TrialController {
     @GetMapping("/{id}")
     public ResponseEntity<TrialDTO> getTrialById(@PathVariable Integer id) {
         Trial trial = trialService.getTrialById(id);
-        return ResponseEntity.ok(CompetitionMapper.toTrialDTO(trial));
+        return ResponseEntity.ok(competitionMapper.toTrialDTO(trial));
     }
 
     @Operation(summary = "Récupérer toutes les manches d'une compétition")
@@ -49,7 +50,7 @@ public class TrialController {
     @GetMapping("/competition/{competitionId}")
     public ResponseEntity<List<TrialDTO>> getTrialsByCompetitionId(@PathVariable Integer competitionId) {
         List<Trial> trials = trialService.getTrialsByCompetitionId(competitionId);
-        return ResponseEntity.ok(trials.stream().map(CompetitionMapper::toTrialDTO).toList());
+        return ResponseEntity.ok(trials.stream().map(competitionMapper::toTrialDTO).toList());
     }
 
     @Operation(summary = "Créer une nouvelle manche pour une compétition (Admin)")
@@ -62,9 +63,9 @@ public class TrialController {
     })
     @PostMapping("/competition/{competitionId}")
     public ResponseEntity<TrialDTO> createTrial(@PathVariable Integer competitionId, @Valid @RequestBody TrialRequestDTO dto) {
-        Trial trial = toTrialEntity(dto);
+        Trial trial = competitionMapper.toTrialEntity(dto);
         Trial createdTrial = trialService.createTrial(competitionId, trial);
-        return ResponseEntity.status(HttpStatus.CREATED).body(CompetitionMapper.toTrialDTO(createdTrial));
+        return ResponseEntity.status(HttpStatus.CREATED).body(competitionMapper.toTrialDTO(createdTrial));
     }
 
     @Operation(summary = "Mettre à jour une manche (Admin)")
@@ -77,9 +78,9 @@ public class TrialController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<TrialDTO> updateTrial(@PathVariable Integer id, @Valid @RequestBody TrialRequestDTO dto) {
-        Trial trial = toTrialEntity(dto);
+        Trial trial = competitionMapper.toTrialEntity(dto);
         Trial updatedTrial = trialService.updateTrial(id, trial);
-        return ResponseEntity.ok(CompetitionMapper.toTrialDTO(updatedTrial));
+        return ResponseEntity.ok(competitionMapper.toTrialDTO(updatedTrial));
     }
 
     @Operation(summary = "Supprimer une manche (Admin)")
@@ -93,19 +94,5 @@ public class TrialController {
     public ResponseEntity<Void> deleteTrial(@PathVariable Integer id) {
         trialService.deleteTrial(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private Trial toTrialEntity(TrialRequestDTO dto) {
-        Trial trial = new Trial();
-        trial.setTrialName(dto.getTrialName());
-        trial.setTrialStartDate(dto.getTrialStartDate());
-        trial.setTrialEndDate(dto.getTrialEndDate());
-        trial.setTrialDescription(dto.getTrialDescription());
-        trial.setTrialStatus(dto.getTrialStatus());
-        trial.setLocationId(dto.getLocationId());
-        trial.setRoundNumber(dto.getRoundNumber());
-        trial.setPosition(dto.getPosition());
-        trial.setParticipantIds(dto.getParticipantIds());
-        return trial;
     }
 }

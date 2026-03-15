@@ -2,8 +2,11 @@ package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.championship.config.TestJacksonConfig;
+import com.moveit.championship.dto.TrialDTO;
+import com.moveit.championship.dto.TrialRequestDTO;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
+import com.moveit.championship.mapper.CompetitionMapper;
 import com.moveit.championship.service.TrialService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +37,9 @@ class TrialControllerTest {
     @MockitoBean
     private TrialService trialService;
 
+    @MockitoBean
+    private CompetitionMapper competitionMapper;
+
     private Trial trial;
 
     @BeforeEach
@@ -45,6 +51,37 @@ class TrialControllerTest {
         trial.setTrialEndDate(LocalDateTime.now());
         trial.setTrialStatus(Status.PLANNED);
         trial.setLocationId(1);
+
+        when(competitionMapper.toTrialDTO(any(Trial.class))).thenAnswer(invocation -> {
+            Trial source = invocation.getArgument(0);
+            return TrialDTO.builder()
+                    .trialId(source.getTrialId())
+                    .trialName(source.getTrialName())
+                    .trialStartDate(source.getTrialStartDate())
+                    .trialEndDate(source.getTrialEndDate())
+                    .trialDescription(source.getTrialDescription())
+                    .trialStatus(source.getTrialStatus())
+                    .locationId(source.getLocationId())
+                    .roundNumber(source.getRoundNumber())
+                    .position(source.getPosition())
+                    .participantIds(source.getParticipantIds())
+                    .build();
+        });
+
+        when(competitionMapper.toTrialEntity(any(TrialRequestDTO.class))).thenAnswer(invocation -> {
+            TrialRequestDTO source = invocation.getArgument(0);
+            Trial mapped = new Trial();
+            mapped.setTrialName(source.getTrialName());
+            mapped.setTrialStartDate(source.getTrialStartDate());
+            mapped.setTrialEndDate(source.getTrialEndDate());
+            mapped.setTrialDescription(source.getTrialDescription());
+            mapped.setTrialStatus(source.getTrialStatus());
+            mapped.setLocationId(source.getLocationId());
+            mapped.setRoundNumber(source.getRoundNumber());
+            mapped.setPosition(source.getPosition());
+            mapped.setParticipantIds(source.getParticipantIds());
+            return mapped;
+        });
     }
 
     @Test

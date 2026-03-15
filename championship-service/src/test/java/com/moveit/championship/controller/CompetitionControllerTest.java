@@ -2,8 +2,12 @@ package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.championship.config.TestJacksonConfig;
+import com.moveit.championship.dto.CompetitionCreateDTO;
+import com.moveit.championship.dto.CompetitionDTO;
+import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.exception.CompetitionNotFoundException;
+import com.moveit.championship.mapper.CompetitionMapper;
 import com.moveit.championship.mother.CompetitionMother;
 import com.moveit.championship.service.CompetitionService;
 import com.moveit.championship.service.TreeGenerationService;
@@ -49,6 +53,9 @@ class CompetitionControllerTest {
     @MockitoBean
     private TreeGenerationService treeGenerationService;
 
+        @MockitoBean
+        private CompetitionMapper competitionMapper;
+
     private Competition competition1;
     private Competition competition2;
 
@@ -59,6 +66,61 @@ class CompetitionControllerTest {
                 .withCompetitionId(2)
                 .withCompetitionName("Coupe du Monde")
                 .build();
+
+                when(competitionMapper.toCompetitionDTO(any(Competition.class))).thenAnswer(invocation -> {
+                        Competition source = invocation.getArgument(0);
+                        return CompetitionDTO.builder()
+                                        .competitionId(source.getCompetitionId())
+                                        .championshipId(source.getChampionship() != null ? source.getChampionship().getId() : null)
+                                        .competitionSport(source.getCompetitionSport())
+                                        .competitionName(source.getCompetitionName())
+                                        .competitionStartDate(source.getCompetitionStartDate())
+                                        .competitionEndDate(source.getCompetitionEndDate())
+                                        .competitionDescription(source.getCompetitionDescription())
+                                        .competitionStatus(source.getCompetitionStatus())
+                                        .nbManches(source.getNbManches())
+                                        .competitionType(source.getCompetitionType())
+                                        .maxPerHeat(source.getMaxPerHeat())
+                                        .participantType(source.getParticipantType())
+                                        .assignedCommissaireId(source.getAssignedCommissaireId())
+                                        .build();
+                });
+
+                when(competitionMapper.toCompetitionSummaryDTOList(anyList())).thenAnswer(invocation -> {
+                        List<Competition> sourceList = invocation.getArgument(0);
+                        return sourceList.stream().map(source -> CompetitionSummaryDTO.builder()
+                                        .competitionId(source.getCompetitionId())
+                                        .championshipId(source.getChampionship() != null ? source.getChampionship().getId() : null)
+                                        .competitionSport(source.getCompetitionSport())
+                                        .competitionName(source.getCompetitionName())
+                                        .competitionStartDate(source.getCompetitionStartDate())
+                                        .competitionEndDate(source.getCompetitionEndDate())
+                                        .competitionDescription(source.getCompetitionDescription())
+                                        .competitionStatus(source.getCompetitionStatus())
+                                        .nbManches(source.getNbManches())
+                                        .competitionType(source.getCompetitionType())
+                                        .maxPerHeat(source.getMaxPerHeat())
+                                        .participantType(source.getParticipantType())
+                                        .assignedCommissaireId(source.getAssignedCommissaireId())
+                                        .build()).toList();
+                });
+
+                when(competitionMapper.toCompetitionEntity(any(CompetitionCreateDTO.class))).thenAnswer(invocation -> {
+                        CompetitionCreateDTO source = invocation.getArgument(0);
+                        Competition mapped = new Competition();
+                        mapped.setCompetitionSport(source.getCompetitionSport());
+                        mapped.setCompetitionName(source.getCompetitionName());
+                        mapped.setCompetitionStartDate(source.getCompetitionStartDate());
+                        mapped.setCompetitionEndDate(source.getCompetitionEndDate());
+                        mapped.setCompetitionDescription(source.getCompetitionDescription());
+                        mapped.setCompetitionStatus(source.getCompetitionStatus());
+                        mapped.setNbManches(source.getNbManches());
+                        mapped.setCompetitionType(source.getCompetitionType());
+                        mapped.setMaxPerHeat(source.getMaxPerHeat());
+                        mapped.setParticipantType(source.getParticipantType());
+                        mapped.setAssignedCommissaireId(source.getAssignedCommissaireId());
+                        return mapped;
+                });
     }
 
     @Test

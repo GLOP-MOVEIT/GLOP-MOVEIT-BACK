@@ -28,6 +28,7 @@ import java.util.List;
 public class ChampionshipController {
 
     private final ChampionshipService championshipService;
+    private final ChampionshipMapper championshipMapper;
 
     @Operation(summary = "Récupérer tous les championnats")
     @ApiResponses(value = {
@@ -37,7 +38,7 @@ public class ChampionshipController {
     @GetMapping
     public ResponseEntity<List<ChampionshipSummaryDTO>> getAllChampionships() {
         List<Championship> championships = championshipService.getAllChampionships();
-        return ResponseEntity.ok(ChampionshipMapper.toChampionshipSummaryDTOList(championships));
+        return ResponseEntity.ok(championshipMapper.toChampionshipSummaryDTOList(championships));
     }
 
     @Operation(summary = "Récupérer un championnat par ID")
@@ -49,7 +50,7 @@ public class ChampionshipController {
     @GetMapping("/{id}")
     public ResponseEntity<ChampionshipDTO> getChampionshipById(@PathVariable Integer id) {
         Championship championship = championshipService.getChampionshipById(id);
-        return ResponseEntity.ok(ChampionshipMapper.toChampionshipDTO(championship));
+        return ResponseEntity.ok(championshipMapper.toChampionshipDTO(championship));
     }
 
     @Operation(summary = "Créer un nouveau championnat (Admin)")
@@ -61,9 +62,9 @@ public class ChampionshipController {
     })
     @PostMapping
     public ResponseEntity<ChampionshipDTO> createChampionship(@Valid @RequestBody ChampionshipCreateDTO dto) {
-        Championship championship = toChampionshipEntity(dto);
+        Championship championship = championshipMapper.toChampionshipEntity(dto);
         Championship createdChampionship = championshipService.createChampionship(championship);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ChampionshipMapper.toChampionshipDTO(createdChampionship));
+        return ResponseEntity.status(HttpStatus.CREATED).body(championshipMapper.toChampionshipDTO(createdChampionship));
     }
 
     @Operation(summary = "Mettre à jour un championnat (Admin)")
@@ -77,7 +78,7 @@ public class ChampionshipController {
     @PutMapping("/{id}")
     public ResponseEntity<ChampionshipDTO> updateChampionship(@PathVariable Integer id, @Valid @RequestBody ChampionshipUpdateDTO dto) {
         Championship updatedChampionship = championshipService.updateChampionship(id, dto);
-        return ResponseEntity.ok(ChampionshipMapper.toChampionshipDTO(updatedChampionship));
+        return ResponseEntity.ok(championshipMapper.toChampionshipDTO(updatedChampionship));
     }
 
     @Operation(summary = "Supprimer un championnat (Admin)")
@@ -91,15 +92,5 @@ public class ChampionshipController {
     public ResponseEntity<Void> deleteChampionship(@PathVariable Integer id) {
         championshipService.deleteChampionship(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private Championship toChampionshipEntity(ChampionshipCreateDTO dto) {
-        Championship championship = new Championship();
-        championship.setName(dto.getName());
-        championship.setDescription(dto.getDescription());
-        championship.setStartDate(dto.getStartDate());
-        championship.setEndDate(dto.getEndDate());
-        championship.setStatus(dto.getStatus());
-        return championship;
     }
 }
