@@ -18,7 +18,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -45,9 +48,9 @@ public class TaskAssignmentService {
         }
 
         List<Long> orderedVolunteerIds = volunteerIds.stream()
-                .filter(java.util.Objects::nonNull)
-                .collect(java.util.stream.Collectors.collectingAndThen(
-                        java.util.stream.Collectors.toCollection(LinkedHashSet::new),
+            .filter(Objects::nonNull)
+            .collect(Collectors.collectingAndThen(
+                Collectors.toCollection(LinkedHashSet::new),
                         List::copyOf));
 
         if (orderedVolunteerIds.isEmpty()) {
@@ -60,7 +63,7 @@ public class TaskAssignmentService {
                 .filter(existing -> existing.getTask() != null && !existing.getTask().getId().equals(taskId))
                 .filter(existing -> hasScheduleOverlap(task, existing.getTask()))
                 .map(TaskAssignment::getVolunteerId)
-                .collect(java.util.stream.Collectors.toSet());
+            .collect(Collectors.toSet());
 
         return orderedVolunteerIds.stream()
                 .filter(volunteerId -> !busyVolunteerIds.contains(volunteerId))
@@ -80,7 +83,7 @@ public class TaskAssignmentService {
             .findByTaskType_IdAndUserIdIn(task.getTaskType().getId(), availableVolunteerIds)
             .stream()
             .map(VolunteerPreference::getUserId)
-            .collect(java.util.stream.Collectors.toSet());
+            .collect(Collectors.toSet());
 
         List<VolunteerWithPreferenceDTO> preferred = availableVolunteerIds.stream()
             .filter(preferredVolunteerIds::contains)
@@ -92,7 +95,7 @@ public class TaskAssignmentService {
             .map(volunteerId -> new VolunteerWithPreferenceDTO(volunteerId, false))
             .toList();
 
-        return java.util.stream.Stream.concat(preferred.stream(), others.stream()).toList();
+        return Stream.concat(preferred.stream(), others.stream()).toList();
         }
 
     public List<TaskAssignment> getAssignmentsByStatus(AssignmentStatus status) {
