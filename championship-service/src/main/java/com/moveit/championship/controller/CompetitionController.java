@@ -1,9 +1,11 @@
 package com.moveit.championship.controller;
 
 import com.moveit.championship.dto.AssignLocationDTO;
+import com.moveit.championship.dto.CompetitionCreateDTO;
 import com.moveit.championship.dto.CompetitionDTO;
 import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.dto.CompetitionUpdateDTO;
+import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.mapper.CompetitionMapper;
@@ -64,7 +66,8 @@ public class CompetitionController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping
-    public ResponseEntity<CompetitionDTO> createCompetition(@Valid @RequestBody Competition competition) {
+    public ResponseEntity<CompetitionDTO> createCompetition(@Valid @RequestBody CompetitionCreateDTO dto) {
+        Competition competition = toCompetitionEntity(dto);
         Competition createdCompetition = competitionService.createCompetition(competition);
         return ResponseEntity.status(HttpStatus.CREATED).body(CompetitionMapper.toCompetitionDTO(createdCompetition));
     }
@@ -134,5 +137,25 @@ public class CompetitionController {
     public ResponseEntity<List<String>> getCompetitionTypes() {
         List<String> types = List.of(CompetitionType.values()).stream().map(Enum::name).toList();
         return ResponseEntity.ok(types);
+    }
+
+    private Competition toCompetitionEntity(CompetitionCreateDTO dto) {
+        Championship championship = new Championship();
+        championship.setId(dto.getChampionship().getId());
+
+        Competition competition = new Competition();
+        competition.setCompetitionSport(dto.getCompetitionSport());
+        competition.setCompetitionName(dto.getCompetitionName());
+        competition.setCompetitionStartDate(dto.getCompetitionStartDate());
+        competition.setCompetitionEndDate(dto.getCompetitionEndDate());
+        competition.setCompetitionDescription(dto.getCompetitionDescription());
+        competition.setCompetitionStatus(dto.getCompetitionStatus());
+        competition.setNbManches(dto.getNbManches());
+        competition.setCompetitionType(dto.getCompetitionType());
+        competition.setMaxPerHeat(dto.getMaxPerHeat());
+        competition.setParticipantType(dto.getParticipantType());
+        competition.setAssignedCommissaireId(dto.getAssignedCommissaireId());
+        competition.setChampionship(championship);
+        return competition;
     }
 }

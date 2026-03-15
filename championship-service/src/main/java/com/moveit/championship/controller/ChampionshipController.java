@@ -1,6 +1,7 @@
 package com.moveit.championship.controller;
 
 import com.moveit.championship.dto.ChampionshipDTO;
+import com.moveit.championship.dto.ChampionshipCreateDTO;
 import com.moveit.championship.dto.ChampionshipSummaryDTO;
 import com.moveit.championship.dto.ChampionshipUpdateDTO;
 import com.moveit.championship.entity.Championship;
@@ -59,7 +60,8 @@ public class ChampionshipController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping
-    public ResponseEntity<ChampionshipDTO> createChampionship(@Valid @RequestBody Championship championship) {
+    public ResponseEntity<ChampionshipDTO> createChampionship(@Valid @RequestBody ChampionshipCreateDTO dto) {
+        Championship championship = toChampionshipEntity(dto);
         Championship createdChampionship = championshipService.createChampionship(championship);
         return ResponseEntity.status(HttpStatus.CREATED).body(ChampionshipMapper.toChampionshipDTO(createdChampionship));
     }
@@ -89,5 +91,15 @@ public class ChampionshipController {
     public ResponseEntity<Void> deleteChampionship(@PathVariable Integer id) {
         championshipService.deleteChampionship(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private Championship toChampionshipEntity(ChampionshipCreateDTO dto) {
+        Championship championship = new Championship();
+        championship.setName(dto.getName());
+        championship.setDescription(dto.getDescription());
+        championship.setStartDate(dto.getStartDate());
+        championship.setEndDate(dto.getEndDate());
+        championship.setStatus(dto.getStatus());
+        return championship;
     }
 }

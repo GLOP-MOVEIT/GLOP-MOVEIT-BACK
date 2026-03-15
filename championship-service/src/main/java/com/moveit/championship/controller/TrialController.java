@@ -2,6 +2,7 @@ package com.moveit.championship.controller;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.moveit.championship.dto.TrialRequestDTO;
 import com.moveit.championship.dto.TrialDTO;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.mapper.CompetitionMapper;
@@ -60,7 +61,8 @@ public class TrialController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/competition/{competitionId}")
-    public ResponseEntity<TrialDTO> createTrial(@PathVariable Integer competitionId, @Valid @RequestBody Trial trial) {
+    public ResponseEntity<TrialDTO> createTrial(@PathVariable Integer competitionId, @Valid @RequestBody TrialRequestDTO dto) {
+        Trial trial = toTrialEntity(dto);
         Trial createdTrial = trialService.createTrial(competitionId, trial);
         return ResponseEntity.status(HttpStatus.CREATED).body(CompetitionMapper.toTrialDTO(createdTrial));
     }
@@ -74,7 +76,8 @@ public class TrialController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PutMapping("/{id}")
-    public ResponseEntity<TrialDTO> updateTrial(@PathVariable Integer id, @Valid @RequestBody Trial trial) {
+    public ResponseEntity<TrialDTO> updateTrial(@PathVariable Integer id, @Valid @RequestBody TrialRequestDTO dto) {
+        Trial trial = toTrialEntity(dto);
         Trial updatedTrial = trialService.updateTrial(id, trial);
         return ResponseEntity.ok(CompetitionMapper.toTrialDTO(updatedTrial));
     }
@@ -90,5 +93,19 @@ public class TrialController {
     public ResponseEntity<Void> deleteTrial(@PathVariable Integer id) {
         trialService.deleteTrial(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private Trial toTrialEntity(TrialRequestDTO dto) {
+        Trial trial = new Trial();
+        trial.setTrialName(dto.getTrialName());
+        trial.setTrialStartDate(dto.getTrialStartDate());
+        trial.setTrialEndDate(dto.getTrialEndDate());
+        trial.setTrialDescription(dto.getTrialDescription());
+        trial.setTrialStatus(dto.getTrialStatus());
+        trial.setLocationId(dto.getLocationId());
+        trial.setRoundNumber(dto.getRoundNumber());
+        trial.setPosition(dto.getPosition());
+        trial.setParticipantIds(dto.getParticipantIds());
+        return trial;
     }
 }

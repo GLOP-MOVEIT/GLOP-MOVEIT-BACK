@@ -19,7 +19,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -127,7 +129,7 @@ class CompetitionControllerTest {
 
         mockMvc.perform(post("/championships/competitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(competition1)))
+                                                .content(toCreateCompetitionJson(competition1)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.competitionId", equalTo(competition1.getCompetitionId())))
                 .andExpect(jsonPath("$.competitionName", equalTo(competition1.getCompetitionName())));
@@ -145,7 +147,7 @@ class CompetitionControllerTest {
 
         mockMvc.perform(post("/championships/competitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(competitionWithCommissaire)))
+                        .content(toCreateCompetitionJson(competitionWithCommissaire)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.assignedCommissaireId", equalTo(7)));
 
@@ -277,7 +279,6 @@ class CompetitionControllerTest {
         when(competitionService.assignLocation(eq(id), eq(5), isNull())).thenReturn(competition1);
 
         String body = "{\"locationId\": 5}";
-
         mockMvc.perform(put("/championships/competitions/" + id + "/assign-location")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
@@ -335,4 +336,24 @@ class CompetitionControllerTest {
 
         verify(competitionService, never()).assignLocation(any(), any(), any());
     }
+
+        private String toCreateCompetitionJson(Competition competition) throws Exception {
+                Map<String, Object> payload = new LinkedHashMap<>();
+                payload.put("competitionSport", competition.getCompetitionSport());
+                payload.put("competitionName", competition.getCompetitionName());
+                payload.put("competitionStartDate", competition.getCompetitionStartDate());
+                payload.put("competitionEndDate", competition.getCompetitionEndDate());
+                payload.put("competitionDescription", competition.getCompetitionDescription());
+                payload.put("competitionStatus", competition.getCompetitionStatus());
+                payload.put("nbManches", competition.getNbManches());
+                payload.put("competitionType", competition.getCompetitionType());
+                payload.put("maxPerHeat", competition.getMaxPerHeat());
+                payload.put("participantType", competition.getParticipantType());
+                payload.put("assignedCommissaireId", competition.getAssignedCommissaireId());
+
+                Integer championshipId = competition.getChampionship() != null ? competition.getChampionship().getId() : null;
+                payload.put("championship", Map.of("id", championshipId));
+
+                return objectMapper.writeValueAsString(payload);
+        }
 }
