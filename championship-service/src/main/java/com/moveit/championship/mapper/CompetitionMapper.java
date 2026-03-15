@@ -5,7 +5,6 @@ import com.moveit.championship.dto.CompetitionDTO;
 import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.dto.EventDTO;
 import com.moveit.championship.dto.TrialDTO;
-import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Event;
 import com.moveit.championship.entity.Trial;
@@ -42,25 +41,11 @@ public interface CompetitionMapper {
         return competitions.stream().map(this::toCompetitionSummaryDTO).toList();
     }
 
-    default Competition toCompetitionEntity(CompetitionCreateDTO dto) {
-        Championship championship = new Championship();
-        championship.setId(dto.getChampionship().getId());
-
-        Competition competition = new Competition();
-        competition.setCompetitionSport(dto.getCompetitionSport());
-        competition.setCompetitionName(dto.getCompetitionName());
-        competition.setCompetitionStartDate(dto.getCompetitionStartDate());
-        competition.setCompetitionEndDate(dto.getCompetitionEndDate());
-        competition.setCompetitionDescription(dto.getCompetitionDescription());
-        competition.setCompetitionStatus(dto.getCompetitionStatus());
-        competition.setNbManches(dto.getNbManches());
-        competition.setCompetitionType(dto.getCompetitionType());
-        competition.setMaxPerHeat(dto.getMaxPerHeat());
-        competition.setParticipantType(dto.getParticipantType());
-        competition.setAssignedCommissaireId(dto.getAssignedCommissaireId());
-        competition.setChampionship(championship);
-        return competition;
-    }
+    @Mapping(target = "competitionId", ignore = true)
+    @Mapping(target = "events", ignore = true)
+    @Mapping(target = "trials", ignore = true)
+    @Mapping(target = "championship.id", source = "championship.id")
+    Competition toCompetitionEntity(CompetitionCreateDTO dto);
 
     default List<TrialDTO> toSortedTrialDTOList(List<Trial> trials) {
         return TrialMapper.INSTANCE.toSortedTrialDTOList(trials);

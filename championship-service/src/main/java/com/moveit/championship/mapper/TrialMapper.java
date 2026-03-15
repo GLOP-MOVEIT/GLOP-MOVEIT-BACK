@@ -20,19 +20,10 @@ public interface TrialMapper {
     @Mapping(target = "competitionId", expression = "java(trial.getCompetition() != null ? trial.getCompetition().getCompetitionId() : null)")
     TrialDTO toTrialDTO(Trial trial);
 
-    default Trial toTrialEntity(TrialRequestDTO dto) {
-        Trial trial = new Trial();
-        trial.setTrialName(dto.getTrialName());
-        trial.setTrialStartDate(dto.getTrialStartDate());
-        trial.setTrialEndDate(dto.getTrialEndDate());
-        trial.setTrialDescription(dto.getTrialDescription());
-        trial.setTrialStatus(dto.getTrialStatus());
-        trial.setLocationId(dto.getLocationId());
-        trial.setRoundNumber(dto.getRoundNumber());
-        trial.setPosition(dto.getPosition());
-        trial.setParticipantIds(dto.getParticipantIds());
-        return trial;
-    }
+    @Mapping(target = "trialId", ignore = true)
+    @Mapping(target = "competition", ignore = true)
+    @Mapping(target = "nextTrial", ignore = true)
+    Trial toTrialEntity(TrialRequestDTO dto);
 
     default List<TrialDTO> toSortedTrialDTOList(List<Trial> trials) {
         if (trials == null) {
