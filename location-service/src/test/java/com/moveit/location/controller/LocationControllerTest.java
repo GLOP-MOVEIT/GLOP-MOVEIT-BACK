@@ -1,8 +1,10 @@
 package com.moveit.location.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.location.dto.LocationDTO;
 import com.moveit.location.entity.Location;
 import com.moveit.location.exception.LocationNotFoundException;
+import com.moveit.location.mapper.LocationMapper;
 import com.moveit.location.mother.LocationMother;
 import com.moveit.location.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +41,9 @@ class LocationControllerTest {
     @MockitoBean
     private LocationService locationService;
 
+        @MockitoBean
+        private LocationMapper locationMapper;
+
     private Location location1;
     private Location location2;
 
@@ -51,6 +56,34 @@ class LocationControllerTest {
                 .withLatitude(48.8414)
                 .withLongitude(2.2530)
                 .build();
+
+                when(locationMapper.toDto(any(Location.class))).thenAnswer(invocation -> {
+                        Location source = invocation.getArgument(0);
+                        return LocationDTO.builder()
+                                        .locationId(source.getLocationId())
+                                        .name(source.getName())
+                                        .latitude(source.getLatitude())
+                                        .longitude(source.getLongitude())
+                                        .mainEntrance(source.getMainEntrance())
+                                        .refereeEntrance(source.getRefereeEntrance())
+                                        .athleteEntrance(source.getAthleteEntrance())
+                                        .description(source.getDescription())
+                                        .build();
+                });
+
+                when(locationMapper.toEntity(any(LocationDTO.class))).thenAnswer(invocation -> {
+                        LocationDTO source = invocation.getArgument(0);
+                        Location mapped = new Location();
+                        mapped.setLocationId(source.getLocationId());
+                        mapped.setName(source.getName());
+                        mapped.setLatitude(source.getLatitude());
+                        mapped.setLongitude(source.getLongitude());
+                        mapped.setMainEntrance(source.getMainEntrance());
+                        mapped.setRefereeEntrance(source.getRefereeEntrance());
+                        mapped.setAthleteEntrance(source.getAthleteEntrance());
+                        mapped.setDescription(source.getDescription());
+                        return mapped;
+                });
     }
 
     @Test

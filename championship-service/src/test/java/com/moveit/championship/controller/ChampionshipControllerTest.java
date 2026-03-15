@@ -2,10 +2,14 @@ package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.championship.config.TestJacksonConfig;
+import com.moveit.championship.dto.ChampionshipCreateDTO;
+import com.moveit.championship.dto.ChampionshipDTO;
+import com.moveit.championship.dto.ChampionshipSummaryDTO;
 import com.moveit.championship.dto.ChampionshipUpdateDTO;
 import com.moveit.championship.entity.Championship;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.exception.ChampionshipNotFoundException;
+import com.moveit.championship.mapper.ChampionshipMapper;
 import com.moveit.championship.mother.ChampionshipMother;
 import com.moveit.championship.service.ChampionshipService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +46,9 @@ class ChampionshipControllerTest {
     @MockitoBean
     private ChampionshipService championshipService;
 
+        @MockitoBean
+        private ChampionshipMapper championshipMapper;
+
     private Championship championship1;
     private Championship championship2;
 
@@ -52,6 +59,42 @@ class ChampionshipControllerTest {
         championship2 = ChampionshipMother.championship()
                 .withId(2)
                 .build();
+
+                when(championshipMapper.toChampionshipDTO(any(Championship.class))).thenAnswer(invocation -> {
+                        Championship source = invocation.getArgument(0);
+                        return ChampionshipDTO.builder()
+                                        .id(source.getId())
+                                        .name(source.getName())
+                                        .description(source.getDescription())
+                                        .startDate(source.getStartDate())
+                                        .endDate(source.getEndDate())
+                                        .status(source.getStatus())
+                                        .competitions(List.of())
+                                        .build();
+                });
+
+                when(championshipMapper.toChampionshipSummaryDTOList(anyList())).thenAnswer(invocation -> {
+                        List<Championship> sourceList = invocation.getArgument(0);
+                        return sourceList.stream().map(source -> ChampionshipSummaryDTO.builder()
+                                        .id(source.getId())
+                                        .name(source.getName())
+                                        .description(source.getDescription())
+                                        .startDate(source.getStartDate())
+                                        .endDate(source.getEndDate())
+                                        .status(source.getStatus())
+                                        .build()).toList();
+                });
+
+                when(championshipMapper.toChampionshipEntity(any(ChampionshipCreateDTO.class))).thenAnswer(invocation -> {
+                        ChampionshipCreateDTO source = invocation.getArgument(0);
+                        Championship mapped = new Championship();
+                        mapped.setName(source.getName());
+                        mapped.setDescription(source.getDescription());
+                        mapped.setStartDate(source.getStartDate());
+                        mapped.setEndDate(source.getEndDate());
+                        mapped.setStatus(source.getStatus());
+                        return mapped;
+                });
     }
 
     @Test

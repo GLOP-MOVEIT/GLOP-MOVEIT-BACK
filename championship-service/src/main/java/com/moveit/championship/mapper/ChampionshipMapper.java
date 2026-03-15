@@ -1,50 +1,27 @@
 package com.moveit.championship.mapper;
 
 import com.moveit.championship.dto.ChampionshipDTO;
+import com.moveit.championship.dto.ChampionshipCreateDTO;
 import com.moveit.championship.dto.ChampionshipSummaryDTO;
 import com.moveit.championship.entity.Championship;
+import org.mapstruct.Mapper;
 
 import java.util.Collections;
 import java.util.List;
 
-public class ChampionshipMapper {
+@Mapper(componentModel = "spring", uses = CompetitionMapper.class)
+public interface ChampionshipMapper {
 
-    private ChampionshipMapper() {
-    }
+    ChampionshipSummaryDTO toChampionshipSummaryDTO(Championship championship);
 
-    public static ChampionshipSummaryDTO toChampionshipSummaryDTO(Championship championship) {
-        if (championship == null) return null;
+    ChampionshipDTO toChampionshipDTO(Championship championship);
 
-        return ChampionshipSummaryDTO.builder()
-                .id(championship.getId())
-                .name(championship.getName())
-                .description(championship.getDescription())
-                .startDate(championship.getStartDate())
-                .endDate(championship.getEndDate())
-                .status(championship.getStatus())
-                .build();
-    }
+    Championship toChampionshipEntity(ChampionshipCreateDTO dto);
 
-    public static List<ChampionshipSummaryDTO> toChampionshipSummaryDTOList(List<Championship> championships) {
-        if (championships == null) return Collections.emptyList();
-        return championships.stream().map(ChampionshipMapper::toChampionshipSummaryDTO).toList();
-    }
-
-    public static ChampionshipDTO toChampionshipDTO(Championship championship) {
-        if (championship == null) return null;
-
-        return ChampionshipDTO.builder()
-                .id(championship.getId())
-                .name(championship.getName())
-                .description(championship.getDescription())
-                .startDate(championship.getStartDate())
-                .endDate(championship.getEndDate())
-                .status(championship.getStatus())
-                .competitions(championship.getCompetitions() != null
-                        ? championship.getCompetitions().stream()
-                            .map(CompetitionMapper::toCompetitionSummaryDTO)
-                            .toList()
-                        : Collections.emptyList())
-                .build();
+    default List<ChampionshipSummaryDTO> toChampionshipSummaryDTOList(List<Championship> championships) {
+        if (championships == null) {
+            return Collections.emptyList();
+        }
+        return championships.stream().map(this::toChampionshipSummaryDTO).toList();
     }
 }

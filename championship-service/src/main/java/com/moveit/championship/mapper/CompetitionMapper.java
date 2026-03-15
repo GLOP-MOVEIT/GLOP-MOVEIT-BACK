@@ -1,5 +1,6 @@
 package com.moveit.championship.mapper;
 
+import com.moveit.championship.dto.CompetitionCreateDTO;
 import com.moveit.championship.dto.CompetitionDTO;
 import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.dto.EventDTO;
@@ -7,105 +8,53 @@ import com.moveit.championship.dto.TrialDTO;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Event;
 import com.moveit.championship.entity.Trial;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.Collections;
 import java.util.List;
 
-public class CompetitionMapper {
+@Mapper(componentModel = "spring")
+public interface CompetitionMapper {
 
-    private CompetitionMapper() {
+    EventDTO toEventDTO(Event event);
+
+    @Mapping(target = "championshipId", expression = "java(competition.getChampionship() != null ? competition.getChampionship().getId() : null)")
+    @Mapping(target = "events", expression = "java(toEventDTOList(competition.getEvents()))")
+    @Mapping(target = "trials", expression = "java(toSortedTrialDTOList(competition.getTrials()))")
+    CompetitionDTO toCompetitionDTO(Competition competition);
+
+    @Mapping(target = "championshipId", expression = "java(competition.getChampionship() != null ? competition.getChampionship().getId() : null)")
+    CompetitionSummaryDTO toCompetitionSummaryDTO(Competition competition);
+
+    default List<CompetitionDTO> toCompetitionDTOList(List<Competition> competitions) {
+        if (competitions == null) {
+            return Collections.emptyList();
+        }
+        return competitions.stream().map(this::toCompetitionDTO).toList();
     }
 
-    public static TrialDTO toTrialDTO(Trial trial) {
-        if (trial == null) return null;
-
-        return TrialDTO.builder()
-                .trialId(trial.getTrialId())
-                .trialName(trial.getTrialName())
-                .trialStartDate(trial.getTrialStartDate())
-                .trialEndDate(trial.getTrialEndDate())
-                .trialDescription(trial.getTrialDescription())
-                .trialStatus(trial.getTrialStatus())
-                .locationId(trial.getLocationId())
-                .roundNumber(trial.getRoundNumber())
-                .position(trial.getPosition())
-                .nextTrialId(trial.getNextTrial() != null ? trial.getNextTrial().getTrialId() : null)
-                .competitionId(trial.getCompetition() != null ? trial.getCompetition().getCompetitionId() : null)
-                .participantIds(trial.getParticipantIds())
-                .build();
+    default List<CompetitionSummaryDTO> toCompetitionSummaryDTOList(List<Competition> competitions) {
+        if (competitions == null) {
+            return Collections.emptyList();
+        }
+        return competitions.stream().map(this::toCompetitionSummaryDTO).toList();
     }
 
-    public static EventDTO toEventDTO(Event event) {
-        if (event == null) return null;
+    @Mapping(target = "competitionId", ignore = true)
+    @Mapping(target = "events", ignore = true)
+    @Mapping(target = "trials", ignore = true)
+    @Mapping(target = "championship.id", source = "championship.id")
+    Competition toCompetitionEntity(CompetitionCreateDTO dto);
 
-        return EventDTO.builder()
-                .eventId(event.getEventId())
-                .eventName(event.getEventName())
-                .eventDate(event.getEventDate())
-                .eventDescription(event.getEventDescription())
-                .build();
+    default List<TrialDTO> toSortedTrialDTOList(List<Trial> trials) {
+        return TrialMapper.INSTANCE.toSortedTrialDTOList(trials);
     }
 
-    public static CompetitionDTO toCompetitionDTO(Competition competition) {
-        if (competition == null) return null;
-
-        List<TrialDTO> trialDTOs = competition.getTrials() != null
-                ? competition.getTrials().stream()
-                    .sorted(java.util.Comparator.comparing(com.moveit.championship.entity.Trial::getRoundNumber)
-                        .thenComparing(com.moveit.championship.entity.Trial::getPosition))
-                    .map(CompetitionMapper::toTrialDTO).toList()
-                : Collections.emptyList();
-
-        List<EventDTO> eventDTOs = competition.getEvents() != null
-                ? competition.getEvents().stream().map(CompetitionMapper::toEventDTO).toList()
-                : Collections.emptyList();
-
-        return CompetitionDTO.builder()
-                .competitionId(competition.getCompetitionId())
-                .championshipId(competition.getChampionship() != null ? competition.getChampionship().getId() : null)
-                .competitionSport(competition.getCompetitionSport())
-                .competitionName(competition.getCompetitionName())
-                .competitionStartDate(competition.getCompetitionStartDate())
-                .competitionEndDate(competition.getCompetitionEndDate())
-                .competitionDescription(competition.getCompetitionDescription())
-                .competitionStatus(competition.getCompetitionStatus())
-                .events(eventDTOs)
-                .trials(trialDTOs)
-                .nbManches(competition.getNbManches())
-                .competitionType(competition.getCompetitionType())
-                .maxPerHeat(competition.getMaxPerHeat())
-                .participantType(competition.getParticipantType())
-                .assignedCommissaireId(competition.getAssignedCommissaireId())
-                .build();
-    }
-
-    public static List<CompetitionDTO> toCompetitionDTOList(List<Competition> competitions) {
-        if (competitions == null) return Collections.emptyList();
-        return competitions.stream().map(CompetitionMapper::toCompetitionDTO).toList();
-    }
-
-    public static CompetitionSummaryDTO toCompetitionSummaryDTO(Competition competition) {
-        if (competition == null) return null;
-
-        return CompetitionSummaryDTO.builder()
-                .competitionId(competition.getCompetitionId())
-                .championshipId(competition.getChampionship() != null ? competition.getChampionship().getId() : null)
-                .competitionSport(competition.getCompetitionSport())
-                .competitionName(competition.getCompetitionName())
-                .competitionStartDate(competition.getCompetitionStartDate())
-                .competitionEndDate(competition.getCompetitionEndDate())
-                .competitionDescription(competition.getCompetitionDescription())
-                .competitionStatus(competition.getCompetitionStatus())
-                .nbManches(competition.getNbManches())
-                .competitionType(competition.getCompetitionType())
-                .maxPerHeat(competition.getMaxPerHeat())
-                .participantType(competition.getParticipantType())
-                .assignedCommissaireId(competition.getAssignedCommissaireId())
-                .build();
-    }
-
-    public static List<CompetitionSummaryDTO> toCompetitionSummaryDTOList(List<Competition> competitions) {
-        if (competitions == null) return Collections.emptyList();
-        return competitions.stream().map(CompetitionMapper::toCompetitionSummaryDTO).toList();
+    default List<EventDTO> toEventDTOList(List<Event> events) {
+        if (events == null) {
+            return Collections.emptyList();
+        }
+        return events.stream().map(this::toEventDTO).toList();
     }
 }
