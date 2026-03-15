@@ -37,7 +37,8 @@
         <maven-surefire.version>3.5.4</maven-surefire.version>
         <sonar.coverage.exclusions>
             **/configuration/**,
-            **/*Application.java
+            **/*Application.java,
+            **/mapper/**
         </sonar.coverage.exclusions>
     </properties>
 
