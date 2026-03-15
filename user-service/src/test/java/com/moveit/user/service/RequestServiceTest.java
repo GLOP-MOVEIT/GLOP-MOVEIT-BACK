@@ -1,5 +1,6 @@
 package com.moveit.user.service;
 
+import com.moveit.user.dto.CoverLetter;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
@@ -7,6 +8,7 @@ import com.moveit.user.entity.RequestEntity;
 import com.moveit.user.entity.RoleEntity;
 import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.RequestNotFoundException;
+import com.moveit.user.exception.UserNotASpectatorException;
 import com.moveit.user.mapper.RequestMapper;
 import com.moveit.user.repository.RequestRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,9 +54,14 @@ class RequestServiceTest {
     private UserEntity testUser;
     private RoleEntity athleteRole;
     private RoleEntity volunteerRole;
+    private RoleEntity spectatorRole;
 
     @BeforeEach
     void setUp() {
+        spectatorRole = new RoleEntity();
+        spectatorRole.setRoleId(3);
+        spectatorRole.setName("SPECTATOR");
+
         testUser = new UserEntity();
         testUser.setUserId(1);
         testUser.setFirstName("John");
@@ -63,6 +70,7 @@ class RequestServiceTest {
         testUser.setPhoneNumber("+33123456789");
         testUser.setLanguage("FR");
         testUser.setAcceptsNotifications(true);
+        testUser.setRole(spectatorRole);
 
         athleteRole = new RoleEntity();
         athleteRole.setRoleId(1);
@@ -77,7 +85,6 @@ class RequestServiceTest {
         testRequestEntity.setRequestStatus(RequestStatus.PENDING);
         testRequestEntity.setUser(testUser);
         testRequestEntity.setRole(athleteRole);
-        testRequestEntity.setDocuments(List.of());
 
         testRequest = new Request();
         testRequest.setRequestId(1);
@@ -173,12 +180,26 @@ class RequestServiceTest {
     }
 
     @Test
+    void createAthleteRequest_ShouldThrowException_WhenUserNotSpectator() {
+        testUser.setRole(athleteRole);
+        when(userService.getUserEntityById(1)).thenReturn(testUser);
+
+        assertThatThrownBy(() -> requestService.createAthleteRequest(1))
+                .isInstanceOf(UserNotASpectatorException.class)
+                .hasMessage("User with id 1 is not a spectator");
+
+        verify(userService).getUserEntityById(1);
+        verify(requestRepository, never()).save(any());
+    }
+
+    @Test
     void createVolunteerRequest_ShouldCreateRequestWithVolunteerRole() {
         RequestEntity volunteerRequestEntity = new RequestEntity();
         volunteerRequestEntity.setRequestId(2);
         volunteerRequestEntity.setRequestStatus(RequestStatus.PENDING);
         volunteerRequestEntity.setUser(testUser);
         volunteerRequestEntity.setRole(volunteerRole);
+        volunteerRequestEntity.setCoverLetter("My motivation");
 
         Request volunteerRequest = new Request();
         volunteerRequest.setRequestId(2);
@@ -189,7 +210,8 @@ class RequestServiceTest {
         when(requestRepository.save(any(RequestEntity.class))).thenReturn(volunteerRequestEntity);
         when(requestMapper.toDto(volunteerRequestEntity)).thenReturn(volunteerRequest);
 
-        Request result = requestService.createVolunteerRequest(1);
+        CoverLetter coverLetter = new CoverLetter("My motivation");
+        Request result = requestService.createVolunteerRequest(1, coverLetter);
 
         assertThat(result).isNotNull();
         assertThat(result.getRequestId()).isEqualTo(2);
@@ -201,10 +223,26 @@ class RequestServiceTest {
         assertThat(savedEntity.getRequestStatus()).isEqualTo(RequestStatus.PENDING);
         assertThat(savedEntity.getUser()).isEqualTo(testUser);
         assertThat(savedEntity.getRole()).isEqualTo(volunteerRole);
+        assertThat(savedEntity.getCoverLetter()).isEqualTo("My motivation");
 
         verify(userService).getUserEntityById(1);
         verify(roleService).getRoleEntityByName("VOLUNTEER");
         verify(requestMapper).toDto(volunteerRequestEntity);
+    }
+
+    @Test
+    void createVolunteerRequest_ShouldThrowException_WhenUserNotSpectator() {
+        testUser.setRole(athleteRole);
+        CoverLetter coverLetter = new CoverLetter("My motivation");
+
+        when(userService.getUserEntityById(1)).thenReturn(testUser);
+
+        assertThatThrownBy(() -> requestService.createVolunteerRequest(1, coverLetter))
+                .isInstanceOf(UserNotASpectatorException.class)
+                .hasMessage("User with id 1 is not a spectator");
+
+        verify(userService).getUserEntityById(1);
+        verify(requestRepository, never()).save(any());
     }
 
     @Test
@@ -275,4 +313,3 @@ class RequestServiceTest {
         verify(requestRepository, never()).save(any());
     }
 }
-

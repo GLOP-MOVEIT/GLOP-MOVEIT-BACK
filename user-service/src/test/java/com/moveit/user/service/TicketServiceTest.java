@@ -69,7 +69,7 @@ class TicketServiceTest {
         testTicket.setId(1);
         testTicket.setTicketNumber("TKT-12345");
         testTicket.setSeatInformation("Section A, Row 5, Seat 10");
-        testTicket.setEventDate("2026-03-15T18:00:00");
+        testTicket.setEventDate(Instant.parse("2026-03-15T18:00:00Z"));
     }
 
     @Test
@@ -142,7 +142,7 @@ class TicketServiceTest {
         Ticket newTicket = new Ticket();
         newTicket.setTicketNumber("TKT-67890");
         newTicket.setSeatInformation("Section B, Row 3, Seat 7");
-        newTicket.setEventDate("2026-04-20T19:30:00");
+        newTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
 
         TicketEntity newTicketEntity = new TicketEntity();
         newTicketEntity.setTicketNumber("TKT-67890");
@@ -160,7 +160,7 @@ class TicketServiceTest {
         savedTicket.setId(2);
         savedTicket.setTicketNumber("TKT-67890");
         savedTicket.setSeatInformation("Section B, Row 3, Seat 7");
-        savedTicket.setEventDate("2026-04-20T19:30:00");
+        savedTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
 
         when(userService.getUserEntityById(1)).thenReturn(testUser);
         when(ticketMapper.toEntity(newTicket)).thenReturn(newTicketEntity);
@@ -189,7 +189,7 @@ class TicketServiceTest {
         Ticket newTicket = new Ticket();
         newTicket.setTicketNumber("TKT-67890");
         newTicket.setSeatInformation("Section B, Row 3, Seat 7");
-        newTicket.setEventDate("2026-04-20T19:30:00");
+        newTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
 
         when(userService.getUserEntityById(999)).thenThrow(new UserNotFoundException(999));
 
@@ -207,12 +207,12 @@ class TicketServiceTest {
         Ticket ticket1 = new Ticket();
         ticket1.setTicketNumber("TKT-00001");
         ticket1.setSeatInformation("Section A, Row 1, Seat 1");
-        ticket1.setEventDate("2026-05-01T20:00:00");
+        ticket1.setEventDate(Instant.parse("2026-05-01T20:00:00Z"));
 
         Ticket ticket2 = new Ticket();
         ticket2.setTicketNumber("TKT-00002");
         ticket2.setSeatInformation("Section A, Row 1, Seat 2");
-        ticket2.setEventDate("2026-05-01T20:00:00");
+        ticket2.setEventDate(Instant.parse("2026-05-01T20:00:00Z"));
 
         TicketEntity ticketEntity1 = new TicketEntity();
         ticketEntity1.setTicketNumber("TKT-00001");
