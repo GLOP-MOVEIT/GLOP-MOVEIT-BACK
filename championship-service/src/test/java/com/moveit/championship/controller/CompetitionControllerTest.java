@@ -3,7 +3,6 @@ package com.moveit.championship.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.championship.config.TestJacksonConfig;
 import com.moveit.championship.entity.Competition;
-import com.moveit.championship.entity.Status;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.mother.CompetitionMother;
 import com.moveit.championship.service.CompetitionService;
