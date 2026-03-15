@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
 @Data
 @NoArgsConstructor
@@ -18,6 +16,7 @@ public class RequestEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer requestId;
 
+    private String coverLetter;
     private RequestStatus requestStatus;
     private String requestRejectionReason;
 
@@ -28,8 +27,4 @@ public class RequestEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private RoleEntity role;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "request_id", nullable = false)
-    private List<DocumentEntity> documents;
 }

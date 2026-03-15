@@ -1,5 +1,6 @@
 package com.moveit.user.service;
 
+import com.moveit.user.dto.CoverLetter;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
@@ -41,11 +42,12 @@ public class RequestService {
         return this.requestMapper.toDto(this.requestRepository.save(entity));
     }
 
-    public Request createVolunteerRequest(Integer userId) {
+    public Request createVolunteerRequest(Integer userId, CoverLetter coverLetter) {
         RequestEntity entity = new RequestEntity();
         entity.setRequestStatus(RequestStatus.PENDING);
         entity.setUser(this.userService.getUserEntityById(userId));
         entity.setRole(this.roleService.getRoleEntityByName("VOLUNTEER"));
+        entity.setCoverLetter(coverLetter.getCoverLetter());
         return this.requestMapper.toDto(this.requestRepository.save(entity));
     }
 

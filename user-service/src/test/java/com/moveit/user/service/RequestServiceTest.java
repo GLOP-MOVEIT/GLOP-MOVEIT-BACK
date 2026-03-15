@@ -1,5 +1,6 @@
 package com.moveit.user.service;
 
+import com.moveit.user.dto.CoverLetter;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
@@ -77,7 +78,6 @@ class RequestServiceTest {
         testRequestEntity.setRequestStatus(RequestStatus.PENDING);
         testRequestEntity.setUser(testUser);
         testRequestEntity.setRole(athleteRole);
-        testRequestEntity.setDocuments(List.of());
 
         testRequest = new Request();
         testRequest.setRequestId(1);
@@ -179,6 +179,7 @@ class RequestServiceTest {
         volunteerRequestEntity.setRequestStatus(RequestStatus.PENDING);
         volunteerRequestEntity.setUser(testUser);
         volunteerRequestEntity.setRole(volunteerRole);
+        volunteerRequestEntity.setCoverLetter("My motivation");
 
         Request volunteerRequest = new Request();
         volunteerRequest.setRequestId(2);
@@ -189,7 +190,8 @@ class RequestServiceTest {
         when(requestRepository.save(any(RequestEntity.class))).thenReturn(volunteerRequestEntity);
         when(requestMapper.toDto(volunteerRequestEntity)).thenReturn(volunteerRequest);
 
-        Request result = requestService.createVolunteerRequest(1);
+        CoverLetter coverLetter = new CoverLetter("My motivation");
+        Request result = requestService.createVolunteerRequest(1, coverLetter);
 
         assertThat(result).isNotNull();
         assertThat(result.getRequestId()).isEqualTo(2);
@@ -201,6 +203,7 @@ class RequestServiceTest {
         assertThat(savedEntity.getRequestStatus()).isEqualTo(RequestStatus.PENDING);
         assertThat(savedEntity.getUser()).isEqualTo(testUser);
         assertThat(savedEntity.getRole()).isEqualTo(volunteerRole);
+        assertThat(savedEntity.getCoverLetter()).isEqualTo("My motivation");
 
         verify(userService).getUserEntityById(1);
         verify(roleService).getRoleEntityByName("VOLUNTEER");
@@ -275,4 +278,3 @@ class RequestServiceTest {
         verify(requestRepository, never()).save(any());
     }
 }
-

@@ -1,5 +1,6 @@
 package com.moveit.user.controller;
 
+import com.moveit.user.dto.CoverLetter;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.service.RequestService;
@@ -62,8 +63,8 @@ public class RequestController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @PostMapping("/volunteer/{userId}")
-    public Request requestToVolunteer(@PathVariable Integer userId) {
-        return this.requestService.createVolunteerRequest(userId);
+    public Request requestToVolunteer(@PathVariable Integer userId, @RequestBody CoverLetter coverLetter) {
+        return this.requestService.createVolunteerRequest(userId,  coverLetter);
     }
 
     @Operation(summary = "Promouvoir un utilisateur au rôle d'arbitre")

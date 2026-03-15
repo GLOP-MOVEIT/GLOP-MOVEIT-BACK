@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Request {
+public class CoverLetter {
 
-    private Integer requestId;
-    private RequestStatus requestStatus;
-    private String requestRejectionReason;
-    private Role role;
+    private String coverLetter;
 }
