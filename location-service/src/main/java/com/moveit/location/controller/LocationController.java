@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.moveit.location.dto.LocationDTO;
 import com.moveit.location.entity.Location;
+import com.moveit.location.mapper.LocationMapper;
 import com.moveit.location.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,6 +26,7 @@ import java.util.List;
 public class LocationController {
 
     private final LocationService locationService;
+    private final LocationMapper locationMapper;
 
     @Operation(summary = "Récupérer tous les lieux")
     @ApiResponses(value = {
@@ -34,7 +36,7 @@ public class LocationController {
     @GetMapping
     public ResponseEntity<List<LocationDTO>> getAllLocations() {
         List<Location> locations = locationService.getAllLocations();
-        return ResponseEntity.ok(locations.stream().map(this::toLocationDTO).toList());
+        return ResponseEntity.ok(locations.stream().map(locationMapper::toDto).toList());
     }
 
     @Operation(summary = "Récupérer un lieu par ID")
@@ -46,7 +48,7 @@ public class LocationController {
     @GetMapping("/{id}")
     public ResponseEntity<LocationDTO> getLocationById(@PathVariable Integer id) {
         Location location = locationService.getLocationById(id);
-        return ResponseEntity.ok(toLocationDTO(location));
+        return ResponseEntity.ok(locationMapper.toDto(location));
     }
 
     @Operation(summary = "Créer un nouveau lieu (Admin)")
@@ -58,9 +60,9 @@ public class LocationController {
     })
     @PostMapping
     public ResponseEntity<LocationDTO> createLocation(@Valid @RequestBody LocationDTO dto) {
-        Location location = toLocationEntity(dto);
+        Location location = locationMapper.toEntity(dto);
         Location createdLocation = locationService.createLocation(location);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toLocationDTO(createdLocation));
+        return ResponseEntity.status(HttpStatus.CREATED).body(locationMapper.toDto(createdLocation));
     }
 
     @Operation(summary = "Mettre à jour un lieu (Admin)")
@@ -73,9 +75,9 @@ public class LocationController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<LocationDTO> updateLocation(@PathVariable Integer id, @Valid @RequestBody LocationDTO dto) {
-        Location location = toLocationEntity(dto);
+        Location location = locationMapper.toEntity(dto);
         Location updatedLocation = locationService.updateLocation(id, location);
-        return ResponseEntity.ok(toLocationDTO(updatedLocation));
+        return ResponseEntity.ok(locationMapper.toDto(updatedLocation));
     }
 
     @Operation(summary = "Supprimer un lieu (Admin)")
@@ -89,31 +91,5 @@ public class LocationController {
     public ResponseEntity<Void> deleteLocation(@PathVariable Integer id) {
         locationService.deleteLocation(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private LocationDTO toLocationDTO(Location location) {
-        return LocationDTO.builder()
-                .locationId(location.getLocationId())
-                .name(location.getName())
-                .latitude(location.getLatitude())
-                .longitude(location.getLongitude())
-                .mainEntrance(location.getMainEntrance())
-                .refereeEntrance(location.getRefereeEntrance())
-                .athleteEntrance(location.getAthleteEntrance())
-                .description(location.getDescription())
-                .build();
-    }
-
-    private Location toLocationEntity(LocationDTO dto) {
-        Location location = new Location();
-        location.setLocationId(dto.getLocationId());
-        location.setName(dto.getName());
-        location.setLatitude(dto.getLatitude());
-        location.setLongitude(dto.getLongitude());
-        location.setMainEntrance(dto.getMainEntrance());
-        location.setRefereeEntrance(dto.getRefereeEntrance());
-        location.setAthleteEntrance(dto.getAthleteEntrance());
-        location.setDescription(dto.getDescription());
-        return location;
     }
 }
