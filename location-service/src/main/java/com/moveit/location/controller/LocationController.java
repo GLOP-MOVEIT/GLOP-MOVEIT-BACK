@@ -1,10 +1,9 @@
 package com.moveit.location.controller;
 
-import org.springframework.web.bind.annotation.*;
-
-import com.moveit.location.dto.LocationDTO;
+import com.moveit.location.dto.*;
 import com.moveit.location.entity.Location;
 import com.moveit.location.mapper.LocationMapper;
+import com.moveit.location.service.LocationLocatorService;
 import com.moveit.location.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,9 +24,9 @@ import java.util.List;
 @RequestMapping("/locations")
 @Tag(name = "Lieux", description = "API de gestion des lieux")
 public class LocationController {
-
     private final LocationService locationService;
     private final LocationMapper locationMapper;
+    private final LocationLocatorService locatorService;
 
     @Operation(summary = "Récupérer tous les lieux")
     @ApiResponses(value = {
@@ -91,5 +91,64 @@ public class LocationController {
     public ResponseEntity<Void> deleteLocation(@PathVariable Integer id) {
         locationService.deleteLocation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Localiser un utilisateur (spectateur ou athlète)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Position renvoyée", content = @Content(schema = @Schema(implementation = LocateResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate")
+    public ResponseEntity<LocateResponse> locateUser(@RequestBody LocateRequest request,
+                                                     @RequestHeader(value = "Authorization", required = false) String authorization) {
+        LocateResponse response = locatorService.locate(request, authorization);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Localiser tous les athlètes et volontaires d'une épreuve (Referee)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Positions renvoyées", content = @Content(schema = @Schema(implementation = BulkLocateTrialResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requête invalide", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Epreuve ou utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate/trial")
+    public ResponseEntity<BulkLocateTrialResponse> locateAllForTrial(@Valid @RequestBody BulkLocateTrialRequest request,
+                                                                     @RequestHeader(value = "Authorization", required = false) String authorization) {
+        BulkLocateTrialResponse response = locatorService.locateAllForTrial(request, authorization);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Localiser tous les athlètes d'une épreuve (Referee)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Positions renvoyées", content = @Content(schema = @Schema(implementation = BulkLocateTrialResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requête invalide", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Epreuve ou utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate/trial/athletes")
+    public ResponseEntity<BulkLocateTrialResponse> locateAthletesForTrial(@Valid @RequestBody BulkLocateTrialRequest request,
+                                                                          @RequestHeader(value = "Authorization", required = false) String authorization) {
+        BulkLocateTrialResponse response = locatorService.locateAllForTrial(request, authorization);
+        return ResponseEntity.ok(new BulkLocateTrialResponse(response.getTrialId(), response.getAthletes(), List.of()));
+    }
+
+    @Operation(summary = "Localiser tous les volontaires d'une épreuve (Referee)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Positions renvoyées", content = @Content(schema = @Schema(implementation = BulkLocateTrialResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requête invalide", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Epreuve ou utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate/trial/volunteers")
+    public ResponseEntity<BulkLocateTrialResponse> locateVolunteersForTrial(@Valid @RequestBody BulkLocateTrialRequest request,
+                                                                            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        BulkLocateTrialResponse response = locatorService.locateAllForTrial(request, authorization);
+        return ResponseEntity.ok(new BulkLocateTrialResponse(response.getTrialId(), List.of(), response.getVolunteers()));
     }
 }

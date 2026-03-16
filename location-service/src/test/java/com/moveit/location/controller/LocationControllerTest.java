@@ -6,13 +6,13 @@ import com.moveit.location.entity.Location;
 import com.moveit.location.exception.LocationNotFoundException;
 import com.moveit.location.mapper.LocationMapper;
 import com.moveit.location.mother.LocationMother;
+import com.moveit.location.service.LocationLocatorService;
 import com.moveit.location.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,17 +29,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = LocationController.class)
-@Import(ObjectMapper.class)
 class LocationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean
     private LocationService locationService;
+
+    @MockitoBean
+    private LocationLocatorService locationLocatorService;
 
         @MockitoBean
         private LocationMapper locationMapper;
