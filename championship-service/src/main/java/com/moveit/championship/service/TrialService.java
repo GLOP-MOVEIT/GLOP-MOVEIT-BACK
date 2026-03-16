@@ -32,11 +32,15 @@ public class TrialService {
         return trialRepository.findByCompetition_CompetitionId(competitionId);
     }
 
+    public List<Trial> getTrialsByAthleteId(Integer athleteId) {
+        return trialRepository.findByAthleteId(athleteId);
+    }
+
     @Transactional
     public Trial createTrial(Integer competitionId, Trial trial) {
         Competition competition = competitionRepository.findById(competitionId)
                 .orElseThrow(() -> new CompetitionNotFoundException(competitionId));
-        
+
         trial.setCompetition(competition);
         return trialRepository.save(trial);
     }
@@ -55,6 +59,7 @@ public class TrialService {
         existingTrial.setLocationId(trial.getLocationId());
         existingTrial.setRoundNumber(trial.getRoundNumber());
         existingTrial.setPosition(trial.getPosition());
+        existingTrial.setParticipantIds(trial.getParticipantIds());
 
         return trialRepository.save(existingTrial);
     }

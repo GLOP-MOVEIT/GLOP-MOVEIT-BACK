@@ -35,11 +35,11 @@ class TrialServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        
+
         competition = new Competition();
         competition.setCompetitionId(1);
         competition.setCompetitionName("Compétition Test");
-        
+
         trial = new Trial();
         trial.setTrialId(1);
         trial.setTrialName("Trial 1");
@@ -48,6 +48,7 @@ class TrialServiceTest {
         trial.setTrialStatus(Status.PLANNED);
         trial.setCompetition(competition);
         trial.setLocationId(1);
+        trial.setParticipantIds(List.of(7, 8));
     }
 
     @Test
@@ -78,6 +79,15 @@ class TrialServiceTest {
     }
 
     @Test
+    void getTrialsByAthleteId_shouldReturnList_whenAthleteHasTrials() {
+        when(trialRepository.findByAthleteId(7)).thenReturn(List.of(trial));
+
+        List<Trial> trials = trialService.getTrialsByAthleteId(7);
+
+        assertThat(trials).containsExactly(trial);
+    }
+
+    @Test
     void createTrial_shouldSaveAndReturnTrial() {
         when(competitionRepository.findById(1)).thenReturn(Optional.of(competition));
         when(trialRepository.save(any(Trial.class))).thenReturn(trial);
@@ -101,15 +111,17 @@ class TrialServiceTest {
         updated.setTrialDescription("desc");
         updated.setTrialStatus(Status.ONGOING);
         updated.setLocationId(2);
-        
+        updated.setParticipantIds(List.of(10, 11));
+
         when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
         when(trialRepository.save(any(Trial.class))).thenAnswer(inv -> inv.getArgument(0));
-        
+
         Trial result = trialService.updateTrial(1, updated);
-        
+
         assertThat(result.getTrialName()).isEqualTo("Updated");
         assertThat(result.getTrialStatus()).isEqualTo(Status.ONGOING);
         assertThat(result.getLocationId()).isEqualTo(2);
+        assertThat(result.getParticipantIds()).containsExactly(10, 11);
     }
 
     @Test

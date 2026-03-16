@@ -51,6 +51,7 @@ class TrialControllerTest {
         trial.setTrialEndDate(LocalDateTime.now());
         trial.setTrialStatus(Status.PLANNED);
         trial.setLocationId(1);
+        trial.setParticipantIds(List.of(7, 8));
 
         when(trialMapper.toTrialDTO(any(Trial.class))).thenAnswer(invocation -> {
             Trial source = invocation.getArgument(0);
@@ -91,6 +92,15 @@ class TrialControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.trialId").value(1))
                 .andExpect(jsonPath("$.trialName").value("Trial 1"));
+    }
+
+    @Test
+    void getTrialsByAthleteId_shouldReturnList() throws Exception {
+        when(trialService.getTrialsByAthleteId(7)).thenReturn(List.of(trial));
+        mockMvc.perform(get("/trials/athlete/7"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].trialId").value(1))
+                .andExpect(jsonPath("$[0].participantIds[0]").value(7));
     }
 
     @Test

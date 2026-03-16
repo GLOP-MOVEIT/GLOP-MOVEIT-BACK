@@ -41,6 +41,17 @@ public class TrialController {
         return ResponseEntity.ok(trialMapper.toTrialDTO(trial));
     }
 
+    @Operation(summary = "Récupérer toutes les manches d'un athlète")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Manches de l'athlète récupérées avec succès", content = @Content(schema = @Schema(implementation = TrialDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/athlete/{athleteId}")
+    public ResponseEntity<List<TrialDTO>> getTrialsByAthleteId(@PathVariable Integer athleteId) {
+        List<Trial> trials = trialService.getTrialsByAthleteId(athleteId);
+        return ResponseEntity.ok(trials.stream().map(trialMapper::toTrialDTO).toList());
+    }
+
     @Operation(summary = "Récupérer toutes les manches d'une compétition")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Manches récupérées avec succès", content = @Content(schema = @Schema(implementation = TrialDTO.class))),

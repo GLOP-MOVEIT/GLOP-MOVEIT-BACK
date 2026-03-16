@@ -48,6 +48,9 @@ public class Competition {
     @Column(length = 1000)
     private String competitionDescription;
 
+    @Column(name = "competition_result_unit", length = 100)
+    private String competitionResultUnit;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status competitionStatus = Status.PLANNED;
