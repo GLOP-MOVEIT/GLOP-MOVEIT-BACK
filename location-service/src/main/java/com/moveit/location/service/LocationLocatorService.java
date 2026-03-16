@@ -36,11 +36,27 @@ public class LocationLocatorService {
     }
 
     public BulkLocateTrialResponse locateAllForTrial(BulkLocateTrialRequest request, String authorization) {
+        validateBulkLocateTrialRequest(request);
+
+        UserDto requester = safeFetchUser(request.getRequesterId(), authorization);
+        ensureRequesterCanBulkLocateTrial(requester);
+
+        List<Integer> participantIds = getTrialParticipantIds(request.getTrialId(), authorization);
+
+        List<BulkLocateUserPosition> athletes = new ArrayList<>();
+        List<BulkLocateUserPosition> volunteers = new ArrayList<>();
+        addParticipantPositions(participantIds, authorization, athletes, volunteers);
+
+        return new BulkLocateTrialResponse(request.getTrialId(), athletes, volunteers);
+    }
+
+    private void validateBulkLocateTrialRequest(BulkLocateTrialRequest request) {
         if (request == null || request.getRequesterId() == null || request.getTrialId() == null) {
             throw new UserServiceException("requesterId et trialId sont requis.");
         }
+    }
 
-        UserDto requester = safeFetchUser(request.getRequesterId(), authorization);
+    private void ensureRequesterCanBulkLocateTrial(UserDto requester) {
         String requesterRole = extractRole(requester);
         if (requesterRole == null) {
             throw new UserServiceException("Impossible de vérifier le rôle du demandeur.");
@@ -48,14 +64,18 @@ public class LocationLocatorService {
         if (!isReferee(requesterRole) && !isAdmin(requesterRole)) {
             throw new UserServiceException("Non autorisé à localiser les participants d'une épreuve.");
         }
+    }
 
-        TrialDto trial = safeFetchTrial(request.getTrialId(), authorization);
+    private List<Integer> getTrialParticipantIds(Integer trialId, String authorization) {
+        TrialDto trial = safeFetchTrial(trialId, authorization);
         List<Integer> participantIds = trial != null ? trial.getParticipantIds() : null;
-        if (participantIds == null) participantIds = Collections.emptyList();
+        return participantIds != null ? participantIds : Collections.emptyList();
+    }
 
-        List<BulkLocateUserPosition> athletes = new ArrayList<>();
-        List<BulkLocateUserPosition> volunteers = new ArrayList<>();
-
+    private void addParticipantPositions(List<Integer> participantIds,
+                                         String authorization,
+                                         List<BulkLocateUserPosition> athletes,
+                                         List<BulkLocateUserPosition> volunteers) {
         for (Integer participantId : participantIds) {
             if (participantId == null) continue;
             UserDto participant = safeFetchUser(participantId, authorization);
@@ -63,27 +83,18 @@ public class LocationLocatorService {
             if (role == null) continue;
 
             if (isAthlete(role)) {
-                LocateResponse pos = buildLocateResponse();
-                athletes.add(new BulkLocateUserPosition(
-                        participantId,
-                        participant.getFirstName(),
-                        participant.getSurname(),
-                        pos.getLatitude(),
-                        pos.getLongitude()
-                ));
+                athletes.add(buildUserPosition(participantId, participant));
             } else if (isVolunteer(role)) {
-                LocateResponse pos = buildLocateResponse();
-                volunteers.add(new BulkLocateUserPosition(
-                        participantId,
-                        participant.getFirstName(),
-                        participant.getSurname(),
-                        pos.getLatitude(),
-                        pos.getLongitude()
-                ));
+                volunteers.add(buildUserPosition(participantId, participant));
             }
         }
+    }
 
-        return new BulkLocateTrialResponse(request.getTrialId(), athletes, volunteers);
+    private BulkLocateUserPosition buildUserPosition(Integer userId, UserDto user) {
+        LocateResponse pos = buildLocateResponse();
+        String firstName = user != null ? user.getFirstName() : null;
+        String surname = user != null ? user.getSurname() : null;
+        return new BulkLocateUserPosition(userId, firstName, surname, pos.getLatitude(), pos.getLongitude());
     }
 
     private UserDto safeFetchUser(Integer userId, String authorization) {
@@ -96,11 +107,7 @@ public class LocationLocatorService {
 
     private UserDto fetchUser(Integer userId, String authorization) {
         String url = userServiceBaseUrl + "/users/" + userId;
-        HttpHeaders headers = new HttpHeaders();
-        if (authorization != null && !authorization.isBlank()) {
-            headers.set(HttpHeaders.AUTHORIZATION, authorization);
-        }
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        HttpEntity<Void> entity = new HttpEntity<>(buildHeaders(authorization));
         ResponseEntity<UserDto> response = restTemplate.exchange(url, HttpMethod.GET, entity, UserDto.class);
         return response.getBody();
     }
@@ -115,13 +122,17 @@ public class LocationLocatorService {
 
     private TrialDto fetchTrial(Integer trialId, String authorization) {
         String url = championshipServiceBaseUrl + "/trials/" + trialId;
+        HttpEntity<Void> entity = new HttpEntity<>(buildHeaders(authorization));
+        ResponseEntity<TrialDto> response = restTemplate.exchange(url, HttpMethod.GET, entity, TrialDto.class);
+        return response.getBody();
+    }
+
+    private HttpHeaders buildHeaders(String authorization) {
         HttpHeaders headers = new HttpHeaders();
         if (authorization != null && !authorization.isBlank()) {
             headers.set(HttpHeaders.AUTHORIZATION, authorization);
         }
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
-        ResponseEntity<TrialDto> response = restTemplate.exchange(url, HttpMethod.GET, entity, TrialDto.class);
-        return response.getBody();
+        return headers;
     }
 
     private void verifyRolesAndConsent(UserDto requester, UserDto target, LocateRequest request) {
