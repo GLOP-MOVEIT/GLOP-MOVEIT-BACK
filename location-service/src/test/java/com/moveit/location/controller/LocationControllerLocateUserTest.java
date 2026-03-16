@@ -3,8 +3,9 @@ package com.moveit.location.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.location.dto.LocateRequest;
 import com.moveit.location.dto.LocateResponse;
-import com.moveit.location.service.LocationService;
+import com.moveit.location.mapper.LocationMapper;
 import com.moveit.location.service.LocationLocatorService;
+import com.moveit.location.service.LocationService;
 import com.moveit.location.service.exception.UserServiceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = LocationController.class)
 @DisplayName("POST /locations/locate - Localisation d'utilisateurs")
@@ -32,6 +33,9 @@ class LocationControllerLocateUserTest {
 
     @MockitoBean
     private LocationLocatorService locatorService;
+
+    @MockitoBean
+    private LocationMapper locationMapper;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

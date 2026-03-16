@@ -1,12 +1,10 @@
 package com.moveit.location.controller;
 
-import org.springframework.web.bind.annotation.*;
-
-import com.moveit.location.dto.LocationDTO;
+import com.moveit.location.dto.*;
 import com.moveit.location.entity.Location;
 import com.moveit.location.mapper.LocationMapper;
-import com.moveit.location.service.LocationService;
 import com.moveit.location.service.LocationLocatorService;
+import com.moveit.location.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,11 +15,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import com.moveit.location.dto.LocateRequest;
-import com.moveit.location.dto.LocateResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -108,6 +104,21 @@ public class LocationController {
     public ResponseEntity<LocateResponse> locateUser(@RequestBody LocateRequest request,
                                                      @RequestHeader(value = "Authorization", required = false) String authorization) {
         LocateResponse response = locatorService.locate(request, authorization);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Localiser tous les athlètes et volontaires d'une épreuve (Referee)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Positions renvoyées", content = @Content(schema = @Schema(implementation = BulkLocateTrialResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requête invalide", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Epreuve ou utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate/trial")
+    public ResponseEntity<BulkLocateTrialResponse> locateAllForTrial(@Valid @RequestBody BulkLocateTrialRequest request,
+                                                                     @RequestHeader(value = "Authorization", required = false) String authorization) {
+        BulkLocateTrialResponse response = locatorService.locateAllForTrial(request, authorization);
         return ResponseEntity.ok(response);
     }
 }

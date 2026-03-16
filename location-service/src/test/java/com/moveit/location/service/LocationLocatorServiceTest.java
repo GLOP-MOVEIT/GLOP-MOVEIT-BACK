@@ -45,33 +45,39 @@ class LocationLocatorServiceTest {
     }
 
     private LocateRequest req(Integer requesterId, Integer targetId, Integer trialId) {
-        LocateRequest r = new LocateRequest();
-        r.setRequesterId(requesterId);
-        r.setTargetId(targetId);
+        LocateRequest r = new LocateRequest(requesterId, targetId);
         r.setTrialId(trialId);
         return r;
     }
 
     private UserDto createUser(Integer id, String roleName, boolean acceptsLocationSharing) {
-        return new UserDto(id, "First", "Last", "email@test.com",
-                "0600000000", "fr", new RoleDto(roleName),
-                true, acceptsLocationSharing);
+        UserDto u = new UserDto();
+        u.setUserId(id);
+        u.setFirstName("First");
+        u.setSurname("Last");
+        u.setEmail("email@test.com");
+        u.setPhoneNumber("0600000000");
+        u.setLanguage("fr");
+        u.setRole(new RoleDto(roleName));
+        u.setAcceptsNotifications(true);
+        u.setAcceptsLocationSharing(acceptsLocationSharing);
+        return u;
     }
 
     private UserDto createUserWithNullRole(Integer id) {
-        return new UserDto(id, "First", "Last", "email@test.com",
-                "0600000000", "fr", null,
-                true, true);
+        UserDto u = createUser(id, "SPECTATOR", true);
+        u.setRole(null);
+        return u;
     }
 
     private UserDto createUserWithNullRoleName(Integer id) {
-        return new UserDto(id, "First", "Last", "email@test.com",
-                "0600000000", "fr", new RoleDto(null),
-                true, true);
+        UserDto u = createUser(id, "SPECTATOR", true);
+        u.setRole(new RoleDto(null));
+        return u;
     }
 
     private void mockUserFetch(Integer userId, UserDto user) {
-        when(restTemplate.exchange(
+        lenient().when(restTemplate.exchange(
                 eq(BASE_URL + "/users/" + userId),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
@@ -80,7 +86,7 @@ class LocationLocatorServiceTest {
     }
 
     private void mockTrialFetch(Integer trialId, TrialDto trial) {
-        when(restTemplate.exchange(
+        lenient().when(restTemplate.exchange(
                 eq(CHAMPIONSHIP_BASE_URL + "/trials/" + trialId),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
@@ -154,7 +160,12 @@ class LocationLocatorServiceTest {
         void adminCanLocateVolunteerOnlyOnSameTrial() {
             mockUserFetch(1, createUser(1, "ADMIN", false));
             mockUserFetch(99, createUser(99, "VOLUNTEER", false));
-            mockTrialFetch(10, new TrialDto(10, 1, List.of(99)));
+
+            TrialDto t = new TrialDto();
+            t.setTrialId(10);
+            t.setCompetitionId(1);
+            t.setParticipantIds(List.of(99));
+            mockTrialFetch(10, t);
 
             LocateResponse response = locationLocatorService.locate(req(1, 99, 10), AUTH_HEADER);
 
@@ -166,7 +177,12 @@ class LocationLocatorServiceTest {
         void adminCannotLocateVolunteerIfNotOnTrial() {
             mockUserFetch(1, createUser(1, "ADMIN", false));
             mockUserFetch(99, createUser(99, "VOLUNTEER", false));
-            mockTrialFetch(10, new TrialDto(10, 1, List.of(1, 2, 3)));
+
+            TrialDto t = new TrialDto();
+            t.setTrialId(10);
+            t.setCompetitionId(1);
+            t.setParticipantIds(List.of(1, 2, 3));
+            mockTrialFetch(10, t);
 
             assertThatThrownBy(() -> locationLocatorService.locate(req(1, 99, 10), AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
@@ -309,7 +325,12 @@ class LocationLocatorServiceTest {
         void refereeCanLocateVolunteerOnlyOnSameTrial() {
             mockUserFetch(1, createUser(1, "REFEREE", false));
             mockUserFetch(99, createUser(99, "VOLUNTEER", false));
-            mockTrialFetch(10, new TrialDto(10, 1, List.of(99, 4)));
+
+            TrialDto t = new TrialDto();
+            t.setTrialId(10);
+            t.setCompetitionId(1);
+            t.setParticipantIds(List.of(99, 4));
+            mockTrialFetch(10, t);
 
             LocateResponse response = locationLocatorService.locate(req(1, 99, 10), AUTH_HEADER);
 
@@ -321,7 +342,12 @@ class LocationLocatorServiceTest {
         void refereeCannotLocateVolunteerIfNotOnTrial() {
             mockUserFetch(1, createUser(1, "REFEREE", false));
             mockUserFetch(99, createUser(99, "VOLUNTEER", false));
-            mockTrialFetch(10, new TrialDto(10, 1, List.of(1, 2, 3)));
+
+            TrialDto t = new TrialDto();
+            t.setTrialId(10);
+            t.setCompetitionId(1);
+            t.setParticipantIds(List.of(1, 2, 3));
+            mockTrialFetch(10, t);
 
             assertThatThrownBy(() -> locationLocatorService.locate(req(1, 99, 10), AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
@@ -485,5 +511,113 @@ class LocationLocatorServiceTest {
             );
         }
     }
-}
 
+    @Nested
+    @DisplayName("Localisation en masse par épreuve (trial)")
+    class BulkLocateTrialTests {
+
+        @Test
+        @DisplayName("Referee peut récupérer les positions (athlètes + volontaires) avec les noms")
+        void refereeCanBulkLocateTrialParticipants() {
+            mockUserFetch(1, createUser(1, "REFEREE", false));
+
+            UserDto athlete = new UserDto();
+            athlete.setUserId(2);
+            athlete.setFirstName("Alice");
+            athlete.setSurname("Athlete");
+            athlete.setEmail("a@test.com");
+            athlete.setPhoneNumber("0600000000");
+            athlete.setLanguage("fr");
+            athlete.setRole(new RoleDto("ATHLETE"));
+            athlete.setAcceptsNotifications(true);
+            athlete.setAcceptsLocationSharing(false);
+
+            UserDto volunteer = new UserDto();
+            volunteer.setUserId(3);
+            volunteer.setFirstName("Victor");
+            volunteer.setSurname("Volunteer");
+            volunteer.setEmail("v@test.com");
+            volunteer.setPhoneNumber("0600000000");
+            volunteer.setLanguage("fr");
+            volunteer.setRole(new RoleDto("VOLUNTEER"));
+            volunteer.setAcceptsNotifications(true);
+            volunteer.setAcceptsLocationSharing(false);
+
+            UserDto spectator = new UserDto();
+            spectator.setUserId(4);
+            spectator.setFirstName("Sam");
+            spectator.setSurname("Spectator");
+            spectator.setEmail("s@test.com");
+            spectator.setPhoneNumber("0600000000");
+            spectator.setLanguage("fr");
+            spectator.setRole(new RoleDto("SPECTATOR"));
+            spectator.setAcceptsNotifications(true);
+            spectator.setAcceptsLocationSharing(true);
+
+            mockUserFetch(2, athlete);
+            mockUserFetch(3, volunteer);
+            mockUserFetch(4, spectator);
+
+            TrialDto t = new TrialDto();
+            t.setTrialId(10);
+            t.setCompetitionId(1);
+            t.setParticipantIds(List.of(2, 3, 4));
+            mockTrialFetch(10, t);
+
+            BulkLocateTrialRequest r = new BulkLocateTrialRequest();
+            r.setRequesterId(1);
+            r.setTrialId(10);
+
+            BulkLocateTrialResponse response = locationLocatorService.locateAllForTrial(r, AUTH_HEADER);
+
+            assertThat(response).isNotNull();
+            assertThat(response.getTrialId()).isEqualTo(10);
+            assertThat(response.getAthletes()).hasSize(1);
+            assertThat(response.getVolunteers()).hasSize(1);
+
+            BulkLocateUserPosition athletePos = response.getAthletes().get(0);
+            assertThat(athletePos.getUserId()).isEqualTo(2);
+            assertThat(athletePos.getFirstName()).isEqualTo("Alice");
+            assertThat(athletePos.getSurname()).isEqualTo("Athlete");
+
+            BulkLocateUserPosition volunteerPos = response.getVolunteers().get(0);
+            assertThat(volunteerPos.getUserId()).isEqualTo(3);
+            assertThat(volunteerPos.getFirstName()).isEqualTo("Victor");
+            assertThat(volunteerPos.getSurname()).isEqualTo("Volunteer");
+        }
+
+        @Test
+        @DisplayName("Non-referee/non-admin ne peut pas bulk locate")
+        void spectatorCannotBulkLocate() {
+            mockUserFetch(1, createUser(1, "SPECTATOR", true));
+
+            TrialDto t = new TrialDto();
+            t.setTrialId(10);
+            t.setCompetitionId(1);
+            t.setParticipantIds(List.of());
+            mockTrialFetch(10, t);
+
+            BulkLocateTrialRequest r = new BulkLocateTrialRequest();
+            r.setRequesterId(1);
+            r.setTrialId(10);
+
+            assertThatThrownBy(() -> locationLocatorService.locateAllForTrial(r, AUTH_HEADER))
+                    .isInstanceOf(UserServiceException.class)
+                    .hasMessageContaining("Non autorisé");
+        }
+
+        @Test
+        @DisplayName("Bulk locate doit exiger trialId")
+        void bulkLocateRequiresTrialId() {
+            mockUserFetch(1, createUser(1, "REFEREE", false));
+
+            BulkLocateTrialRequest r = new BulkLocateTrialRequest();
+            r.setRequesterId(1);
+            r.setTrialId(null);
+
+            assertThatThrownBy(() -> locationLocatorService.locateAllForTrial(r, AUTH_HEADER))
+                    .isInstanceOf(UserServiceException.class)
+                    .hasMessageContaining("trialId");
+        }
+    }
+}
