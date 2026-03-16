@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 
 import com.moveit.championship.client.UserClient;
 import com.moveit.championship.dto.TeamResponseDTO;
-import com.moveit.championship.dto.TrialDTO;
 import com.moveit.championship.dto.TrialWithParticipantsDTO;
 import com.moveit.championship.dto.UserResponseDTO;
 import com.moveit.championship.entity.ParticipantType;
