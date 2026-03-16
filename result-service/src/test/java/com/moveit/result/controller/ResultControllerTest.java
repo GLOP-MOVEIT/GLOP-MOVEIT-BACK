@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
@@ -76,7 +75,7 @@ class ResultControllerTest {
 
     @Test
     @DisplayName("GET /results/trial/{trialId} - exception ResultNotFoundException propagée")
-    void getResultByTrialId_shouldPropagateResultNotFoundException_whenResultNotFound() throws Exception {
+    void getResultByTrialId_shouldPropagateResultNotFoundException_whenResultNotFound() {
         setupMockMvc();
         // Given
         Integer trialId = 999;
@@ -129,7 +128,7 @@ class ResultControllerTest {
 
     @Test
     @DisplayName("PUT /results - exception ResultNotFoundException propagée")
-    void updateResult_shouldPropagateResultNotFoundException_whenResultNotFound() throws Exception {
+    void updateResult_shouldPropagateResultNotFoundException_whenResultNotFound() {
         setupMockMvc();
         // Given
         Result requestDto = buildResult(999);
