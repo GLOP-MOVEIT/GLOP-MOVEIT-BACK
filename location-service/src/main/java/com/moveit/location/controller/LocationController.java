@@ -121,4 +121,34 @@ public class LocationController {
         BulkLocateTrialResponse response = locatorService.locateAllForTrial(request, authorization);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "Localiser tous les athlètes d'une épreuve (Referee)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Positions renvoyées", content = @Content(schema = @Schema(implementation = BulkLocateTrialResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requête invalide", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Epreuve ou utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate/trial/athletes")
+    public ResponseEntity<BulkLocateTrialResponse> locateAthletesForTrial(@Valid @RequestBody BulkLocateTrialRequest request,
+                                                                          @RequestHeader(value = "Authorization", required = false) String authorization) {
+        BulkLocateTrialResponse response = locatorService.locateAllForTrial(request, authorization);
+        return ResponseEntity.ok(new BulkLocateTrialResponse(response.getTrialId(), response.getAthletes(), List.of()));
+    }
+
+    @Operation(summary = "Localiser tous les volontaires d'une épreuve (Referee)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Positions renvoyées", content = @Content(schema = @Schema(implementation = BulkLocateTrialResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requête invalide", content = @Content()),
+            @ApiResponse(responseCode = "403", description = "Non autorisé", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Epreuve ou utilisateur non trouvé", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content())
+    })
+    @PostMapping("/locate/trial/volunteers")
+    public ResponseEntity<BulkLocateTrialResponse> locateVolunteersForTrial(@Valid @RequestBody BulkLocateTrialRequest request,
+                                                                            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        BulkLocateTrialResponse response = locatorService.locateAllForTrial(request, authorization);
+        return ResponseEntity.ok(new BulkLocateTrialResponse(response.getTrialId(), List.of(), response.getVolunteers()));
+    }
 }
