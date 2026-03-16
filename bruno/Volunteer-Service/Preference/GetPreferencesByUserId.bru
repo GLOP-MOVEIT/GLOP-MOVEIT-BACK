@@ -1,0 +1,15 @@
+meta {
+  name: GetPreferencesByUserId
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{URL}}/volunteer/preferences/user/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+

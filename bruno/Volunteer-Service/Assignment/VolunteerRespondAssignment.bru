@@ -1,0 +1,23 @@
+meta {
+  name: VolunteerRespondAssignment
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{URL}}/volunteer/assignments/1/volunteer-response
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "volunteerId": 1,
+    "status": "REFUSED",
+    "comment": "Je ne suis pas disponible sur ce créneau"
+  }
+}

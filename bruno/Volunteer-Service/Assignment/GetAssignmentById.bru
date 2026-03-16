@@ -1,0 +1,15 @@
+meta {
+  name: GetAssignmentById
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{URL}}/volunteer/assignments/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+

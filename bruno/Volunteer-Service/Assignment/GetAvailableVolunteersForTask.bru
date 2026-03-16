@@ -1,0 +1,21 @@
+meta {
+  name: GetAvailableVolunteersForTask
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{URL}}/volunteer/assignments/task/1/available-volunteers
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "volunteerIds": [1, 2, 3, 4, 5]
+  }
+}

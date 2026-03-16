@@ -17,6 +17,7 @@
         <module>gateway</module>
         <module>location-service</module>
         <module>result-service</module>
+        <module>volunteer-service</module>
     </modules>
 
     <properties>
