@@ -1,4 +1,4 @@
-package com.moveit.location.configuration;
+package com.moveit.result.configuration;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

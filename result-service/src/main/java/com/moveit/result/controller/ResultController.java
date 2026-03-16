@@ -1,7 +1,7 @@
-package com.moveit.location.controller;
+package com.moveit.result.controller;
 
-import com.moveit.location.dto.Result;
-import com.moveit.location.service.ResultService;
+import com.moveit.result.dto.Result;
+import com.moveit.result.service.ResultService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

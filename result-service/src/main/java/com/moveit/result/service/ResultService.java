@@ -1,9 +1,9 @@
-package com.moveit.location.service;
+package com.moveit.result.service;
 
-import com.moveit.location.dto.Result;
-import com.moveit.location.exception.ResultNotFoundException;
-import com.moveit.location.mapper.ResultMapper;
-import com.moveit.location.repository.ResultRepository;
+import com.moveit.result.dto.Result;
+import com.moveit.result.exception.ResultNotFoundException;
+import com.moveit.result.mapper.ResultMapper;
+import com.moveit.result.repository.ResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
-package com.moveit.location.mapper;
+package com.moveit.result.mapper;
 
-import com.moveit.location.dto.Result;
-import com.moveit.location.entity.ResultEntity;
+import com.moveit.result.dto.Result;
+import com.moveit.result.entity.ResultEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

@@ -1,6 +1,6 @@
-package com.moveit.location.entity;
+package com.moveit.result.entity;
 
-import com.moveit.location.dto.Ranking;
+import com.moveit.result.dto.Ranking;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

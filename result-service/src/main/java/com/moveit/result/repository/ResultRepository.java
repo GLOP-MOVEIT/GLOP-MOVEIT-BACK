@@ -1,6 +1,6 @@
-package com.moveit.location.repository;
+package com.moveit.result.repository;
 
-import com.moveit.location.entity.ResultEntity;
+import com.moveit.result.entity.ResultEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

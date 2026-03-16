@@ -1,4 +1,4 @@
-package com.moveit.location;
+package com.moveit.result;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

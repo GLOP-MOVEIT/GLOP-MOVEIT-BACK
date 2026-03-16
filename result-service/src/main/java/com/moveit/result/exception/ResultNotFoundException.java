@@ -1,4 +1,4 @@
-package com.moveit.location.exception;
+package com.moveit.result.exception;
 
 public class ResultNotFoundException extends RuntimeException {
 

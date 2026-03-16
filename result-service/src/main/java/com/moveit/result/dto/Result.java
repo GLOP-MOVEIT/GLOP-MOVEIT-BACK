@@ -1,4 +1,4 @@
-package com.moveit.location.dto;
+package com.moveit.result.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
