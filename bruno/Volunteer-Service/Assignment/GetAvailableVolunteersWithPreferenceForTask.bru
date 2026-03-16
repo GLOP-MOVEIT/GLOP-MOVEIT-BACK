@@ -1,0 +1,21 @@
+meta {
+  name: GetAvailableVolunteersWithPreferenceForTask
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{URL}}/volunteer/assignments/task/1/available-volunteers-with-preference
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "volunteerIds": [1, 2, 3, 4, 5]
+  }
+}

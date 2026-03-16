@@ -1,0 +1,31 @@
+meta {
+  name: UpdateTask
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{URL}}/volunteer/tasks/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "targetType": "CHAMPIONSHIP",
+    "targetId": 1,
+    "title": "Accueil des participants - Mise à jour",
+    "description": "Description mise à jour",
+    "taskTypeId": 1,
+    "startDate": "2026-06-01T09:00:00",
+    "endDate": "2026-06-01T13:00:00",
+    "maxVolunteers": 8,
+    "locationId": 1,
+    "location": "Entrée principale - Hall A"
+  }
+}
+

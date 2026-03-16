@@ -37,6 +37,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/championships/v3/api-docs/**").permitAll()
                         .requestMatchers("/users/v3/api-docs/**").permitAll()
                         .requestMatchers("/locations/v3/api-docs/**").permitAll()
+                        .requestMatchers("/volunteer/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -1,0 +1,15 @@
+meta {
+  name: UpdateTaskStatus
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{URL}}/volunteer/tasks/1/status?status=IN_PROGRESS
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+

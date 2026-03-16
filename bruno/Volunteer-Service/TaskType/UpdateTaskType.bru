@@ -1,0 +1,23 @@
+meta {
+  name: UpdateTaskType
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{URL}}/volunteer/task-types/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "name": "Arbitrage - Mise à jour",
+    "description": "Description mise à jour"
+  }
+}
+

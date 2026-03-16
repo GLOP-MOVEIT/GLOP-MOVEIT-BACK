@@ -1,0 +1,15 @@
+meta {
+  name: DeleteTask
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{URL}}/volunteer/tasks/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+

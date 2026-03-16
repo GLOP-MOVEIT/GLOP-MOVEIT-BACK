@@ -1,0 +1,23 @@
+meta {
+  name: UpdatePreference
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{URL}}/volunteer/preferences/1
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "userId": 1,
+    "taskTypeId": 2
+  }
+}
+

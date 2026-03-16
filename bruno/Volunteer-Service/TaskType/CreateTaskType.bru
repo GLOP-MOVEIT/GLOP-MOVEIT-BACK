@@ -1,0 +1,23 @@
+meta {
+  name: CreateTaskType
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{URL}}/volunteer/task-types
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "name": "Arbitrage",
+    "description": "Responsable de l'arbitrage des matchs"
+  }
+}
+
