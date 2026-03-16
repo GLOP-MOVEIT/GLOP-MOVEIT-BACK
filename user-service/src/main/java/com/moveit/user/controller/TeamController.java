@@ -34,6 +34,17 @@ public class TeamController {
         return this.teamService.getAllTeams(pageable);
     }
 
+    @Operation(summary = "Récupérer une équipe par ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Équipe récupérée avec succès", content = @Content(schema = @Schema(implementation = Team.class))),
+            @ApiResponse(responseCode = "404", description = "Équipe non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/{teamId}")
+    public Team getTeamById(@PathVariable Integer teamId) {
+        return this.teamService.getTeamById(teamId);
+    }
+
     @Operation(summary = "Créer une nouvelle équipe vide")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Équipe créée avec succès", content = @Content(schema = @Schema(implementation = Team.class))),

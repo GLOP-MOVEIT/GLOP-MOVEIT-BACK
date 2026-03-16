@@ -4,6 +4,12 @@ import java.util.*;
 import java.time.LocalDateTime;
 
 
+import com.moveit.championship.client.UserClient;
+import com.moveit.championship.dto.TeamResponseDTO;
+import com.moveit.championship.dto.TrialDTO;
+import com.moveit.championship.dto.TrialWithParticipantsDTO;
+import com.moveit.championship.dto.UserResponseDTO;
+import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Competition;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
@@ -26,6 +32,8 @@ class TrialServiceTest {
     private TrialRepository trialRepository;
     @Mock
     private CompetitionRepository competitionRepository;
+    @Mock
+    private UserClient userClient;
     @InjectMocks
     private TrialService trialService;
 
@@ -39,6 +47,7 @@ class TrialServiceTest {
         competition = new Competition();
         competition.setCompetitionId(1);
         competition.setCompetitionName("Compétition Test");
+        competition.setParticipantType(ParticipantType.INDIVIDUAL);
 
         trial = new Trial();
         trial.setTrialId(1);
@@ -142,5 +151,48 @@ class TrialServiceTest {
     void deleteTrial_shouldThrow_whenNotFound() {
         when(trialRepository.existsById(1)).thenReturn(false);
         assertThatThrownBy(() -> trialService.deleteTrial(1)).isInstanceOf(TrialNotFoundException.class);
+    }
+
+    @Test
+    void getTrialWithParticipants_shouldResolveIndividualParticipants() {
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(userClient.getUserById(7)).thenReturn(new UserResponseDTO(7, "Alice", "Martin"));
+        when(userClient.getUserById(8)).thenReturn(new UserResponseDTO(8, "Bob", "Durand"));
+
+        TrialWithParticipantsDTO result = trialService.getTrialWithParticipants(1);
+
+        assertThat(result.getTrialId()).isEqualTo(1);
+        assertThat(result.getCompetitionId()).isEqualTo(1);
+        assertThat(result.getParticipants()).hasSize(2);
+        assertThat(result.getParticipants().get(0).getName()).isEqualTo("Alice Martin");
+        assertThat(result.getParticipants().get(1).getName()).isEqualTo("Bob Durand");
+    }
+
+    @Test
+    void getTrialWithParticipants_shouldResolveTeamParticipants() {
+        competition.setParticipantType(ParticipantType.TEAM);
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(userClient.getTeamById(7)).thenReturn(new TeamResponseDTO(7, "Team Alpha"));
+        when(userClient.getTeamById(8)).thenReturn(new TeamResponseDTO(8, "Team Beta"));
+
+        TrialWithParticipantsDTO result = trialService.getTrialWithParticipants(1);
+
+        assertThat(result.getParticipants()).hasSize(2);
+        assertThat(result.getParticipants().get(0).getName()).isEqualTo("Team Alpha");
+        assertThat(result.getParticipants().get(1).getName()).isEqualTo("Team Beta");
+    }
+
+    @Test
+    void getTrialWithParticipants_shouldFallbackToUnknown_whenUserServiceFails() {
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(userClient.getUserById(7)).thenThrow(new RuntimeException("upstream error"));
+        when(userClient.getUserById(8)).thenReturn(new UserResponseDTO(8, "Bob", "Durand"));
+
+        TrialWithParticipantsDTO result = trialService.getTrialWithParticipants(1);
+
+        assertThat(result.getParticipants()).hasSize(2);
+        assertThat(result.getParticipants().get(0).getId()).isEqualTo(7);
+        assertThat(result.getParticipants().get(0).getName()).isEqualTo("Unknown");
+        assertThat(result.getParticipants().get(1).getName()).isEqualTo("Bob Durand");
     }
 }

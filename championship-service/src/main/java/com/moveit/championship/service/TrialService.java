@@ -1,23 +1,30 @@
 package com.moveit.championship.service;
 
+import com.moveit.championship.client.UserClient;
+import com.moveit.championship.dto.*;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.CompetitionNotFoundException;
 import com.moveit.championship.exception.TrialNotFoundException;
 import com.moveit.championship.repository.CompetitionRepository;
 import com.moveit.championship.repository.TrialRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TrialService {
 
     private final TrialRepository trialRepository;
     private final CompetitionRepository competitionRepository;
+    private final UserClient userClient;
 
 
     public Trial getTrialById(Integer id) {
@@ -70,5 +77,56 @@ public class TrialService {
             throw new TrialNotFoundException(id);
         }
         trialRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public TrialWithParticipantsDTO getTrialWithParticipants(Integer trialId) {
+        Trial trial = trialRepository.findById(trialId)
+                .orElseThrow(() -> new TrialNotFoundException(trialId));
+
+        ParticipantType participantType = trial.getCompetition().getParticipantType();
+        List<Integer> participantIds = trial.getParticipantIds() == null
+                ? Collections.emptyList()
+                : trial.getParticipantIds();
+
+        List<ParticipantDTO> participants = participantIds.stream()
+                .map(id -> fetchParticipant(id, participantType))
+                .toList();
+
+        return TrialWithParticipantsDTO.builder()
+                .trialId(trial.getTrialId())
+                .trialName(trial.getTrialName())
+                .trialStartDate(trial.getTrialStartDate())
+                .trialEndDate(trial.getTrialEndDate())
+                .trialDescription(trial.getTrialDescription())
+                .trialStatus(trial.getTrialStatus())
+                .locationId(trial.getLocationId())
+                .roundNumber(trial.getRoundNumber())
+                .position(trial.getPosition())
+                .nextTrialId(trial.getNextTrial() != null ? trial.getNextTrial().getTrialId() : null)
+                .competitionId(trial.getCompetition() != null ? trial.getCompetition().getCompetitionId() : null)
+                .participants(participants)
+                .build();
+    }
+
+    private ParticipantDTO fetchParticipant(Integer id, ParticipantType participantType) {
+        try {
+            return switch (participantType) {
+                case TEAM -> {
+                    TeamResponseDTO team = userClient.getTeamById(id);
+                    yield new ParticipantDTO(team.getTeamId(), team.getName());
+                }
+                case INDIVIDUAL -> {
+                    UserResponseDTO user = userClient.getUserById(id);
+                    String fullName = String.format("%s %s",
+                            user.getFirstName() == null ? "" : user.getFirstName(),
+                            user.getSurname() == null ? "" : user.getSurname()).trim();
+                    yield new ParticipantDTO(user.getUserId(), fullName.isBlank() ? "Unknown" : fullName);
+                }
+            };
+        } catch (Exception e) {
+            log.warn("Could not fetch participant with id {}: {}", id, e.getMessage());
+            return new ParticipantDTO(id, "Unknown");
+        }
     }
 }

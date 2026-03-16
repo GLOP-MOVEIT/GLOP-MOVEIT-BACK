@@ -33,6 +33,10 @@ public class TeamService {
         return this.teamMapper.toDto(this.teamRepository.save(teamEntity));
     }
 
+    public Team getTeamById(Integer teamId) {
+        return this.teamMapper.toDto(getTeamEntityById(teamId));
+    }
+
     public Team addAthlete(Integer teamId, Integer athleteId) {
         TeamEntity team = getTeamEntityById(teamId);
         UserEntity athlete = this.userService.getUserEntityById(athleteId);

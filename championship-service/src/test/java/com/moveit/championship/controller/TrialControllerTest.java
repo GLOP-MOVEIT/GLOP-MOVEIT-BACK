@@ -2,8 +2,10 @@ package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.championship.config.TestJacksonConfig;
+import com.moveit.championship.dto.ParticipantDTO;
 import com.moveit.championship.dto.TrialDTO;
 import com.moveit.championship.dto.TrialRequestDTO;
+import com.moveit.championship.dto.TrialWithParticipantsDTO;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.mapper.TrialMapper;
@@ -129,6 +131,28 @@ class TrialControllerTest {
                         .content(objectMapper.writeValueAsString(trial)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.trialId").value(1));
+    }
+
+    @Test
+    void getTrialWithParticipants_shouldReturnEnrichedTrial() throws Exception {
+        TrialWithParticipantsDTO enriched = TrialWithParticipantsDTO.builder()
+                .trialId(1)
+                .trialName("Trial 1")
+                .competitionId(3)
+                .participants(List.of(
+                        new ParticipantDTO(7, "Team Alpha"),
+                        new ParticipantDTO(8, "Team Beta")
+                ))
+                .build();
+
+        when(trialService.getTrialWithParticipants(1)).thenReturn(enriched);
+
+        mockMvc.perform(get("/trials/1/participants"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.trialId").value(1))
+                .andExpect(jsonPath("$.competitionId").value(3))
+                .andExpect(jsonPath("$.participants[0].id").value(7))
+                .andExpect(jsonPath("$.participants[0].name").value("Team Alpha"));
     }
 
     @Test
