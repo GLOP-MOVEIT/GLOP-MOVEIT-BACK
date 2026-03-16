@@ -8,6 +8,9 @@
         </encoder>
     </appender>
 
+    <!-- Suppress expected error logs from LocationClient during tests -->
+    <logger name="com.moveit.championship.client.LocationClient" level="OFF"/>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
