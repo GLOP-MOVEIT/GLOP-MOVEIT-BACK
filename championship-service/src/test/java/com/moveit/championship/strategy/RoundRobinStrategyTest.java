@@ -37,7 +37,7 @@ class RoundRobinStrategyTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"4, 6", "6, 15", "3, 6"})
+    @CsvSource({"4, 6", "6, 15", "8, 28"})
     @DisplayName("Should generate correct number of trials for given participant count")
     void testGenerateTrials_CorrectTrialCount(int nbParticipants, int expectedTrials) {
         competition.setNbManches(3);
@@ -73,6 +73,15 @@ class RoundRobinStrategyTest {
         List<Integer> participantIds = List.of();
         assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Should throw when participant count is odd")
+    void testGenerateTrials_OddParticipants() {
+        List<Integer> participantIds = List.of(1, 2, 3);
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pair");
     }
 
     @Test

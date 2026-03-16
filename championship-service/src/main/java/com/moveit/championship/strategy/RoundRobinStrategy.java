@@ -24,7 +24,6 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
     public List<Trial> generateTrials(Competition competition, List<Integer> participantIds) {
         List<Integer> ids = normalize(participantIds);
         validate(ids);
-        addByeIfOdd(ids);
 
         int nbRounds       = ids.size() - 1;
         int matchesPerRound = ids.size() / 2;
@@ -61,16 +60,15 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
         if (ids.size() < 2) {
             throw new IllegalArgumentException("Il faut au moins 2 participants pour un round robin");
         }
+        if (ids.size() % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "Le round robin requiert un nombre pair de participants (reçu : " + ids.size() + ")");
+        }
         if (ids.stream().distinct().count() != ids.size()) {
             throw new IllegalArgumentException("La liste des participants contient des doublons");
         }
     }
 
-    private void addByeIfOdd(List<Integer> ids) {
-        if (ids.size() % 2 != 0) {
-            ids.add(-1); // -1 = bye
-        }
-    }
 
     // --- Calcul de durée ---
 
@@ -126,9 +124,6 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
     }
 
     private List<Integer> buildMatchParticipants(int home, int away) {
-        List<Integer> participants = new ArrayList<>();
-        if (home != -1) participants.add(home);
-        if (away != -1) participants.add(away);
-        return participants;
+        return new ArrayList<>(List.of(home, away));
     }
 }
