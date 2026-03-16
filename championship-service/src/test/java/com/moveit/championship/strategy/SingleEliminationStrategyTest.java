@@ -38,7 +38,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should generate correct number of trials for 3 rounds (8 participants)")
     void testGenerateTrials_3Rounds() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4, 5, 6, 7, 8));
         // 3 rounds: 4 quarts + 2 demis + 1 finale = 7 matchs
         assertThat(trials).hasSize(7);
     }
@@ -47,7 +47,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should generate correct number of trials for 2 rounds (4 participants)")
     void testGenerateTrials_2Rounds() {
         competition.setNbManches(2);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4));
         // 2 rounds: 2 demis + 1 finale = 3 matchs
         assertThat(trials).hasSize(3);
     }
@@ -56,7 +56,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should generate correct number of trials for 1 round (2 participants)")
     void testGenerateTrials_1Round() {
         competition.setNbManches(1);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2));
         // 1 round: 1 finale
         assertThat(trials).hasSize(1);
         assertThat(trials.getFirst().getTrialName()).contains("Finale");
@@ -66,7 +66,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should name rounds correctly")
     void testGenerateTrials_RoundNames() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4, 5, 6, 7, 8));
         assertThat(trials.stream().filter(t -> t.getTrialName().contains("Quarts")).count()).isEqualTo(4);
         assertThat(trials.stream().filter(t -> t.getTrialName().contains("Demi")).count()).isEqualTo(2);
         assertThat(trials.stream().filter(t -> t.getTrialName().contains("Finale")).count()).isEqualTo(1);
@@ -85,7 +85,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("All trials should have PLANNED status")
     void testGenerateTrials_AllPlanned() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4, 5, 6, 7, 8));
         assertThat(trials).isNotEmpty().allMatch(t -> t.getTrialStatus() == Status.PLANNED);
     }
 
@@ -93,7 +93,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("All trials should be linked to the competition")
     void testGenerateTrials_AllLinkedToCompetition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4, 5, 6, 7, 8));
         assertThat(trials).isNotEmpty().allMatch(t -> t.getCompetition().equals(competition));
     }
 
@@ -101,7 +101,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("All trials should have roundNumber and position set")
     void testGenerateTrials_RoundNumberAndPosition() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4, 5, 6, 7, 8));
         assertThat(trials).isNotEmpty().allMatch(t -> t.getRoundNumber() != null && t.getPosition() != null);
 
         // Tour 1 : 4 matchs (positions 1-4)
@@ -124,7 +124,7 @@ class SingleEliminationStrategyTest {
     @DisplayName("Should link trials to next round correctly")
     void testGenerateTrials_NextTrialLinks() {
         competition.setNbManches(3);
-        List<Trial> trials = strategy.generateTrials(competition, List.of());
+        List<Trial> trials = strategy.generateTrials(competition, List.of(1, 2, 3, 4, 5, 6, 7, 8));
 
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
         List<Trial> round2 = trials.stream().filter(t -> t.getRoundNumber() == 2).toList();
@@ -147,6 +147,16 @@ class SingleEliminationStrategyTest {
     }
 
     // --- assignParticipantsToFirstRound tests (tested indirectly via generateTrials) ---
+
+    @Test
+    @DisplayName("Should throw when participant list contains duplicates")
+    void testGenerateTrials_DuplicateParticipants() {
+        competition.setNbManches(2); // requiert exactement 4 participants
+        List<Integer> participantIds = List.of(1, 2, 3, 1); // doublon : 1
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("doublons");
+    }
 
     @Test
     @DisplayName("Should assign 2 participants per match in the first round")
@@ -176,30 +186,33 @@ class SingleEliminationStrategyTest {
     }
 
     @Test
-    @DisplayName("Should handle fewer participants than slots (odd number)")
+    @DisplayName("Should throw when fewer participants than required (odd number)")
     void testAssignParticipantsToFirstRound_FewerParticipants() {
-        competition.setNbManches(2); // 2 matchs au premier tour = 4 slots
+        competition.setNbManches(2); // requiert exactement 4 participants
         List<Integer> participantIds = List.of(10, 20, 30); // 3 participants
-
-        List<Trial> trials = strategy.generateTrials(competition, participantIds);
-
-        List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
-        assertThat(round1.get(0).getParticipantIds()).containsExactly(10, 20);
-        assertThat(round1.get(1).getParticipantIds()).containsExactly(30); // 1 seul participant (bye)
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("4 participants");
     }
 
     @Test
-    @DisplayName("Should handle empty participant list without errors")
+    @DisplayName("Should throw when participant list is empty")
     void testAssignParticipantsToFirstRound_EmptyList() {
-        competition.setNbManches(2);
+        competition.setNbManches(2); // requiert exactement 4 participants
         List<Integer> participantIds = List.of();
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("2 participants");
+    }
 
-        List<Trial> trials = strategy.generateTrials(competition, participantIds);
-
-        List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
-        assertThat(round1).hasSize(2);
-        assertThat(round1.get(0).getParticipantIds()).isEmpty();
-        assertThat(round1.get(1).getParticipantIds()).isEmpty();
+    @Test
+    @DisplayName("Should throw when too many participants")
+    void testGenerateTrials_TooManyParticipants() {
+        competition.setNbManches(2); // requiert exactement 4 participants
+        List<Integer> participantIds = List.of(1, 2, 3, 4, 5);
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("4 participants");
     }
 
     @Test

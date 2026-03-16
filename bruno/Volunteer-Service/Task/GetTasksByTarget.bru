@@ -1,0 +1,14 @@
+meta {
+  name: GetTasksByTarget
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{URL}}/volunteer/tasks/target/CHAMPIONSHIP/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}

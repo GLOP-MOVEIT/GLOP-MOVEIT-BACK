@@ -1,0 +1,15 @@
+meta {
+  name: DeletePreference
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{URL}}/volunteer/preferences/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+

@@ -1,0 +1,20 @@
+package com.moveit.location.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserDto {
+    private Integer userId;
+    private String firstName;
+    private String surname;
+    private String email;
+    private String phoneNumber;
+    private String language;
+    private RoleDto role;
+    private boolean acceptsNotifications;
+    private boolean acceptsLocationSharing;
+}

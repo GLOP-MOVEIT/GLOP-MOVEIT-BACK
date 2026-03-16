@@ -1,0 +1,15 @@
+meta {
+  name: DeleteAssignment
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{URL}}/volunteer/assignments/1
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
