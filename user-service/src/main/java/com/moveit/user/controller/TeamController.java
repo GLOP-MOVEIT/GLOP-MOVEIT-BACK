@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/teams")
@@ -32,6 +34,16 @@ public class TeamController {
     @GetMapping
     public Page<Team> getAllTeams(Pageable pageable) {
         return this.teamService.getAllTeams(pageable);
+    }
+
+    @Operation(summary = "Récupérer toutes les équipes d'un athlète")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Équipes de l'athlète récupérées avec succès", content = @Content(schema = @Schema(implementation = Team.class))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/athletes/{athleteId}")
+    public List<Team> getTeamsByAthleteId(@PathVariable Integer athleteId) {
+        return this.teamService.getTeamsByAthleteId(athleteId);
     }
 
     @Operation(summary = "Récupérer une équipe par ID")

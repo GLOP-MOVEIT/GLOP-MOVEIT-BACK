@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TeamService {
@@ -35,6 +37,13 @@ public class TeamService {
 
     public Team getTeamById(Integer teamId) {
         return this.teamMapper.toDto(getTeamEntityById(teamId));
+    }
+
+    public List<Team> getTeamsByAthleteId(Integer athleteId) {
+        return this.teamRepository.findDistinctByAthletes_UserId(athleteId)
+                .stream()
+                .map(this.teamMapper::toDto)
+                .toList();
     }
 
     public Team addAthlete(Integer teamId, Integer athleteId) {

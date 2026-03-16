@@ -3,13 +3,12 @@ package com.moveit.championship.service;
 import java.util.*;
 import java.time.LocalDateTime;
 
-
 import com.moveit.championship.client.UserClient;
 import com.moveit.championship.dto.TeamResponseDTO;
 import com.moveit.championship.dto.TrialWithParticipantsDTO;
 import com.moveit.championship.dto.UserResponseDTO;
-import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.CompetitionNotFoundException;
@@ -23,8 +22,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 class TrialServiceTest {
     @Mock
@@ -87,12 +87,28 @@ class TrialServiceTest {
     }
 
     @Test
-    void getTrialsByAthleteId_shouldReturnList_whenAthleteHasTrials() {
-        when(trialRepository.findByAthleteId(7)).thenReturn(List.of(trial));
+    void getTrialsByAthleteId_shouldReturnTrialsForAthleteAndTeams() {
+        when(userClient.getTeamsByAthleteId(7)).thenReturn(List.of(
+                new TeamResponseDTO(10, "Team A"),
+                new TeamResponseDTO(11, "Team B")
+        ));
+        when(trialRepository.findByParticipantIds(eq(List.of(7, 10, 11)))).thenReturn(List.of(trial));
 
         List<Trial> trials = trialService.getTrialsByAthleteId(7);
 
         assertThat(trials).containsExactly(trial);
+        verify(trialRepository).findByParticipantIds(List.of(7, 10, 11));
+    }
+
+    @Test
+    void getTrialsByAthleteId_shouldFallbackToAthleteOnly_whenTeamLookupFails() {
+        when(userClient.getTeamsByAthleteId(7)).thenThrow(new RuntimeException("user-service down"));
+        when(trialRepository.findByParticipantIds(eq(List.of(7)))).thenReturn(List.of(trial));
+
+        List<Trial> trials = trialService.getTrialsByAthleteId(7);
+
+        assertThat(trials).containsExactly(trial);
+        verify(trialRepository).findByParticipantIds(List.of(7));
     }
 
     @Test

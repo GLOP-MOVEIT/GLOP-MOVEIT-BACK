@@ -14,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -39,8 +41,23 @@ public class TrialService {
         return trialRepository.findByCompetition_CompetitionId(competitionId);
     }
 
+    @Transactional(readOnly = true)
     public List<Trial> getTrialsByAthleteId(Integer athleteId) {
-        return trialRepository.findByAthleteId(athleteId);
+        List<Integer> participantIds = new ArrayList<>();
+        participantIds.add(athleteId);
+
+        try {
+            List<TeamResponseDTO> teams = userClient.getTeamsByAthleteId(athleteId);
+            participantIds.addAll(teams.stream()
+                    .map(TeamResponseDTO::getTeamId)
+                    .filter(Objects::nonNull)
+                    .toList());
+        } catch (Exception e) {
+            log.warn("Could not fetch teams for athlete {}: {}", athleteId, e.getMessage());
+        }
+
+        List<Integer> distinctParticipantIds = participantIds.stream().distinct().toList();
+        return trialRepository.findByParticipantIds(distinctParticipantIds);
     }
 
     @Transactional

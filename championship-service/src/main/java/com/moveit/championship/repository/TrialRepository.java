@@ -12,6 +12,6 @@ import java.util.List;
 public interface TrialRepository extends JpaRepository<Trial, Integer> {
     List<Trial> findByCompetition_CompetitionId(Integer competitionId);
 
-    @Query("select distinct t from Trial t join t.participantIds participantId where participantId = :athleteId")
-    List<Trial> findByAthleteId(@Param("athleteId") Integer athleteId);
+    @Query("select distinct t from Trial t join t.participantIds participantId where participantId in :participantIds")
+    List<Trial> findByParticipantIds(@Param("participantIds") List<Integer> participantIds);
 }
