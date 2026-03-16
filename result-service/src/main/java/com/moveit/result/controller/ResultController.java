@@ -29,7 +29,7 @@ public class ResultController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping("/trial/{trialId}")
-    public Result getResultByTrialId(Integer trialId) {
+    public Result getResultByTrialId(@PathVariable Integer trialId) {
         return this.resultService.getResultByTrialId(trialId);
     }
 
@@ -63,7 +63,7 @@ public class ResultController {
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
     @GetMapping("/participant/{participantId}")
-    public List<Result> getAllResultsByParticipantId(Integer participantId) {
+    public List<Result> getAllResultsByParticipantId(@PathVariable Integer participantId) {
         return this.resultService.getAllResultsByParticipantId(participantId);
     }
 }
