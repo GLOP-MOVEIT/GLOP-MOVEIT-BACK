@@ -26,6 +26,7 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         int maxPerHeat = competition.getMaxPerHeat();
 
         validateInputs(nbManches, nbParticipants, maxPerHeat);
+        validateNoDuplicates(participantIds);
 
         List<Trial> trials = new ArrayList<>();
 
@@ -100,6 +101,19 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         }
         if (maxPerHeat < 2) {
             throw new IllegalArgumentException("Il faut au moins 2 places par série");
+        }
+        int minRequiredParticipants = maxPerHeat * (int) Math.pow(2, nbManches - 1);
+        if (nbParticipants < minRequiredParticipants) {
+            throw new IllegalArgumentException(
+                    "Avec " + nbManches + " tour(s) et " + maxPerHeat + " place(s) par série, "
+                    + "il faut au moins " + minRequiredParticipants + " participants (reçu : " + nbParticipants + ")");
+        }
+    }
+
+    private void validateNoDuplicates(List<Integer> participantIds) {
+        long distinctCount = participantIds.stream().distinct().count();
+        if (distinctCount != participantIds.size()) {
+            throw new IllegalArgumentException("La liste des participants contient des doublons");
         }
     }
 

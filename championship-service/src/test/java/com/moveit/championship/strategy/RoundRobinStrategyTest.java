@@ -114,6 +114,15 @@ class RoundRobinStrategyTest {
     }
 
     @Test
+    @DisplayName("Should throw when participant list contains duplicates")
+    void testGenerateTrials_DuplicateParticipants() {
+        List<Integer> participantIds = List.of(1, 2, 3, 2); // doublon : 2
+        assertThatThrownBy(() -> strategy.generateTrials(competition, participantIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("doublons");
+    }
+
+    @Test
     @DisplayName("Round robin trials should not have nextTrial links")
     void testGenerateTrials_NoNextTrialLinks() {
         competition.setNbManches(3);

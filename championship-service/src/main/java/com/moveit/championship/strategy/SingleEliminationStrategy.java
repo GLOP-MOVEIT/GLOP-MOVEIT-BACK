@@ -26,6 +26,23 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
             throw new IllegalArgumentException("Il faut au moins 1 manche pour une élimination directe");
         }
 
+        int requiredParticipants = (int) Math.pow(2, nbRounds);
+        int nbParticipants = (participantIds == null) ? 0 : participantIds.size();
+
+        if (nbParticipants < 2) {
+            throw new IllegalArgumentException(
+                    "Il faut au moins 2 participants pour une élimination directe");
+        }
+        if (nbParticipants != requiredParticipants) {
+            throw new IllegalArgumentException(
+                    "L'élimination directe à " + nbRounds + " tour(s) requiert exactement "
+                    + requiredParticipants + " participants (reçu : " + nbParticipants + ")");
+        }
+        long distinctCount = participantIds.stream().distinct().count();
+        if (distinctCount != nbParticipants) {
+            throw new IllegalArgumentException("La liste des participants contient des doublons");
+        }
+
         List<Trial> trials = new ArrayList<>();
         int matchesInRound = (int) Math.pow(2, (double) nbRounds - 1);
 

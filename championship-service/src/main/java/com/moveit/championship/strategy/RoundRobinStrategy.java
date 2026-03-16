@@ -26,6 +26,10 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
         if (ids.size() < 2) {
             throw new IllegalArgumentException("Il faut au moins 2 participants pour un round robin");
         }
+        long distinctCount = ids.stream().distinct().count();
+        if (distinctCount != ids.size()) {
+            throw new IllegalArgumentException("La liste des participants contient des doublons");
+        }
 
         // Si nombre impair, ajouter un "bye" (-1) pour équilibrer
         if (ids.size() % 2 != 0) {
