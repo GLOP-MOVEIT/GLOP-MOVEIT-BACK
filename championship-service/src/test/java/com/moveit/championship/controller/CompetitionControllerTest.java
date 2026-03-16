@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -303,6 +304,25 @@ class CompetitionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(participantIds)))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Should return 400 with message when tree generation input is invalid.")
+    void testGenerateTree_BadRequest() throws Exception {
+        Integer id = competition1.getCompetitionId();
+        List<Integer> participantIds = List.of(1);
+        String errorMessage = "Il faut au moins 2 participants pour une élimination directe";
+
+        when(treeGenerationService.generateTree(eq(id), anyList()))
+                .thenThrow(new IllegalArgumentException(errorMessage));
+
+        mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(participantIds)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(errorMessage));
+
+        verify(treeGenerationService, times(1)).generateTree(eq(id), anyList());
     }
 
     @Test
