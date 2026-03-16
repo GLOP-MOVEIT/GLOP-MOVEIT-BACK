@@ -1,4 +1,4 @@
-package com.moveit.championship.configuration;
+package com.moveit.location.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,3 +12,4 @@ public class RestTemplateConfiguration {
         return new RestTemplate();
     }
 }
+

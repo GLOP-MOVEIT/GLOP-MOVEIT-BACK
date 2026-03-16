@@ -8,6 +8,7 @@ import com.moveit.auth.feign.UserFeignClient;
 import com.moveit.auth.repository.UserAuthRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserFeignClient userFeignClient;
 
+    @Value("${admin.initial.password}")
+    private String adminPassword;
+
     @PostConstruct
     void init() {
         if (userAuthRepository.findByNickname("admin").isPresent()) {
@@ -29,7 +33,7 @@ public class UserService {
 
         UserAuth admin = new UserAuth()
                 .setNickname("admin")
-                .setPassword(passwordEncoder.encode("123456"));
+                .setPassword(passwordEncoder.encode(adminPassword));
         UserCreatedResponse createdAdmin = userFeignClient.createAdmin(new CreateUserRequest(
                 "Admin",
                 "Admin",

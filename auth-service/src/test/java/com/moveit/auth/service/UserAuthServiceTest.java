@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +43,7 @@ class UserAuthServiceTest {
     @BeforeEach
     void setUp() {
         userService = new UserService(userAuthRepository, passwordEncoder, userFeignClient);
+        ReflectionTestUtils.setField(userService, "adminPassword", "123456");
 
         adminUserAuth = new UserAuth()
                 .setId(1)

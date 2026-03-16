@@ -17,6 +17,8 @@
         <module>gateway</module>
         <module>location-service</module>
         <module>notification-service</module>
+        <module>result-service</module>
+        <module>volunteer-service</module>
     </modules>
 
     <properties>
@@ -38,7 +40,8 @@
         <maven-surefire.version>3.5.4</maven-surefire.version>
         <sonar.coverage.exclusions>
             **/configuration/**,
-            **/*Application.java
+            **/*Application.java,
+            **/mapper/**
         </sonar.coverage.exclusions>
     </properties>
 
@@ -165,6 +168,8 @@
                                     <exclude>**/*Application.class</exclude>
                                     <!-- Beans Spring jamais chargés en @WebMvcTest -->
                                     <exclude>**/configuration/**</exclude>
+                                    <exclude>**/mapper/**</exclude>
+                                
                                 </excludes>
                             </configuration>
                         </execution>

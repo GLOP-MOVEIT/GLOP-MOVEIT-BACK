@@ -23,6 +23,7 @@ public class CompetitionDTO {
     private LocalDateTime competitionStartDate;
     private LocalDateTime competitionEndDate;
     private String competitionDescription;
+    private String competitionResultUnit;
     private Status competitionStatus;
     private List<EventDTO> events;
     private List<TrialDTO> trials;

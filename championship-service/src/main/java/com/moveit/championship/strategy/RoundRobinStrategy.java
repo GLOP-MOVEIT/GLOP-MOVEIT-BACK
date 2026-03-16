@@ -22,63 +22,108 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
 
     @Override
     public List<Trial> generateTrials(Competition competition, List<Integer> participantIds) {
-        List<Integer> ids = new ArrayList<>(participantIds != null ? participantIds : List.of());
-        if (ids.size() < 2) {
-            throw new IllegalArgumentException("Il faut au moins 2 participants pour un round robin");
-        }
+        List<Integer> ids = normalize(participantIds);
+        validate(ids);
 
-        // Si nombre impair, ajouter un "bye" (-1) pour équilibrer
-        if (ids.size() % 2 != 0) {
-            ids.add(-1);
-        }
-
-        int nbParticipants = ids.size();
-        int nbRounds = nbParticipants - 1;
-        int matchesPerRound = nbParticipants / 2;
+        int nbRounds       = ids.size() - 1;
+        int matchesPerRound = ids.size() / 2;
+        Duration roundDuration = computeRoundDuration(competition, nbRounds);
 
         List<Trial> trials = new ArrayList<>();
-
-        // Préparer la liste pour le round-robin (algorithme du cercle)
         List<Integer> rotating = new ArrayList<>(ids.subList(1, ids.size()));
-
-        Duration totalDuration = Duration.between(competition.getCompetitionStartDate(), competition.getCompetitionEndDate());
-        Duration roundDuration = totalDuration.dividedBy(nbRounds);
-
         int matchNumber = 1;
 
         for (int round = 1; round <= nbRounds; round++) {
-LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) (round - 1)));
-                LocalDateTime roundEnd = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) round));
+            long roundOffset = (long) round - 1L;
+            LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(roundOffset));
+            LocalDateTime roundEnd   = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
 
-            List<Integer> currentOrder = new ArrayList<>();
-            currentOrder.add(ids.getFirst());
-            currentOrder.addAll(rotating);
+            List<Integer> currentOrder = buildCurrentOrder(ids.getFirst(), rotating);
+            List<Trial> roundTrials = buildRoundTrials(
+                    competition, currentOrder, round, nbRounds, matchesPerRound, matchNumber, roundStart, roundEnd);
 
-            for (int match = 1; match <= matchesPerRound; match++) {
-                Trial trial = new Trial();
-                trial.setCompetition(competition);
-                trial.setTrialName("Journée " + round + " - Match " + match);
-                trial.setTrialStartDate(roundStart);
-                trial.setTrialEndDate(roundEnd);
-                trial.setTrialDescription("Journée " + round + "/" + nbRounds + " - Match " + match + "/" + matchesPerRound + " (match global n°" + matchNumber + ")");
-                trial.setTrialStatus(Status.PLANNED);
-                trial.setRoundNumber(round);
-                trial.setPosition(match);
-
-                int home = currentOrder.get(match - 1);
-                int away = currentOrder.get(currentOrder.size() - match);
-                List<Integer> matchParticipants = new ArrayList<>();
-                if (home != -1) matchParticipants.add(home);
-                if (away != -1) matchParticipants.add(away);
-                trial.setParticipantIds(matchParticipants);
-
-                trials.add(trial);
-                matchNumber++;
-            }
-
+            trials.addAll(roundTrials);
+            matchNumber += matchesPerRound;
             rotating.addFirst(rotating.removeLast());
         }
 
         return trials;
+    }
+
+    // --- Normalisation et validation ---
+
+    private List<Integer> normalize(List<Integer> participantIds) {
+        return new ArrayList<>(participantIds != null ? participantIds : List.of());
+    }
+
+    private void validate(List<Integer> ids) {
+        if (ids.size() < 2) {
+            throw new IllegalArgumentException("Il faut au moins 2 participants pour un round robin");
+        }
+        if (ids.size() % 2 != 0) {
+            throw new IllegalArgumentException(
+                    "Le round robin requiert un nombre pair de participants (reçu : " + ids.size() + ")");
+        }
+        if (ids.stream().distinct().count() != ids.size()) {
+            throw new IllegalArgumentException("La liste des participants contient des doublons");
+        }
+    }
+
+
+    // --- Calcul de durée ---
+
+    private Duration computeRoundDuration(Competition competition, int nbRounds) {
+        Duration totalDuration = Duration.between(
+                competition.getCompetitionStartDate(), competition.getCompetitionEndDate());
+        return totalDuration.dividedBy(nbRounds);
+    }
+
+    // --- Construction de l'ordre du tour courant ---
+
+    private List<Integer> buildCurrentOrder(int fixed, List<Integer> rotating) {
+        List<Integer> order = new ArrayList<>();
+        order.add(fixed);
+        order.addAll(rotating);
+        return order;
+    }
+
+    // --- Construction des épreuves d'une journée ---
+
+    private List<Trial> buildRoundTrials(Competition competition, List<Integer> currentOrder,
+                                          int round, int nbRounds, int matchesPerRound,
+                                          int startMatchNumber,
+                                          LocalDateTime roundStart, LocalDateTime roundEnd) {
+        List<Trial> roundTrials = new ArrayList<>();
+        for (int match = 1; match <= matchesPerRound; match++) {
+            int home = currentOrder.get(match - 1);
+            int away = currentOrder.get(currentOrder.size() - match);
+            Trial trial = buildTrial(competition, round, nbRounds, match, matchesPerRound,
+                    startMatchNumber + match - 1, home, away, roundStart, roundEnd);
+            roundTrials.add(trial);
+        }
+        return roundTrials;
+    }
+
+    private Trial buildTrial(Competition competition, int round, int nbRounds,
+                               int match, int matchesPerRound, int matchNumber,
+                               int home, int away,
+                               LocalDateTime roundStart, LocalDateTime roundEnd) {
+        Trial trial = new Trial();
+        trial.setCompetition(competition);
+        trial.setTrialName("Journée " + round + " - Match " + match);
+        trial.setTrialStartDate(roundStart);
+        trial.setTrialEndDate(roundEnd);
+        trial.setTrialDescription("Journée " + round + "/" + nbRounds
+                + " - Match " + match + "/" + matchesPerRound
+                + " (match global n°" + matchNumber + ")");
+        trial.setTrialStatus(Status.PLANNED);
+        trial.setRoundNumber(round);
+        trial.setPosition(match);
+        trial.setParticipantIds(buildMatchParticipants(home, away));
+        return trial;
+    }
+
+    private List<Integer> buildMatchParticipants(int home, int away) {
+        return new ArrayList<>(List.of(home, away));
     }
 }

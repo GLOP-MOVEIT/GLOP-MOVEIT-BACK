@@ -22,6 +22,7 @@ public class CompetitionSummaryDTO {
     private LocalDateTime competitionStartDate;
     private LocalDateTime competitionEndDate;
     private String competitionDescription;
+    private String competitionResultUnit;
     private Status competitionStatus;
     private Integer nbManches;
     private CompetitionType competitionType;

@@ -1,6 +1,7 @@
 package com.moveit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moveit.user.dto.CoverLetter;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
@@ -60,7 +61,6 @@ class RequestControllerTest {
         testRequest.setRequestId(1);
         testRequest.setRequestStatus(RequestStatus.PENDING);
         testRequest.setRole(role);
-        testRequest.setDocuments(List.of());
 
         rejectRequest = new RejectRequest("Invalid documentation");
     }
@@ -146,17 +146,20 @@ class RequestControllerTest {
         volunteerRequest.setRequestId(2);
         volunteerRequest.setRequestStatus(RequestStatus.PENDING);
         volunteerRequest.setRole(volunteerRole);
-        volunteerRequest.setDocuments(List.of());
 
-        when(requestService.createVolunteerRequest(1)).thenReturn(volunteerRequest);
+        CoverLetter coverLetter = new CoverLetter("My motivation");
 
-        mockMvc.perform(post("/requests/volunteer/1"))
+        when(requestService.createVolunteerRequest(eq(1), any(CoverLetter.class))).thenReturn(volunteerRequest);
+
+        mockMvc.perform(post("/requests/volunteer/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(coverLetter)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value(2))
                 .andExpect(jsonPath("$.requestStatus").value("PENDING"))
                 .andExpect(jsonPath("$.role.name").value("VOLUNTEER"));
 
-        verify(requestService).createVolunteerRequest(1);
+        verify(requestService).createVolunteerRequest(eq(1), any(CoverLetter.class));
     }
 
     @Test
@@ -205,5 +208,3 @@ class RequestControllerTest {
         verify(requestService).rejectRequest(eq(999), any(RejectRequest.class));
     }
 }
-
-

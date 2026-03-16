@@ -26,6 +26,10 @@ public class GatewayConfiguration {
 
     @Value("${LOCATION_SERVICE_URL:http://localhost:8084}")
     private String locationServiceUrl;
+
+    @Value("${VOLUNTEER_SERVICE_URL:http://localhost:8085}")
+    private String volunteerServiceUrl;
+
     @Value("${USER_SERVICE_URL:http://localhost:8086}")
     private String userServiceUrl;
 
@@ -72,6 +76,15 @@ public class GatewayConfiguration {
                 .before(uri(locationServiceUrl))
                 .build();
     }
+
+    @Bean
+    public RouterFunction<ServerResponse> volunteerServiceRoute() {
+        return route("volunteer-service")
+                .route(path("/volunteer/**"), http())
+                .before(uri(volunteerServiceUrl))
+                .build();
+    }
+
     @Bean
     public RouterFunction<ServerResponse> userServiceRoute() {
         return route("user-service")
@@ -82,6 +95,8 @@ public class GatewayConfiguration {
                 .route(path("/requests/**"), http())
                 .before(uri(userServiceUrl))
                 .route(path("/tickets/**"), http())
+                .before(uri(userServiceUrl))
+                .route(path("/teams/**"), http())
                 .before(uri(userServiceUrl))
                 .build();
     }

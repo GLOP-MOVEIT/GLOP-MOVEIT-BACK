@@ -17,3 +17,4 @@ public class LocationDTO {
     private String athleteEntrance;
     private String description;
 }
+

@@ -30,6 +30,7 @@ public class CompetitionMother {
         private LocalDateTime competitionStartDate = LocalDateTime.of(2026, 1, 1, 0, 0);
         private LocalDateTime competitionEndDate = LocalDateTime.of(2026, 3, 1, 0, 0);
         private String competitionDescription = "Description de la compétition";
+        private String competitionResultUnit = "POINTS";
         private Status competitionStatus = Status.PLANNED;
         private List<Event> events = List.of();
         private List<Trial> trials = List.of();
@@ -48,6 +49,7 @@ public class CompetitionMother {
                     competitionStartDate,
                     competitionEndDate,
                     competitionDescription,
+                    competitionResultUnit,
                     competitionStatus,
                     events,
                     trials,

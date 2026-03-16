@@ -1,6 +1,8 @@
 package com.moveit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.moveit.user.dto.Ticket;
 import com.moveit.user.exception.GlobalExceptionHandler;
 import com.moveit.user.exception.TicketNotFoundException;
@@ -22,6 +24,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -46,17 +49,20 @@ class TicketControllerTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         mockMvc = MockMvcBuilders.standaloneSetup(ticketController)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .setMessageConverters(new MappingJackson2HttpMessageConverter())
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
                 .build();
 
         testTicket = new Ticket();
         testTicket.setId(1);
         testTicket.setTicketNumber("TKT-12345");
         testTicket.setSeatInformation("Section A, Row 5, Seat 10");
-        testTicket.setEventDate("2026-03-15T18:00:00");
+        testTicket.setEventDate(Instant.parse("2026-03-15T18:00:00Z"));
     }
 
     @Test
@@ -74,7 +80,7 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.content[0].id").value(1))
                 .andExpect(jsonPath("$.content[0].ticketNumber").value("TKT-12345"))
                 .andExpect(jsonPath("$.content[0].seatInformation").value("Section A, Row 5, Seat 10"))
-                .andExpect(jsonPath("$.content[0].eventDate").value("2026-03-15T18:00:00"))
+                .andExpect(jsonPath("$.content[0].eventDate").value("2026-03-15T18:00:00Z"))
                 .andExpect(jsonPath("$.totalElements").value(1));
 
         verify(ticketService).getTickets(any(Pageable.class));
@@ -107,7 +113,7 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.ticketNumber").value("TKT-12345"))
                 .andExpect(jsonPath("$.seatInformation").value("Section A, Row 5, Seat 10"))
-                .andExpect(jsonPath("$.eventDate").value("2026-03-15T18:00:00"));
+                .andExpect(jsonPath("$.eventDate").value("2026-03-15T18:00:00Z"));
 
         verify(ticketService).getTicketById(1);
     }
@@ -127,13 +133,13 @@ class TicketControllerTest {
         Ticket newTicket = new Ticket();
         newTicket.setTicketNumber("TKT-67890");
         newTicket.setSeatInformation("Section B, Row 3, Seat 7");
-        newTicket.setEventDate("2026-04-20T19:30:00");
+        newTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
 
         Ticket createdTicket = new Ticket();
         createdTicket.setId(2);
         createdTicket.setTicketNumber("TKT-67890");
         createdTicket.setSeatInformation("Section B, Row 3, Seat 7");
-        createdTicket.setEventDate("2026-04-20T19:30:00");
+        createdTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
 
         when(ticketService.createTicket(eq(1), any(Ticket.class))).thenReturn(createdTicket);
 
@@ -144,7 +150,7 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.id").value(2))
                 .andExpect(jsonPath("$.ticketNumber").value("TKT-67890"))
                 .andExpect(jsonPath("$.seatInformation").value("Section B, Row 3, Seat 7"))
-                .andExpect(jsonPath("$.eventDate").value("2026-04-20T19:30:00"));
+                .andExpect(jsonPath("$.eventDate").value("2026-04-20T19:30:00Z"));
 
         verify(ticketService).createTicket(eq(1), any(Ticket.class));
     }
@@ -154,7 +160,7 @@ class TicketControllerTest {
         Ticket newTicket = new Ticket();
         newTicket.setTicketNumber("TKT-67890");
         newTicket.setSeatInformation("Section B, Row 3, Seat 7");
-        newTicket.setEventDate("2026-04-20T19:30:00");
+        newTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
 
         when(ticketService.createTicket(eq(999), any(Ticket.class)))
                 .thenThrow(new UserNotFoundException(999));
@@ -167,6 +173,3 @@ class TicketControllerTest {
         verify(ticketService).createTicket(eq(999), any(Ticket.class));
     }
 }
-
-
-

@@ -1,134 +1,49 @@
 package com.moveit.championship.client;
 
 import com.moveit.championship.dto.LocationDTO;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
-import static org.mockito.Mockito.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 
-@ExtendWith(MockitoExtension.class)
 class LocationClientTest {
 
-    @Mock
-    private RestTemplate restTemplate;
+    @Test
+    @DisplayName("Should declare LocationClient as a Feign client with expected name and url")
+    void shouldDeclareFeignClientMetadata() {
+        FeignClient annotation = LocationClient.class.getAnnotation(FeignClient.class);
 
-    private LocationClient locationClient;
-
-    private final String locationServiceUrl = "http://localhost:8084";
-
-    @BeforeEach
-    void setUp() {
-        locationClient = new LocationClient(restTemplate, locationServiceUrl);
+        assertThat(annotation).isNotNull();
+        assertThat(annotation.name()).isEqualTo("location-service");
+        assertThat(annotation.url()).isEqualTo("${location.service.url:http://localhost:8084}");
     }
 
     @Test
-    @DisplayName("Should successfully fetch location by ID")
-    void getLocationById_shouldReturnLocation_whenServiceResponds() {
-        // Given
-        Integer locationId = 1;
-        LocationDTO expectedLocation = new LocationDTO(
-                1,
-                "Stade de France",
-                48.9244,
-                2.3601,
-                "Avenue Jules Rimet",
-                "Entrée E",
-                "Entrée B",
-                "Grand stade national"
-        );
+    @DisplayName("Should expose getLocationById with GET /locations/{id}")
+    void shouldExposeExpectedGetMapping() throws NoSuchMethodException {
+        Method method = LocationClient.class.getMethod("getLocationById", Integer.class);
+        GetMapping getMapping = method.getAnnotation(GetMapping.class);
 
-        when(restTemplate.getForObject(
-                locationServiceUrl + "/locations/" + locationId,
-                LocationDTO.class
-        )).thenReturn(expectedLocation);
-
-        // When
-        LocationDTO result = locationClient.getLocationById(locationId);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getLocationId()).isEqualTo(1);
-        assertThat(result.getName()).isEqualTo("Stade de France");
-        assertThat(result.getLatitude()).isEqualTo(48.9244);
-        assertThat(result.getLongitude()).isEqualTo(2.3601);
-        
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(LocationDTO.class));
+        assertThat(getMapping).isNotNull();
+        assertThat(getMapping.value()).containsExactly("/locations/{id}");
+        assertThat(method.getReturnType()).isEqualTo(LocationDTO.class);
     }
 
     @Test
-    @DisplayName("Should return null when location service is unavailable")
-    void getLocationById_shouldReturnNull_whenServiceUnavailable() {
-        // Given
-        Integer locationId = 999;
-        
-        when(restTemplate.getForObject(anyString(), eq(LocationDTO.class)))
-                .thenThrow(new RestClientException("Connection refused"));
+    @DisplayName("Should map id parameter as path variable")
+    void shouldMapIdAsPathVariable() throws NoSuchMethodException {
+        Method method = LocationClient.class.getMethod("getLocationById", Integer.class);
+        Parameter parameter = method.getParameters()[0];
+        PathVariable pathVariable = parameter.getAnnotation(PathVariable.class);
 
-        // When
-        LocationDTO result = locationClient.getLocationById(locationId);
-
-        // Then
-        assertThat(result).isNull();
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(LocationDTO.class));
-    }
-
-    @Test
-    @DisplayName("Should return null when location not found")
-    void getLocationById_shouldReturnNull_whenLocationNotFound() {
-        // Given
-        Integer locationId = 999;
-        
-        when(restTemplate.getForObject(anyString(), eq(LocationDTO.class)))
-                .thenReturn(null);
-
-        // When
-        LocationDTO result = locationClient.getLocationById(locationId);
-
-        // Then
-        assertThat(result).isNull();
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(LocationDTO.class));
-    }
-
-    @Test
-    @DisplayName("Should construct correct URL for location request")
-    void getLocationById_shouldConstructCorrectUrl() {
-        // Given
-        Integer locationId = 42;
-        String expectedUrl = locationServiceUrl + "/locations/42";
-
-        LocationDTO mockLocation = new LocationDTO();
-        when(restTemplate.getForObject(expectedUrl, LocationDTO.class))
-                .thenReturn(mockLocation);
-
-        // When
-        locationClient.getLocationById(locationId);
-
-        // Then
-        verify(restTemplate).getForObject(expectedUrl, LocationDTO.class);
-    }
-
-    @Test
-    @DisplayName("Should handle network exceptions gracefully")
-    void getLocationById_shouldHandleNetworkException() {
-        // Given
-        Integer locationId = 1;
-        
-        when(restTemplate.getForObject(anyString(), eq(LocationDTO.class)))
-                .thenThrow(new RuntimeException("Network timeout"));
-
-        // When
-        LocationDTO result = locationClient.getLocationById(locationId);
-
-        // Then
-        assertThat(result).isNull();
+        assertThat(pathVariable).isNotNull();
+        assertThat(pathVariable.value()).isEqualTo("id");
+        assertThat(parameter.getType()).isEqualTo(Integer.class);
     }
 }

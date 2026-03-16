@@ -2,9 +2,12 @@ package com.moveit.championship.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.championship.config.TestJacksonConfig;
+import com.moveit.championship.dto.CompetitionCreateDTO;
+import com.moveit.championship.dto.CompetitionDTO;
+import com.moveit.championship.dto.CompetitionSummaryDTO;
 import com.moveit.championship.entity.Competition;
-import com.moveit.championship.entity.Status;
 import com.moveit.championship.exception.CompetitionNotFoundException;
+import com.moveit.championship.mapper.CompetitionMapper;
 import com.moveit.championship.mother.CompetitionMother;
 import com.moveit.championship.service.CompetitionService;
 import com.moveit.championship.service.TreeGenerationService;
@@ -19,7 +22,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -29,6 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,6 +54,9 @@ class CompetitionControllerTest {
     @MockitoBean
     private TreeGenerationService treeGenerationService;
 
+        @MockitoBean
+        private CompetitionMapper competitionMapper;
+
     private Competition competition1;
     private Competition competition2;
 
@@ -58,6 +67,61 @@ class CompetitionControllerTest {
                 .withCompetitionId(2)
                 .withCompetitionName("Coupe du Monde")
                 .build();
+
+                when(competitionMapper.toCompetitionDTO(any(Competition.class))).thenAnswer(invocation -> {
+                        Competition source = invocation.getArgument(0);
+                        return CompetitionDTO.builder()
+                                        .competitionId(source.getCompetitionId())
+                                        .championshipId(source.getChampionship() != null ? source.getChampionship().getId() : null)
+                                        .competitionSport(source.getCompetitionSport())
+                                        .competitionName(source.getCompetitionName())
+                                        .competitionStartDate(source.getCompetitionStartDate())
+                                        .competitionEndDate(source.getCompetitionEndDate())
+                                        .competitionDescription(source.getCompetitionDescription())
+                                        .competitionStatus(source.getCompetitionStatus())
+                                        .nbManches(source.getNbManches())
+                                        .competitionType(source.getCompetitionType())
+                                        .maxPerHeat(source.getMaxPerHeat())
+                                        .participantType(source.getParticipantType())
+                                        .assignedCommissaireId(source.getAssignedCommissaireId())
+                                        .build();
+                });
+
+                when(competitionMapper.toCompetitionSummaryDTOList(anyList())).thenAnswer(invocation -> {
+                        List<Competition> sourceList = invocation.getArgument(0);
+                        return sourceList.stream().map(source -> CompetitionSummaryDTO.builder()
+                                        .competitionId(source.getCompetitionId())
+                                        .championshipId(source.getChampionship() != null ? source.getChampionship().getId() : null)
+                                        .competitionSport(source.getCompetitionSport())
+                                        .competitionName(source.getCompetitionName())
+                                        .competitionStartDate(source.getCompetitionStartDate())
+                                        .competitionEndDate(source.getCompetitionEndDate())
+                                        .competitionDescription(source.getCompetitionDescription())
+                                        .competitionStatus(source.getCompetitionStatus())
+                                        .nbManches(source.getNbManches())
+                                        .competitionType(source.getCompetitionType())
+                                        .maxPerHeat(source.getMaxPerHeat())
+                                        .participantType(source.getParticipantType())
+                                        .assignedCommissaireId(source.getAssignedCommissaireId())
+                                        .build()).toList();
+                });
+
+                when(competitionMapper.toCompetitionEntity(any(CompetitionCreateDTO.class))).thenAnswer(invocation -> {
+                        CompetitionCreateDTO source = invocation.getArgument(0);
+                        Competition mapped = new Competition();
+                        mapped.setCompetitionSport(source.getCompetitionSport());
+                        mapped.setCompetitionName(source.getCompetitionName());
+                        mapped.setCompetitionStartDate(source.getCompetitionStartDate());
+                        mapped.setCompetitionEndDate(source.getCompetitionEndDate());
+                        mapped.setCompetitionDescription(source.getCompetitionDescription());
+                        mapped.setCompetitionStatus(source.getCompetitionStatus());
+                        mapped.setNbManches(source.getNbManches());
+                        mapped.setCompetitionType(source.getCompetitionType());
+                        mapped.setMaxPerHeat(source.getMaxPerHeat());
+                        mapped.setParticipantType(source.getParticipantType());
+                        mapped.setAssignedCommissaireId(source.getAssignedCommissaireId());
+                        return mapped;
+                });
     }
 
     @Test
@@ -127,7 +191,7 @@ class CompetitionControllerTest {
 
         mockMvc.perform(post("/championships/competitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(competition1)))
+                                                .content(toCreateCompetitionJson(competition1)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.competitionId", equalTo(competition1.getCompetitionId())))
                 .andExpect(jsonPath("$.competitionName", equalTo(competition1.getCompetitionName())));
@@ -145,7 +209,7 @@ class CompetitionControllerTest {
 
         mockMvc.perform(post("/championships/competitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(competitionWithCommissaire)))
+                        .content(toCreateCompetitionJson(competitionWithCommissaire)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.assignedCommissaireId", equalTo(7)));
 
@@ -243,6 +307,25 @@ class CompetitionControllerTest {
     }
 
     @Test
+    @DisplayName("Should return 400 with message when tree generation input is invalid.")
+    void testGenerateTree_BadRequest() throws Exception {
+        Integer id = competition1.getCompetitionId();
+        List<Integer> participantIds = List.of(1);
+        String errorMessage = "Il faut au moins 2 participants pour une élimination directe";
+
+        when(treeGenerationService.generateTree(eq(id), anyList()))
+                .thenThrow(new IllegalArgumentException(errorMessage));
+
+        mockMvc.perform(post("/championships/competitions/" + id + "/generate-tree")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(participantIds)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(errorMessage));
+
+        verify(treeGenerationService, times(1)).generateTree(eq(id), anyList());
+    }
+
+    @Test
     @DisplayName("Should delete competition successfully.")
     void testDeleteCompetition_Success() throws Exception {
         Integer id = competition1.getCompetitionId();
@@ -277,7 +360,6 @@ class CompetitionControllerTest {
         when(competitionService.assignLocation(eq(id), eq(5), isNull())).thenReturn(competition1);
 
         String body = "{\"locationId\": 5}";
-
         mockMvc.perform(put("/championships/competitions/" + id + "/assign-location")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
@@ -335,4 +417,24 @@ class CompetitionControllerTest {
 
         verify(competitionService, never()).assignLocation(any(), any(), any());
     }
+
+        private String toCreateCompetitionJson(Competition competition) throws Exception {
+                Map<String, Object> payload = new LinkedHashMap<>();
+                payload.put("competitionSport", competition.getCompetitionSport());
+                payload.put("competitionName", competition.getCompetitionName());
+                payload.put("competitionStartDate", competition.getCompetitionStartDate());
+                payload.put("competitionEndDate", competition.getCompetitionEndDate());
+                payload.put("competitionDescription", competition.getCompetitionDescription());
+                payload.put("competitionStatus", competition.getCompetitionStatus());
+                payload.put("nbManches", competition.getNbManches());
+                payload.put("competitionType", competition.getCompetitionType());
+                payload.put("maxPerHeat", competition.getMaxPerHeat());
+                payload.put("participantType", competition.getParticipantType());
+                payload.put("assignedCommissaireId", competition.getAssignedCommissaireId());
+
+                Integer championshipId = competition.getChampionship() != null ? competition.getChampionship().getId() : null;
+                payload.put("championship", Map.of("id", championshipId));
+
+                return objectMapper.writeValueAsString(payload);
+        }
 }

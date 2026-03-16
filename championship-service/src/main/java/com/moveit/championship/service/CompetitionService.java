@@ -52,6 +52,7 @@ public class CompetitionService {
         existing.setCompetitionStartDate(dto.getCompetitionStartDate());
         existing.setCompetitionEndDate(dto.getCompetitionEndDate());
         existing.setCompetitionDescription(dto.getCompetitionDescription());
+        existing.setCompetitionResultUnit(dto.getCompetitionResultUnit());
         existing.setCompetitionStatus(dto.getCompetitionStatus());
 
         validateCompetitionDates(existing, existing.getChampionship());

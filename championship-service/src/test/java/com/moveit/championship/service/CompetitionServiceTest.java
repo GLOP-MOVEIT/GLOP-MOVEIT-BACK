@@ -90,6 +90,7 @@ class CompetitionServiceTest {
         var result = competitionService.createCompetition(competition);
 
         assertThat(result).isEqualTo(competition);
+        assertThat(result.getCompetitionResultUnit()).isEqualTo("POINTS");
         verify(championshipRepository, times(1)).findById(championship.getId());
         verify(competitionRepository, times(1)).save(competition);
     }
@@ -120,6 +121,7 @@ class CompetitionServiceTest {
         dto.setCompetitionStartDate(existing.getCompetitionStartDate());
         dto.setCompetitionEndDate(existing.getCompetitionEndDate());
         dto.setCompetitionDescription(existing.getCompetitionDescription());
+        dto.setCompetitionResultUnit("SECONDES");
         dto.setCompetitionStatus(Status.PLANNED);
 
         when(competitionRepository.findById(existing.getCompetitionId()))
@@ -130,6 +132,7 @@ class CompetitionServiceTest {
         var result = competitionService.updateCompetition(existing.getCompetitionId(), dto);
 
         assertThat(result.getCompetitionName()).isEqualTo("Updated Competition");
+        assertThat(result.getCompetitionResultUnit()).isEqualTo("SECONDES");
         assertThat(result.getCompetitionId()).isEqualTo(existing.getCompetitionId());
         verify(competitionRepository, times(1)).save(any(Competition.class));
     }

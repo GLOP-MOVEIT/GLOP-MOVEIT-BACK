@@ -1,0 +1,23 @@
+meta {
+  name: CreateAssignment
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{URL}}/volunteer/assignments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+
+body:json {
+  {
+    "volunteerId": 1,
+    "taskId": 1
+  }
+}
+

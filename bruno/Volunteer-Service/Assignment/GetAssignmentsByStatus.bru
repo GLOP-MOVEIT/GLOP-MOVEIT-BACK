@@ -1,0 +1,15 @@
+meta {
+  name: GetAssignmentsByStatus
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{URL}}/volunteer/assignments/status/PENDING
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{JWT_TOKEN}}
+}
+

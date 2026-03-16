@@ -1,11 +1,8 @@
 package com.moveit.user.dto;
 
-import com.moveit.user.entity.DocumentEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,5 +13,5 @@ public class Request {
     private RequestStatus requestStatus;
     private String requestRejectionReason;
     private Role role;
-    private List<DocumentEntity> documents;
+    private String coverLetter;
 }

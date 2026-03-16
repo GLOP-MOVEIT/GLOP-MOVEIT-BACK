@@ -11,6 +11,7 @@ public class CompetitionUpdateDTOMother {
         dto.setCompetitionStartDate(LocalDateTime.now());
         dto.setCompetitionEndDate(LocalDateTime.now().plusDays(1));
         dto.setCompetitionDescription("Description mise à jour");
+        dto.setCompetitionResultUnit("SECONDES");
         dto.setCompetitionStatus(Status.ONGOING);
         return dto;
     }

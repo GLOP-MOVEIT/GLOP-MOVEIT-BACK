@@ -26,4 +26,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Void> handleTrialNotFound() {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        log.warn(ex.getMessage());
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

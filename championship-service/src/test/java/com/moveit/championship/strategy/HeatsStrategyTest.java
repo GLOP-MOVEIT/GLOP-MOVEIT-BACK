@@ -36,37 +36,38 @@ class HeatsStrategyTest {
         competition.setCompetitionType(CompetitionType.HEATS);
         competition.setNbManches(3);
         competition.setMaxPerHeat(8);
-        participantIds = createParticipantIds(29);
+        // nbManches=3, maxPerHeat=8 → min requis = 8 * 2^(3-1) = 32 participants
+        participantIds = createParticipantIds(32);
 
         competition.setCompetitionStartDate(LocalDateTime.of(2026, 7, 1, 0, 0));
         competition.setCompetitionEndDate(LocalDateTime.of(2026, 7, 3, 0, 0));
     }
 
     @Test
-    @DisplayName("Should generate correct number of trials for 29 participants, 8 per heat, 3 rounds")
+    @DisplayName("Should generate correct number of trials for 32 participants, 8 per heat, 3 rounds")
     void testGenerateTrials_29Participants_3Rounds() {
         // Finale: 1 × 8 = 8 participants → 1 série
         // Demi-finales: 2 × 8 = 16 participants → 2 séries
-        // Séries: 4 × 8 = 32 attendus, mais 29 réels → ceil(29/8) = 4 séries
+        // Séries: 4 × 8 = 32 participants → 4 séries
         // Total: 4 + 2 + 1 = 7 trials
         List<Trial> trials = strategy.generateTrials(competition, participantIds);
         assertThat(trials).hasSize(7);
     }
 
     @Test
-    @DisplayName("Should generate correct round structure for 29 participants")
+    @DisplayName("Should generate correct round structure for 32 participants")
     void testGenerateTrials_RoundStructure() {
         List<Trial> trials = strategy.generateTrials(competition, participantIds);
 
-        // Round 1 (Séries): 4×8=32 attendus, 29 réels → ceil(29/8) = 4
+        // Round 1 (Séries): 4 × 8 = 32 → 4 séries
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
         assertThat(round1).hasSize(4);
 
-        // Round 2 (Demi-finales): 2 × maxPerHeat = 16 → 16/8 = 2
+        // Round 2 (Demi-finales): 2 × 8 = 16 → 2 séries
         List<Trial> round2 = trials.stream().filter(t -> t.getRoundNumber() == 2).toList();
         assertThat(round2).hasSize(2);
 
-        // Round 3 (Finale): 1 × maxPerHeat = 8 → 8/8 = 1
+        // Round 3 (Finale): 1 × 8 = 8 → 1 série
         List<Trial> round3 = trials.stream().filter(t -> t.getRoundNumber() == 3).toList();
         assertThat(round3).hasSize(1);
     }
@@ -120,11 +121,32 @@ class HeatsStrategyTest {
     @DisplayName("Should include participant count in description")
     void testGenerateTrials_DescriptionContainsParticipants() {
         List<Trial> trials = strategy.generateTrials(competition, participantIds);
-        // First heat has 8 participants
+        // Chaque série du round 1 a 8 participants (32 / 4 séries = 8)
         assertThat(trials.getFirst().getTrialDescription()).contains("8 participants");
-        // Last heat of round 1 (4th série) has 5 participants (29 - 3*8)
+        // Dernière série du round 1 a aussi 8 participants (32 est divisible par 8)
         List<Trial> round1 = trials.stream().filter(t -> t.getRoundNumber() == 1).toList();
-        assertThat(round1.getLast().getTrialDescription()).contains("5 participants");
+        assertThat(round1.getLast().getTrialDescription()).contains("8 participants");
+    }
+
+    @Test
+    @DisplayName("Should throw when not enough participants for the bracket")
+    void testGenerateTrials_NotEnoughParticipantsForBracket() {
+        // nbManches=3, maxPerHeat=8 → min requis = 32, on passe 10
+        List<Integer> tooFew = createParticipantIds(10);
+        assertThatThrownBy(() -> strategy.generateTrials(competition, tooFew))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("32 participants");
+    }
+
+    @Test
+    @DisplayName("Should throw when participant list contains duplicates")
+    void testGenerateTrials_DuplicateParticipants() {
+        // On recrée une liste de 32 avec un doublon (on remplace le dernier par 1)
+        List<Integer> withDuplicate = new java.util.ArrayList<>(createParticipantIds(31));
+        withDuplicate.add(1); // doublon de 1
+        assertThatThrownBy(() -> strategy.generateTrials(competition, withDuplicate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("doublons");
     }
 
     @Test
