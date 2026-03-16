@@ -22,6 +22,10 @@ location:
   service:
     url: http://localhost:8084
 
+user:
+  service:
+    url: http://localhost:8085
+
 springdoc:
   api-docs:
     enabled: true

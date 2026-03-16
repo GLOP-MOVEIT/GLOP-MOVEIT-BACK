@@ -1,5 +1,6 @@
 package com.moveit.championship.controller;
 
+import com.moveit.championship.dto.TrialWithParticipantsDTO;
 import org.springframework.web.bind.annotation.*;
 
 import com.moveit.championship.dto.TrialRequestDTO;
@@ -39,6 +40,17 @@ public class TrialController {
     public ResponseEntity<TrialDTO> getTrialById(@PathVariable Integer id) {
         Trial trial = trialService.getTrialById(id);
         return ResponseEntity.ok(trialMapper.toTrialDTO(trial));
+    }
+
+    @Operation(summary = "Récupérer toutes les manches d'un athlète")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Manches de l'athlète récupérées avec succès", content = @Content(schema = @Schema(implementation = TrialDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/athlete/{athleteId}")
+    public ResponseEntity<List<TrialDTO>> getTrialsByAthleteId(@PathVariable Integer athleteId) {
+        List<Trial> trials = trialService.getTrialsByAthleteId(athleteId);
+        return ResponseEntity.ok(trials.stream().map(trialMapper::toTrialDTO).toList());
     }
 
     @Operation(summary = "Récupérer toutes les manches d'une compétition")
@@ -81,6 +93,17 @@ public class TrialController {
         Trial trial = trialMapper.toTrialEntity(dto);
         Trial updatedTrial = trialService.updateTrial(id, trial);
         return ResponseEntity.ok(trialMapper.toTrialDTO(updatedTrial));
+    }
+
+    @Operation(summary = "Récupérer les participants enrichis d'une manche")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Participants récupérés avec succès", content = @Content(schema = @Schema(implementation = TrialDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Manche non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<TrialWithParticipantsDTO> getTrialWithParticipants(@PathVariable Integer id) {
+        return ResponseEntity.ok(trialService.getTrialWithParticipants(id));
     }
 
     @Operation(summary = "Supprimer une manche (Admin)")

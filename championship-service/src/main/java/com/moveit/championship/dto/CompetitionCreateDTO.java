@@ -26,6 +26,8 @@ public class CompetitionCreateDTO {
 
     private String competitionDescription;
 
+    private String competitionResultUnit;
+
     private Status competitionStatus;
 
     @NotNull(message = "Le nombre de manches est obligatoire")

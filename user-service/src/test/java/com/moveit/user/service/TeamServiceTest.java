@@ -132,6 +132,19 @@ class TeamServiceTest {
         verify(teamMapper).toDto(testTeamEntity);
     }
 
+    @Test
+    void getTeamsByAthleteId_ShouldReturnTeamsForAthlete() {
+        when(teamRepository.findDistinctByAthletes_UserId(1)).thenReturn(List.of(testTeamEntity));
+        when(teamMapper.toDto(testTeamEntity)).thenReturn(testTeam);
+
+        List<Team> result = teamService.getTeamsByAthleteId(1);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getTeamId()).isEqualTo(1);
+        assertThat(result.getFirst().getName()).isEqualTo("Team Alpha");
+        verify(teamRepository).findDistinctByAthletes_UserId(1);
+    }
+
     // --- addAthlete ---
 
     @Test

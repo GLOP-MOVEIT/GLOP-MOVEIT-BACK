@@ -62,6 +62,17 @@ class TeamControllerTest {
 
     // --- getAllTeams ---
 
+    @Test
+    void getTeamsByAthleteId_ShouldReturnTeams() throws Exception {
+        when(teamService.getTeamsByAthleteId(5)).thenReturn(List.of(testTeam));
+
+        mockMvc.perform(get("/teams/athletes/5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].teamId").value(1))
+                .andExpect(jsonPath("$[0].name").value("Team Alpha"));
+
+        verify(teamService).getTeamsByAthleteId(5);
+    }
 
     // --- createTeam ---
 
