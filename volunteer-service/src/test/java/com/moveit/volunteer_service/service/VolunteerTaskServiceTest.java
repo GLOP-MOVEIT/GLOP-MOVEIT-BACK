@@ -2,7 +2,6 @@ package com.moveit.volunteer_service.service;
 
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
 import com.moveit.volunteer_service.entity.VolunteerTask;
-import com.moveit.volunteer_service.enums.TaskStatus;
 import com.moveit.volunteer_service.enums.TaskTargetType;
 import com.moveit.volunteer_service.exception.VolunteerTaskNotFoundException;
 import com.moveit.volunteer_service.exception.VolunteerTaskTypeNotFoundException;
@@ -161,17 +160,6 @@ class VolunteerTaskServiceTest {
         verify(volunteerTaskRepository).save(existing);
     }
 
-    @Test
-    @DisplayName("Should update task status")
-    void shouldUpdateTaskStatus() {
-        var existing = VolunteerTaskMother.defaultTask();
-        when(volunteerTaskRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(volunteerTaskRepository.save(any(VolunteerTask.class))).thenReturn(existing);
-
-        var result = volunteerTaskService.updateTaskStatus(1L, TaskStatus.IN_PROGRESS);
-
-        assertThat(result.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
-    }
 
     @Test
     @DisplayName("Should reject task update when start date is after end date")

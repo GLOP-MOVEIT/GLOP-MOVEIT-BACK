@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.moveit.volunteer_service.enums.TaskStatus;
 import com.moveit.volunteer_service.enums.TaskTargetType;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -38,10 +37,6 @@ public class VolunteerTask {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_type_id", nullable = false)
     private VolunteerTaskType taskType;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TaskStatus status = TaskStatus.PENDING;
 
     @Column(name = "start_date")
     private LocalDateTime startDate;

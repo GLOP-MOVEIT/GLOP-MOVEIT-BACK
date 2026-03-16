@@ -3,7 +3,6 @@ package com.moveit.volunteer_service.controller;
 import org.springframework.web.bind.annotation.*;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
 import com.moveit.volunteer_service.dto.VolunteerTaskDTO;
-import com.moveit.volunteer_service.enums.TaskStatus;
 import com.moveit.volunteer_service.enums.TaskTargetType;
 import com.moveit.volunteer_service.mapper.VolunteerTaskMapper;
 import com.moveit.volunteer_service.service.VolunteerTaskService;
@@ -61,14 +60,6 @@ public class VolunteerTaskController {
             @Valid @RequestBody CreateVolunteerTaskRequest request) {
         return ResponseEntity.ok(
                 VolunteerTaskMapper.toDTO(volunteerTaskService.updateTask(id, request)));
-    }
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<VolunteerTaskDTO> updateTaskStatus(
-            @PathVariable Long id,
-            @RequestParam TaskStatus status) {
-        return ResponseEntity.ok(
-                VolunteerTaskMapper.toDTO(volunteerTaskService.updateTaskStatus(id, status)));
     }
 
     @DeleteMapping("/{id}")

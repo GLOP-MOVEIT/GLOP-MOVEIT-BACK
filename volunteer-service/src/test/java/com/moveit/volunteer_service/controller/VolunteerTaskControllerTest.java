@@ -3,7 +3,6 @@ package com.moveit.volunteer_service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moveit.volunteer_service.config.TestJacksonConfig;
 import com.moveit.volunteer_service.dto.CreateVolunteerTaskRequest;
-import com.moveit.volunteer_service.enums.TaskStatus;
 import com.moveit.volunteer_service.enums.TaskTargetType;
 import com.moveit.volunteer_service.exception.VolunteerTaskNotFoundException;
 import com.moveit.volunteer_service.mother.VolunteerTaskMother;
@@ -139,20 +138,6 @@ class VolunteerTaskControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", equalTo("Tâche mise à jour")));
-    }
-
-    @Test
-    @DisplayName("Should update task status")
-    void shouldUpdateTaskStatus() throws Exception {
-        var updated = VolunteerTaskMother.defaultTask();
-        updated.setStatus(TaskStatus.IN_PROGRESS);
-        when(volunteerTaskService.updateTaskStatus(1L, TaskStatus.IN_PROGRESS)).thenReturn(updated);
-
-        mockMvc.perform(patch("/volunteer/tasks/1/status")
-                        .param("status", "IN_PROGRESS")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", equalTo("IN_PROGRESS")));
     }
 
     @Test
