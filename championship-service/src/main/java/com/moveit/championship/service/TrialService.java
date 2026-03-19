@@ -14,10 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -74,6 +77,11 @@ public class TrialService {
         Trial existingTrial = trialRepository.findById(id)
                 .orElseThrow(() -> new TrialNotFoundException(id));
 
+        List<Integer> updatedParticipantIds = trial.getParticipantIds() != null
+                ? trial.getParticipantIds()
+                : existingTrial.getParticipantIds();
+
+        validateScheduleConflict(id, updatedParticipantIds, trial.getTrialStartDate(), trial.getTrialEndDate());
 
         existingTrial.setTrialName(trial.getTrialName());
         existingTrial.setTrialStartDate(trial.getTrialStartDate());
@@ -83,9 +91,50 @@ public class TrialService {
         existingTrial.setLocationId(trial.getLocationId());
         existingTrial.setRoundNumber(trial.getRoundNumber());
         existingTrial.setPosition(trial.getPosition());
-        existingTrial.setParticipantIds(trial.getParticipantIds());
+        existingTrial.setParticipantIds(updatedParticipantIds);
 
         return trialRepository.save(existingTrial);
+    }
+
+    private void validateScheduleConflict(Integer trialId,
+                                          List<Integer> participantIds,
+                                          LocalDateTime candidateStart,
+                                          LocalDateTime candidateEnd) {
+        if (participantIds == null || participantIds.isEmpty()) {
+            return;
+        }
+        if (candidateStart == null || candidateEnd == null) {
+            return;
+        }
+
+        List<Integer> distinctParticipantIds = participantIds.stream().distinct().toList();
+        List<Trial> conflicts = trialRepository.findConflictingTrials(
+                trialId, distinctParticipantIds, candidateStart, candidateEnd);
+
+        if (conflicts == null || conflicts.isEmpty()) {
+            return;
+        }
+
+        Set<Integer> conflictingParticipantIds = new LinkedHashSet<>();
+        Set<Integer> conflictTrialIds = new LinkedHashSet<>();
+
+        for (Trial conflictingTrial : conflicts) {
+            conflictTrialIds.add(conflictingTrial.getTrialId());
+            if (conflictingTrial.getParticipantIds() == null) {
+                continue;
+            }
+
+            for (Integer participantId : conflictingTrial.getParticipantIds()) {
+                if (distinctParticipantIds.contains(participantId)) {
+                    conflictingParticipantIds.add(participantId);
+                }
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "Conflit d'emploi du temps pour les participants " + conflictingParticipantIds
+                        + " avec les épreuves " + conflictTrialIds
+                        + " entre " + candidateStart + " et " + candidateEnd);
     }
 
     @Transactional

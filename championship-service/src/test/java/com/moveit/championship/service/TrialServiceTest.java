@@ -130,14 +130,17 @@ class TrialServiceTest {
     void updateTrial_shouldUpdateFields() {
         Trial updated = new Trial();
         updated.setTrialName("Updated");
-        updated.setTrialStartDate(LocalDateTime.now());
-        updated.setTrialEndDate(LocalDateTime.now());
+        LocalDateTime start = LocalDateTime.of(2026, 3, 24, 15, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 3, 24, 16, 0);
+        updated.setTrialStartDate(start);
+        updated.setTrialEndDate(end);
         updated.setTrialDescription("desc");
         updated.setTrialStatus(Status.ONGOING);
         updated.setLocationId(2);
         updated.setParticipantIds(List.of(10, 11));
 
         when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(trialRepository.findConflictingTrials(1, List.of(10, 11), start, end)).thenReturn(List.of());
         when(trialRepository.save(any(Trial.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Trial result = trialService.updateTrial(1, updated);
@@ -146,6 +149,59 @@ class TrialServiceTest {
         assertThat(result.getTrialStatus()).isEqualTo(Status.ONGOING);
         assertThat(result.getLocationId()).isEqualTo(2);
         assertThat(result.getParticipantIds()).containsExactly(10, 11);
+    }
+
+    @Test
+    void updateTrial_shouldThrow_whenScheduleConflictsForSharedAthlete() {
+        LocalDateTime candidateStart = LocalDateTime.of(2026, 3, 24, 15, 0);
+        LocalDateTime candidateEnd = LocalDateTime.of(2026, 3, 24, 16, 0);
+
+        Trial updated = new Trial();
+        updated.setTrialName("Updated");
+        updated.setTrialStartDate(candidateStart);
+        updated.setTrialEndDate(candidateEnd);
+        updated.setParticipantIds(List.of(7, 8));
+
+        Trial conflicting = new Trial();
+        conflicting.setTrialId(2);
+        conflicting.setTrialStartDate(LocalDateTime.of(2026, 3, 24, 15, 30));
+        conflicting.setTrialEndDate(LocalDateTime.of(2026, 3, 24, 16, 30));
+        conflicting.setParticipantIds(List.of(7, 99));
+
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(trialRepository.findConflictingTrials(1, List.of(7, 8), candidateStart, candidateEnd))
+                .thenReturn(List.of(conflicting));
+
+        assertThatThrownBy(() -> trialService.updateTrial(1, updated))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Conflit d'emploi du temps")
+                .hasMessageContaining("[7]")
+                .hasMessageContaining("[2]");
+
+        verify(trialRepository, never()).save(any(Trial.class));
+    }
+
+    @Test
+    void updateTrial_shouldAllow_whenSharedAthleteHasAdjacentButNonOverlappingTrial() {
+        LocalDateTime candidateStart = LocalDateTime.of(2026, 3, 24, 15, 0);
+        LocalDateTime candidateEnd = LocalDateTime.of(2026, 3, 24, 16, 0);
+
+        Trial updated = new Trial();
+        updated.setTrialName("Updated");
+        updated.setTrialStartDate(candidateStart);
+        updated.setTrialEndDate(candidateEnd);
+        updated.setParticipantIds(List.of(7, 8));
+
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(trialRepository.findConflictingTrials(1, List.of(7, 8), candidateStart, candidateEnd))
+                .thenReturn(List.of());
+        when(trialRepository.save(any(Trial.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Trial result = trialService.updateTrial(1, updated);
+
+        assertThat(result.getTrialStartDate()).isEqualTo(candidateStart);
+        assertThat(result.getTrialEndDate()).isEqualTo(candidateEnd);
+        verify(trialRepository).save(any(Trial.class));
     }
 
     @Test
