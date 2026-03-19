@@ -61,10 +61,10 @@ public class HeatsStrategy implements TreeGenerationStrategy {
             throw new IllegalArgumentException("Il faut au moins 2 places par série");
         }
         int minRequired = maxPerHeat * (int) Math.pow(2d, (double) nbManches - 1d);
-        if (nbParticipants < minRequired) {
+        if (nbParticipants != minRequired ) {
             throw new IllegalArgumentException(
                     "Avec " + nbManches + " tour(s) et " + maxPerHeat + " place(s) par série, "
-                    + "il faut au moins " + minRequired + " participants (reçu : " + nbParticipants + ")");
+                    + "le nombre de participants doit être égal à " + minRequired + " (reçu : " + nbParticipants + ")");
         }
     }
 
@@ -115,7 +115,7 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         String roundName = getRoundName(round, nbManches);
         Trial trial = new Trial();
         trial.setCompetition(competition);
-        trial.setTrialName(roundName + " - Série " + heat);
+        trial.setTrialName(roundName );
         trial.setTrialStartDate(roundStart);
         trial.setTrialEndDate(roundEnd);
         trial.setTrialDescription(roundName + " - Série " + heat + "/" + nbHeats
