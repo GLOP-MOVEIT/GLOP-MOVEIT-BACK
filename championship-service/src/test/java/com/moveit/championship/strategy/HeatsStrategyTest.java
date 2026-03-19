@@ -114,7 +114,7 @@ class HeatsStrategyTest {
 
         List<Trial> trials = strategy.generateTrials(competition, ids8);
         assertThat(trials).hasSize(1);
-        assertThat(trials.getFirst().getTrialName()).contains("Finale");
+        assertThat(trials.getFirst().getTrialName()).isEqualTo("Finale");
     }
 
     @Test
@@ -129,13 +129,13 @@ class HeatsStrategyTest {
     }
 
     @Test
-    @DisplayName("Should throw when not enough participants for the bracket")
-    void testGenerateTrials_NotEnoughParticipantsForBracket() {
-        // nbManches=3, maxPerHeat=8 → min requis = 32, on passe 10
+    @DisplayName("Should throw when participant count is different from required bracket size")
+    void testGenerateTrials_InvalidParticipantsCountForBracket() {
+        // nbManches=3, maxPerHeat=8 → requis exact = 32, on passe 10
         List<Integer> tooFew = createParticipantIds(10);
         assertThatThrownBy(() -> strategy.generateTrials(competition, tooFew))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("32 participants");
+                .hasMessageContaining("doit être égal à 32");
     }
 
     @Test

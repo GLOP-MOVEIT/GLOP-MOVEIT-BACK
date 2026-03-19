@@ -115,7 +115,7 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         String roundName = getRoundName(round, nbManches);
         Trial trial = new Trial();
         trial.setCompetition(competition);
-        trial.setTrialName(roundName + " - Série " + heat);
+        trial.setTrialName(roundName );
         trial.setTrialStartDate(roundStart);
         trial.setTrialEndDate(roundEnd);
         trial.setTrialDescription(roundName + " - Série " + heat + "/" + nbHeats
