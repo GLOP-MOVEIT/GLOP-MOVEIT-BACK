@@ -97,9 +97,9 @@ class UserServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getUserId()).isEqualTo(1);
-        assertThat(result.getContent().get(0).getFirstName()).isEqualTo("John");
-        assertThat(result.getContent().get(0).getSurname()).isEqualTo("Doe");
+        assertThat(result.getContent().getFirst().getUserId()).isEqualTo(1);
+        assertThat(result.getContent().getFirst().getFirstName()).isEqualTo("John");
+        assertThat(result.getContent().getFirst().getSurname()).isEqualTo("Doe");
         assertThat(result.getTotalElements()).isEqualTo(1);
 
         verify(userRepository).findAll(pageable);
