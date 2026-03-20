@@ -1,7 +1,6 @@
 package com.moveit.volunteer_service.service;
 
 import com.moveit.volunteer_service.dto.CreateVolunteerPreferenceRequest;
-import com.moveit.volunteer_service.entity.VolunteerTaskType;
 import com.moveit.volunteer_service.entity.VolunteerPreference;
 import com.moveit.volunteer_service.exception.VolunteerPreferenceNotFoundException;
 import com.moveit.volunteer_service.exception.VolunteerTaskTypeNotFoundException;
