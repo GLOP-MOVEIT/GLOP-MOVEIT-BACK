@@ -121,7 +121,7 @@ class RequestServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isZero();
 
         verify(requestRepository).findAll(pageable);
         verify(requestMapper, never()).toDto(any());
