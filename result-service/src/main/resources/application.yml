@@ -2,7 +2,7 @@ spring:
   application:
     name: result-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/moveit_location
+    url: jdbc:postgresql://localhost:5432/moveit_auth
     username: postgres
     password: password
     driver-class-name: org.postgresql.Driver
