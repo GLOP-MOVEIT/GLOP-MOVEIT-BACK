@@ -24,7 +24,7 @@ RUN apk add --no-cache wget
 COPY --from=build /workspace/result-service/target/*.jar app.jar
 
 # Expose port
-EXPOSE 8084
+EXPOSE 8087
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
