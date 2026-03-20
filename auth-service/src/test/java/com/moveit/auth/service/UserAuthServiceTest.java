@@ -61,8 +61,7 @@ class UserAuthServiceTest {
 
         List<UserAuth> result = userService.allUsers();
 
-        assertThat(result).hasSize(2);
-        assertThat(result).containsExactly(userAuth1, userAuth2);
+        assertThat(result).hasSize(2).containsExactly(userAuth1, userAuth2);
     }
 
     @Test
