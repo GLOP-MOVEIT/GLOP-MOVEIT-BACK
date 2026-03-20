@@ -66,8 +66,7 @@ class RoleServiceTest {
 
         List<Role> result = roleService.getAllRole();
 
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(5);
+        assertThat(result).isNotNull().hasSize(5);
         assertThat(result.get(0).getName()).isEqualTo("SPECTATOR");
         assertThat(result.get(1).getName()).isEqualTo("VOLUNTEER");
         assertThat(result.get(2).getName()).isEqualTo("ATHLETE");
@@ -85,8 +84,7 @@ class RoleServiceTest {
 
         List<Role> result = roleService.getAllRole();
 
-        assertThat(result).isNotNull();
-        assertThat(result).isEmpty();
+        assertThat(result).isNotNull().isEmpty();
 
         verify(roleRepository).findAll();
         verify(roleMapper).toDtoList(List.of());
