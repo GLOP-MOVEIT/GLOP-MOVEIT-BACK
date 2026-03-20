@@ -2,8 +2,6 @@ package com.moveit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.moveit.user.dto.Team;
 import com.moveit.user.dto.TeamRequest;
 import com.moveit.user.dto.User;
