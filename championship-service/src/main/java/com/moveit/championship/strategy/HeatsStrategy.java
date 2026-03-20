@@ -32,9 +32,9 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         List<Trial> previousRoundTrials = new ArrayList<>();
 
         for (int round = 1; round <= nbManches; round++) {
-            long roundOffset = (long) round - 1L;
+            long roundOffset = round - 1L;
             LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(roundOffset));
-            LocalDateTime roundEnd   = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy((long) round));
+            LocalDateTime roundEnd   = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
 
             List<Trial> currentRoundTrials = buildRound(
                     competition, participantIds, round, nbManches, maxPerHeat, roundStart, roundEnd);
@@ -60,7 +60,7 @@ public class HeatsStrategy implements TreeGenerationStrategy {
         if (maxPerHeat < 2) {
             throw new IllegalArgumentException("Il faut au moins 2 places par série");
         }
-        int minRequired = maxPerHeat * (int) Math.pow(2d, (double) nbManches - 1d);
+        int minRequired = maxPerHeat * (int) Math.pow(2d, nbManches - 1d);
         if (nbParticipants != minRequired ) {
             throw new IllegalArgumentException(
                     "Avec " + nbManches + " tour(s) et " + maxPerHeat + " place(s) par série, "
