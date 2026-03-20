@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = "spring")
 public abstract class UserMapper {
 
-    @Autowired
     protected RoleService roleService;
+
+    @Autowired
+    protected void setRoleService(RoleService roleService) {
+        this.roleService = roleService;
+    }
 
     public abstract User toDto(UserEntity userEntity);
 
