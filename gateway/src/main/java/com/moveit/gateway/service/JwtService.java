@@ -40,7 +40,7 @@ public class JwtService {
         try {
             extractAllClaims(token);
             return !isTokenExpired(token);
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException _) {
             return false;
         }
     }
@@ -72,7 +72,7 @@ public class JwtService {
         try {
             byte[] keyBytes = Decoders.BASE64.decode(secretKey);
             return Keys.hmacShaKeyFor(keyBytes);
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException _) {
             byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
             return Keys.hmacShaKeyFor(keyBytes);
         }
