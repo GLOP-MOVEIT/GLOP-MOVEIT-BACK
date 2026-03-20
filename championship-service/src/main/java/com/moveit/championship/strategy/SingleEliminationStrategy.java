@@ -25,13 +25,13 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
         validateInputs(nbRounds, participantIds);
 
         List<Trial> trials = new ArrayList<>();
-        int matchesInRound = (int) Math.pow(2d, (double) nbRounds - 1d);
+        int matchesInRound = (int) Math.pow(2d, nbRounds - 1d);
 
         Duration roundDuration = computeRoundDuration(competition, nbRounds);
         List<Trial> previousRoundTrials = new ArrayList<>();
 
         for (int round = 1; round <= nbRounds; round++) {
-            long roundOffset = (long) round - 1L;
+            long roundOffset = round - 1L;
             LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(roundOffset));
             LocalDateTime roundEnd   = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
 
