@@ -92,8 +92,8 @@ public class JwtService {
                     .getPayload();
         } catch (ExpiredJwtException e) {
             throw e;
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new RuntimeException("Impossible de parser le token JWT", e);
+        } catch (JwtException | IllegalArgumentException exception) {
+            throw new RuntimeException("Impossible de parser le token JWT", exception);
         }
     }
 
@@ -101,7 +101,7 @@ public class JwtService {
         try {
             byte[] keyBytes = Decoders.BASE64.decode(secretKey);
             return Keys.hmacShaKeyFor(keyBytes);
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException exception) {
             byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
             return Keys.hmacShaKeyFor(keyBytes);
         }
