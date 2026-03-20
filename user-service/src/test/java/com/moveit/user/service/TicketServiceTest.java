@@ -103,7 +103,7 @@ class TicketServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isZero();
 
         verify(ticketRepository).findAll(pageable);
         verify(ticketMapper, never()).toDto(any());
