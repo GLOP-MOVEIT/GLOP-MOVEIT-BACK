@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class RequestService {
 
+    private static final String REQUEST_ERROR_MESSAGE = "Request with id ";
+    private static final String NOT_FOUND_MESSAGE = " not found";
+
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
     private final UserService userService;
@@ -32,7 +35,7 @@ public class RequestService {
     public Request getRequestById(Integer id) {
         return this.requestRepository.findById(id)
                 .map(requestMapper::toDto)
-                .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
+                .orElseThrow(() -> new RequestNotFoundException(REQUEST_ERROR_MESSAGE + id + NOT_FOUND_MESSAGE));
     }
 
     public Request createAthleteRequest(Integer userId) {
@@ -56,7 +59,7 @@ public class RequestService {
 
     public void acceptRequest(Integer id) {
         RequestEntity request = this.requestRepository.findById(id)
-                .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
+                .orElseThrow(() -> new RequestNotFoundException(REQUEST_ERROR_MESSAGE + id + NOT_FOUND_MESSAGE));
 
         request.setRequestStatus(RequestStatus.APPROVED);
 
@@ -69,7 +72,7 @@ public class RequestService {
 
     public void rejectRequest(Integer id, RejectRequest refuseRequest) {
         RequestEntity request = this.requestRepository.findById(id)
-                .orElseThrow(() -> new RequestNotFoundException("Request with id " + id + " not found"));
+                .orElseThrow(() -> new RequestNotFoundException(REQUEST_ERROR_MESSAGE + id + NOT_FOUND_MESSAGE));
 
         request.setRequestStatus(RequestStatus.REJECTED);
         request.setRequestRejectionReason(refuseRequest.getRequestRejectionReason());
