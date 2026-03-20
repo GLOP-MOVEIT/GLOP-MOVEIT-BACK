@@ -31,8 +31,7 @@ class JwtServiceTest {
     void generateToken_ShouldReturnValidToken() {
         String token = jwtService.generateToken(testUserAuth);
 
-        assertThat(token).isNotNull();
-        assertThat(token).isNotEmpty();
+        assertThat(token).isNotNull().isNotEmpty();
         assertThat(token.split("\\.")).hasSize(3);
     }
 
@@ -43,16 +42,14 @@ class JwtServiceTest {
 
         String token = jwtService.generateToken(extraClaims, testUserAuth);
 
-        assertThat(token).isNotNull();
-        assertThat(token).isNotEmpty();
+        assertThat(token).isNotNull().isNotEmpty();
     }
 
     @Test
     void generateToken_WithNullExtraClaims_ShouldReturnValidToken() {
         String token = jwtService.generateToken(null, testUserAuth);
 
-        assertThat(token).isNotNull();
-        assertThat(token).isNotEmpty();
+        assertThat(token).isNotNull().isNotEmpty();
     }
 
     @Test
