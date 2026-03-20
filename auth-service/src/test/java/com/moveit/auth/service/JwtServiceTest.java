@@ -94,16 +94,10 @@ class JwtServiceTest {
 
     @Test
     void isTokenValid_ShouldReturnFalse_WhenTokenIsExpired() {
-        JwtService shortExpirationService = new JwtService(SECRET_KEY, 1L);
-        String token = shortExpirationService.generateToken(testUserAuth);
+        JwtService expiredTokenService = new JwtService(SECRET_KEY, -1L);
+        String token = expiredTokenService.generateToken(testUserAuth);
 
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        boolean isValid = shortExpirationService.isTokenValid(token, testUserAuth);
+        boolean isValid = expiredTokenService.isTokenValid(token, testUserAuth);
 
         assertThat(isValid).isFalse();
     }
