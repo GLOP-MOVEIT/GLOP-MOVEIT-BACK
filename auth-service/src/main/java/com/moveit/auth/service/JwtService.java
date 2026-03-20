@@ -69,7 +69,7 @@ public class JwtService {
         try {
             final String username = extractUsername(token);
             return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-        } catch (JwtException | IllegalArgumentException exception) {
+        } catch (JwtException | IllegalArgumentException _) {
             return false;
         }
     }
@@ -101,7 +101,7 @@ public class JwtService {
         try {
             byte[] keyBytes = Decoders.BASE64.decode(secretKey);
             return Keys.hmacShaKeyFor(keyBytes);
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException _) {
             byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
             return Keys.hmacShaKeyFor(keyBytes);
         }
