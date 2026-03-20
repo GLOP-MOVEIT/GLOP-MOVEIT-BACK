@@ -117,7 +117,7 @@ class UserServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isZero();
 
         verify(userRepository).findAll(pageable);
         verify(userMapper, never()).toDto(any(UserEntity.class));
