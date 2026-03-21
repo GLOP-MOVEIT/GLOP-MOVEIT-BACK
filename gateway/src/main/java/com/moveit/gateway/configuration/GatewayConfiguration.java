@@ -17,7 +17,6 @@ public class GatewayConfiguration {
     @Value("${AUTH_SERVICE_URL:http://localhost:8082}")
     private String authServiceUrl;
 
-
     @Value("${NOTIFICATION_SERVICE_URL:http://localhost:8088}")
     private String notificationServiceUrl;
 
@@ -32,6 +31,9 @@ public class GatewayConfiguration {
 
     @Value("${USER_SERVICE_URL:http://localhost:8086}")
     private String userServiceUrl;
+
+    @Value("${RESULT_SERVICE_URL:http://localhost:8087")
+    private String resultServiceUrl;
 
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
@@ -98,6 +100,14 @@ public class GatewayConfiguration {
                 .before(uri(userServiceUrl))
                 .route(path("/teams/**"), http())
                 .before(uri(userServiceUrl))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> resultServiceRoute() {
+        return route("result-service")
+                .route(path("/results/**"), http())
+                .before(uri(resultServiceUrl))
                 .build();
     }
 }
