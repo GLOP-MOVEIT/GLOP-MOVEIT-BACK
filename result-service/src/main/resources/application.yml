@@ -21,10 +21,9 @@ server:
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
+    path: /results/v3/api-docs
   swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
+    enabled: false
 
 management:
   endpoints:
