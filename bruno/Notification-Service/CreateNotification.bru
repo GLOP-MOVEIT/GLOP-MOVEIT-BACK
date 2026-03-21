@@ -1,0 +1,25 @@
+meta {
+  name: CreateNotification
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{URL}}/notifications
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{TOKEN}}
+}
+
+body:json {
+  {
+    "title": "Titre de la notif",
+    "content": "Test notification Bruno",
+    "notificationType": "ALERT",
+    "targetType": "GLOBAL",
+    "targetId": null
+  }
+}
