@@ -80,7 +80,6 @@ public class LocationLocatorService {
             if (participantId == null) continue;
             UserDto participant = safeFetchUser(participantId, authorization);
             String role = extractRole(participant);
-            if (role == null) continue;
 
             if (isAthlete(role)) {
                 athletes.add(buildUserPosition(participantId, participant));
