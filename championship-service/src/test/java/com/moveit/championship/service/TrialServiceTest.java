@@ -240,8 +240,9 @@ class TrialServiceTest {
         trial.setNextTrial(nextTrial);
 
         when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        List<Integer> qualifiedIds = List.of(7, 8);
 
-        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, List.of(7, 8)))
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, qualifiedIds))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("ne peut pas depasser 2 participants");
     }
@@ -250,8 +251,9 @@ class TrialServiceTest {
     void advanceParticipantsToNextTrial_shouldThrowWhenNoNextTrial() {
         trial.setNextTrial(null);
         when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        List<Integer> qualifiedIds = List.of(7);
 
-        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, List.of(7)))
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, qualifiedIds))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Aucune manche suivante");
     }
@@ -262,8 +264,9 @@ class TrialServiceTest {
         nextTrial.setTrialId(2);
         trial.setNextTrial(nextTrial);
         when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        List<Integer> qualifiedIds = List.of();
 
-        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, List.of()))
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, qualifiedIds))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("liste des qualifies est obligatoire");
     }
