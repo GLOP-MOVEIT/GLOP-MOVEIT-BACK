@@ -1,0 +1,34 @@
+meta {
+  name: Update result
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{URL}}/results
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: token
+}
+
+body:json {
+  {
+    "trialId": 1,
+    "lastTrial": false,
+    "rankings": [
+      {
+        "id": 1,
+        "score": "50",
+        "position": 1
+      },
+      {
+        "id": 2,
+        "score": "30",
+        "position": 2
+      }
+    ]
+  }
+}
