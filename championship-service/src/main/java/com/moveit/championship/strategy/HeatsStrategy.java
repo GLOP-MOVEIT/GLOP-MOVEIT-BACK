@@ -14,6 +14,10 @@ import java.util.List;
 @Component
 public class HeatsStrategy implements TreeGenerationStrategy {
 
+    private record RoundContext(int round, int nbManches, int maxPerHeat,
+                                LocalDateTime roundStart, LocalDateTime roundEnd) {
+    }
+
     @Override
     public CompetitionType getType() {
         return CompetitionType.HEATS;
@@ -35,9 +39,9 @@ public class HeatsStrategy implements TreeGenerationStrategy {
             long roundOffset = round - 1L;
             LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(roundOffset));
             LocalDateTime roundEnd   = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
+            RoundContext context = new RoundContext(round, nbManches, maxPerHeat, roundStart, roundEnd);
 
-            List<Trial> currentRoundTrials = buildRound(
-                    competition, participantIds, round, nbManches, maxPerHeat, roundStart, roundEnd);
+            List<Trial> currentRoundTrials = buildRound(competition, participantIds, context);
 
             linkRounds(previousRoundTrials, currentRoundTrials);
 
@@ -84,44 +88,39 @@ public class HeatsStrategy implements TreeGenerationStrategy {
 
     // --- Construction des séries d'un tour ---
 
-    private List<Trial> buildRound(Competition competition, List<Integer> participantIds,
-                                   int round, int nbManches, int maxPerHeat,
-                                   LocalDateTime roundStart, LocalDateTime roundEnd) {
-        int currentParticipants = computeCurrentParticipants(
-                participantIds.size(), round, nbManches, maxPerHeat);
-        int nbHeats = (int) Math.ceil((double) currentParticipants / maxPerHeat);
+    private List<Trial> buildRound(Competition competition, List<Integer> participantIds, RoundContext context) {
+        int currentParticipants = computeCurrentParticipants(participantIds.size(), context);
+        int nbHeats = (int) Math.ceil((double) currentParticipants / context.maxPerHeat());
 
         List<Trial> roundTrials = new ArrayList<>();
         for (int heat = 1; heat <= nbHeats; heat++) {
-            int participantsInHeat = Math.min(maxPerHeat, currentParticipants - (heat - 1) * maxPerHeat);
-            Trial trial = buildHeatTrial(competition, round, nbManches, heat, nbHeats,
-                    participantsInHeat, roundStart, roundEnd);
-            if (round == 1) {
-                assignFirstRoundParticipants(trial, heat, maxPerHeat, participantsInHeat, participantIds);
+            int participantsInHeat = Math.min(context.maxPerHeat(), currentParticipants - (heat - 1) * context.maxPerHeat());
+            Trial trial = buildHeatTrial(competition, context, heat, nbHeats, participantsInHeat);
+            if (context.round() == 1) {
+                assignFirstRoundParticipants(trial, heat, context.maxPerHeat(), participantsInHeat, participantIds);
             }
             roundTrials.add(trial);
         }
         return roundTrials;
     }
 
-    private int computeCurrentParticipants(int nbParticipants, int round, int nbManches, int maxPerHeat) {
-        int expected = maxPerHeat * (int) Math.pow(2d, (double) nbManches - (double) round);
-        return (round == 1) ? Math.min(nbParticipants, expected) : expected;
+    private int computeCurrentParticipants(int nbParticipants, RoundContext context) {
+        int expected = context.maxPerHeat() * (int) Math.pow(2d, (double) context.nbManches() - (double) context.round());
+        return (context.round() == 1) ? Math.min(nbParticipants, expected) : expected;
     }
 
-    private Trial buildHeatTrial(Competition competition, int round, int nbManches,
-                                  int heat, int nbHeats, int participantsInHeat,
-                                  LocalDateTime roundStart, LocalDateTime roundEnd) {
-        String roundName = getRoundName(round, nbManches);
+    private Trial buildHeatTrial(Competition competition, RoundContext context,
+                                 int heat, int nbHeats, int participantsInHeat) {
+        String roundName = getRoundName(context.round(), context.nbManches());
         Trial trial = new Trial();
         trial.setCompetition(competition);
         trial.setTrialName(roundName );
-        trial.setTrialStartDate(roundStart);
-        trial.setTrialEndDate(roundEnd);
+        trial.setTrialStartDate(context.roundStart());
+        trial.setTrialEndDate(context.roundEnd());
         trial.setTrialDescription(roundName + " - Série " + heat + "/" + nbHeats
                 + " (" + participantsInHeat + " participants)");
         trial.setTrialStatus(Status.PLANNED);
-        trial.setRoundNumber(round);
+        trial.setRoundNumber(context.round());
         trial.setPosition(heat);
         return trial;
     }
