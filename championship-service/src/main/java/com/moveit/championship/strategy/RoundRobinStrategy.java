@@ -15,6 +15,10 @@ import java.util.List;
 @Component
 public class RoundRobinStrategy implements TreeGenerationStrategy {
 
+    private record RoundSchedule(int round, int nbRounds, int matchesPerRound, int startMatchNumber,
+                                 LocalDateTime roundStart, LocalDateTime roundEnd) {
+    }
+
     @Override
     public CompetitionType getType() {
         return CompetitionType.ROUND_ROBIN;
@@ -37,10 +41,11 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
             long roundOffset = round - 1L;
             LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(roundOffset));
             LocalDateTime roundEnd   = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
+            RoundSchedule schedule = new RoundSchedule(
+                round, nbRounds, matchesPerRound, matchNumber, roundStart, roundEnd);
 
             List<Integer> currentOrder = buildCurrentOrder(ids.getFirst(), rotating);
-            List<Trial> roundTrials = buildRoundTrials(
-                    competition, currentOrder, round, nbRounds, matchesPerRound, matchNumber, roundStart, roundEnd);
+            List<Trial> roundTrials = buildRoundTrials(competition, currentOrder, schedule);
 
             trials.addAll(roundTrials);
             matchNumber += matchesPerRound;
@@ -89,35 +94,29 @@ public class RoundRobinStrategy implements TreeGenerationStrategy {
 
     // --- Construction des épreuves d'une journée ---
 
-    private List<Trial> buildRoundTrials(Competition competition, List<Integer> currentOrder,
-                                          int round, int nbRounds, int matchesPerRound,
-                                          int startMatchNumber,
-                                          LocalDateTime roundStart, LocalDateTime roundEnd) {
+    private List<Trial> buildRoundTrials(Competition competition, List<Integer> currentOrder, RoundSchedule schedule) {
         List<Trial> roundTrials = new ArrayList<>();
-        for (int match = 1; match <= matchesPerRound; match++) {
+        for (int match = 1; match <= schedule.matchesPerRound(); match++) {
             int home = currentOrder.get(match - 1);
             int away = currentOrder.get(currentOrder.size() - match);
-            Trial trial = buildTrial(competition, round, nbRounds, match, matchesPerRound,
-                    startMatchNumber + match - 1, home, away, roundStart, roundEnd);
+            Trial trial = buildTrial(competition, schedule, match, home, away);
             roundTrials.add(trial);
         }
         return roundTrials;
     }
 
-    private Trial buildTrial(Competition competition, int round, int nbRounds,
-                               int match, int matchesPerRound, int matchNumber,
-                               int home, int away,
-                               LocalDateTime roundStart, LocalDateTime roundEnd) {
+    private Trial buildTrial(Competition competition, RoundSchedule schedule, int match, int home, int away) {
+        int matchNumber = schedule.startMatchNumber() + match - 1;
         Trial trial = new Trial();
         trial.setCompetition(competition);
-        trial.setTrialName("Journée " + round + " - Match " + match);
-        trial.setTrialStartDate(roundStart);
-        trial.setTrialEndDate(roundEnd);
-        trial.setTrialDescription("Journée " + round + "/" + nbRounds
-                + " - Match " + match + "/" + matchesPerRound
+        trial.setTrialName("Journée " + schedule.round() + " - Match " + match);
+        trial.setTrialStartDate(schedule.roundStart());
+        trial.setTrialEndDate(schedule.roundEnd());
+        trial.setTrialDescription("Journée " + schedule.round() + "/" + schedule.nbRounds()
+                + " - Match " + match + "/" + schedule.matchesPerRound()
                 + " (match global n°" + matchNumber + ")");
         trial.setTrialStatus(Status.PLANNED);
-        trial.setRoundNumber(round);
+        trial.setRoundNumber(schedule.round());
         trial.setPosition(match);
         trial.setParticipantIds(buildMatchParticipants(home, away));
         return trial;
