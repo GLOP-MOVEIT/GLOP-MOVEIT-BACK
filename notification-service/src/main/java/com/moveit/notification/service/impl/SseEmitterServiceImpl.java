@@ -9,7 +9,6 @@ import com.moveit.notification.repository.NotificationRepository;
 import com.moveit.notification.repository.SubscriptionRepository;
 import com.moveit.notification.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -29,7 +28,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SseEmitterServiceImpl implements SseEmitterService {
 
     private static final long SSE_TIMEOUT = 30 * 60 * 1000L; // 30 minutes
@@ -58,12 +56,10 @@ public class SseEmitterServiceImpl implements SseEmitterService {
             if (lastEventId != null) {
                 replayMissedNotifications(userId, lastEventId, emitter);
             }
-        } catch (IOException e) {
-            log.warn("Failed to send connection event to user {}", userId);
+        } catch (IOException _) {
             removeEmitter(userId, emitter);
         }
 
-        log.debug("User {} subscribed to SSE (lastEventId={})", userId, lastEventId);
         return emitter;
     }
 
@@ -71,7 +67,6 @@ public class SseEmitterServiceImpl implements SseEmitterService {
     public void sendToUser(String userId, NotificationResponseDTO dto) {
         List<SseEmitter> userEmitters = emitters.get(userId);
         if (userEmitters == null || userEmitters.isEmpty()) {
-            log.trace("No active SSE connection for user {}", userId);
             return;
         }
 
@@ -83,8 +78,7 @@ public class SseEmitterServiceImpl implements SseEmitterService {
                         .id(String.valueOf(dto.getId()))
                         .name("notification")
                         .data(dto));
-            } catch (IOException e) {
-                log.trace("Failed to send SSE to user {}, removing emitter", userId);
+            } catch (IOException _) {
                 deadEmitters.add(emitter);
             }
         }
@@ -111,12 +105,8 @@ public class SseEmitterServiceImpl implements SseEmitterService {
         }
 
         if (activeUserIds.isEmpty()) {
-            log.debug("No active subscribers for notification type={} target={}",
-                    notification.getNotificationType(), notification.getTargetType());
             return;
         }
-
-        log.debug("Broadcasting notification {} to {} users via SSE", notification.getId(), activeUserIds.size());
 
         NotificationResponseDTO dto = notificationMapper.toResponseDTO(notification);
 
@@ -136,16 +126,13 @@ public class SseEmitterServiceImpl implements SseEmitterService {
                 .map(notificationMapper::toResponseDTO)
                 .toList();
 
-        log.debug("Replaying {} missed notifications to user {}", missed.size(), userId);
-
         for (NotificationResponseDTO dto : missed) {
             try {
                 emitter.send(SseEmitter.event()
                         .id(String.valueOf(dto.getId()))
                         .name("notification")
                         .data(dto));
-            } catch (IOException e) {
-                log.warn("Failed to replay notification {} to user {}", dto.getId(), userId);
+            } catch (IOException _) {
                 break;
             }
         }
@@ -178,7 +165,6 @@ public class SseEmitterServiceImpl implements SseEmitterService {
                 emitters.remove(userId);
             }
         }
-        log.trace("Emitter removed for user {}", userId);
     }
 }
 
