@@ -192,6 +192,7 @@ services:
       - USER_SERVICE_URL=http://user-service:8086
       - LOKI_URL=http://loki:3100
       - NOTIFICATION_SERVICE_URL=http://notification-service:8088
+      - RESULT_SERVICE_URL=http://result-service:8087
     depends_on:
       auth-service:
         condition: service_healthy
