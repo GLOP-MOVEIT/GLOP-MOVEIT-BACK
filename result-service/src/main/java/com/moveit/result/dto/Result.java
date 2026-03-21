@@ -16,7 +16,7 @@ public class Result {
     @NotNull
     private Integer trialId;
     @NotNull
-    private boolean lastTrial;
+    private Boolean lastTrial;
     @NotNull
     private List<Ranking> rankings;
 }

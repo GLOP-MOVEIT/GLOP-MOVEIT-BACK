@@ -129,7 +129,7 @@ class ResultServiceTest {
 
         ResultEntity savedEntity = captor.getValue();
         assertThat(savedEntity.getTrialId()).isEqualTo(dto.getTrialId());
-        assertThat(savedEntity.isLastTrial()).isEqualTo(dto.isLastTrial());
+        assertThat(savedEntity.isLastTrial()).isEqualTo(Boolean.TRUE.equals(dto.getLastTrial()));
         // ...vérifier d'autres champs comme rankings si disponibles...
 
         verifyNoMoreInteractions(resultRepository, resultMapper);

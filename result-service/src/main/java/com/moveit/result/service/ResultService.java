@@ -33,7 +33,7 @@ public class ResultService {
                 .orElseThrow(() -> new ResultNotFoundException("Result not found for trialId: " + result.getTrialId()));
 
         existingResultEntity.setTrialId(result.getTrialId());
-        existingResultEntity.setLastTrial(result.isLastTrial());
+        existingResultEntity.setLastTrial(Boolean.TRUE.equals(result.getLastTrial()));
         existingResultEntity.setRankings(result.getRankings());
 
         var updatedEntity = this.resultRepository.save(existingResultEntity);
