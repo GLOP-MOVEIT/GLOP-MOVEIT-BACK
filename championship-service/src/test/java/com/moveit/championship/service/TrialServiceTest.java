@@ -210,4 +210,42 @@ class TrialServiceTest {
         assertThat(result.getParticipants().get(0).getName()).isEqualTo("Unknown");
         assertThat(result.getParticipants().get(1).getName()).isEqualTo("Bob Durand");
     }
+
+    @Test
+    void advanceParticipantsToNextTrial_shouldAppendQualifiedParticipantsWithoutDuplicates() {
+        Trial nextTrial = new Trial();
+        nextTrial.setTrialId(2);
+        nextTrial.setParticipantIds(new ArrayList<>(List.of(30)));
+        trial.setNextTrial(nextTrial);
+
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(trialRepository.save(any(Trial.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Trial updated = trialService.advanceParticipantsToNextTrial(1, Arrays.asList(7, 8, 8, null));
+
+        assertThat(updated.getTrialId()).isEqualTo(2);
+        assertThat(updated.getParticipantIds()).containsExactly(30, 7, 8);
+    }
+
+    @Test
+    void advanceParticipantsToNextTrial_shouldThrowWhenNoNextTrial() {
+        trial.setNextTrial(null);
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, List.of(7)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Aucune manche suivante");
+    }
+
+    @Test
+    void advanceParticipantsToNextTrial_shouldThrowWhenQualifiedListIsEmpty() {
+        Trial nextTrial = new Trial();
+        nextTrial.setTrialId(2);
+        trial.setNextTrial(nextTrial);
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("liste des qualifies est obligatoire");
+    }
 }

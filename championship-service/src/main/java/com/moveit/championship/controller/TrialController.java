@@ -106,6 +106,21 @@ public class TrialController {
         return ResponseEntity.ok(trialService.getTrialWithParticipants(id));
     }
 
+    @Operation(summary = "Qualifier une liste de participants vers la manche suivante")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Participants qualifiés avec succès", content = @Content(schema = @Schema(implementation = TrialDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Liste de qualifiés invalide ou manche suivante absente", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Manche non trouvée", content = @Content()),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
+    })
+    @PostMapping("/{id}/advance-qualified")
+    public ResponseEntity<TrialDTO> advanceQualifiedParticipants(
+            @PathVariable Integer id,
+            @RequestBody List<Integer> qualifiedParticipantIds) {
+        Trial updatedNextTrial = trialService.advanceParticipantsToNextTrial(id, qualifiedParticipantIds);
+        return ResponseEntity.ok(trialMapper.toTrialDTO(updatedNextTrial));
+    }
+
     @Operation(summary = "Supprimer une manche (Admin)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Manche supprimée avec succès", content = @Content()),

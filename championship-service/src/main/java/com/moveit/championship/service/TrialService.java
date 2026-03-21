@@ -89,6 +89,48 @@ public class TrialService {
     }
 
     @Transactional
+    public Trial advanceParticipantsToNextTrial(Integer trialId, List<Integer> qualifiedParticipantIds) {
+        Trial currentTrial = trialRepository.findById(trialId)
+                .orElseThrow(() -> new TrialNotFoundException(trialId));
+
+        Trial nextTrial = currentTrial.getNextTrial();
+        if (nextTrial == null) {
+            throw new IllegalArgumentException("Aucune manche suivante pour le trial: " + trialId);
+        }
+
+        if (qualifiedParticipantIds == null || qualifiedParticipantIds.isEmpty()) {
+            throw new IllegalArgumentException("La liste des qualifies est obligatoire");
+        }
+
+        List<Integer> cleanedQualifiedIds = qualifiedParticipantIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (cleanedQualifiedIds.isEmpty()) {
+            throw new IllegalArgumentException("La liste des qualifies ne contient aucun participant valide");
+        }
+
+        List<Integer> nextParticipants = nextTrial.getParticipantIds() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(nextTrial.getParticipantIds());
+
+        int initialSize = nextParticipants.size();
+        for (Integer participantId : cleanedQualifiedIds) {
+            if (!nextParticipants.contains(participantId)) {
+                nextParticipants.add(participantId);
+            }
+        }
+
+        if (nextParticipants.size() == initialSize) {
+            throw new IllegalArgumentException("Tous les participants qualifies sont deja presents dans la manche suivante");
+        }
+
+        nextTrial.setParticipantIds(nextParticipants);
+        return trialRepository.save(nextTrial);
+    }
+
+    @Transactional
     public void deleteTrial(Integer id) {
         if (!trialRepository.existsById(id)) {
             throw new TrialNotFoundException(id);
