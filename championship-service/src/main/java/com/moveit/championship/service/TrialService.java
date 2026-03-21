@@ -3,6 +3,7 @@ package com.moveit.championship.service;
 import com.moveit.championship.client.UserClient;
 import com.moveit.championship.dto.*;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.CompetitionNotFoundException;
@@ -115,11 +116,22 @@ public class TrialService {
                 ? new ArrayList<>()
                 : new ArrayList<>(nextTrial.getParticipantIds());
 
+        int maxAllowedParticipants = resolveTrialCapacity(nextTrial, currentTrial);
+        if (nextParticipants.size() >= maxAllowedParticipants) {
+            throw new IllegalArgumentException("La manche suivante est deja pleine (max " + maxAllowedParticipants + " participants)");
+        }
+
+        List<Integer> idsToAdd = cleanedQualifiedIds.stream()
+                .filter(id -> !nextParticipants.contains(id))
+                .toList();
+
+        if (nextParticipants.size() + idsToAdd.size() > maxAllowedParticipants) {
+            throw new IllegalArgumentException("La manche suivante ne peut pas depasser " + maxAllowedParticipants + " participants");
+        }
+
         int initialSize = nextParticipants.size();
-        for (Integer participantId : cleanedQualifiedIds) {
-            if (!nextParticipants.contains(participantId)) {
-                nextParticipants.add(participantId);
-            }
+        for (Integer participantId : idsToAdd) {
+            nextParticipants.add(participantId);
         }
 
         if (nextParticipants.size() == initialSize) {
@@ -128,6 +140,22 @@ public class TrialService {
 
         nextTrial.setParticipantIds(nextParticipants);
         return trialRepository.save(nextTrial);
+    }
+
+    private int resolveTrialCapacity(Trial nextTrial, Trial currentTrial) {
+        Competition competition = nextTrial.getCompetition() != null
+                ? nextTrial.getCompetition()
+                : currentTrial.getCompetition();
+
+        if (competition != null && CompetitionType.HEATS.equals(competition.getCompetitionType())) {
+            Integer maxPerHeat = competition.getMaxPerHeat();
+            if (maxPerHeat != null && maxPerHeat > 0) {
+                return maxPerHeat;
+            }
+        }
+
+        // Single elimination and round-robin matches are 1v1 by construction.
+        return 2;
     }
 
     @Transactional
