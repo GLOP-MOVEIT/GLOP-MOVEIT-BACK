@@ -14,6 +14,11 @@ import java.util.List;
 @Component
 public class SingleEliminationStrategy implements TreeGenerationStrategy {
 
+    private record EliminationRound(int round, int nbRounds, int matchesInRound,
+                                    LocalDateTime roundStart, LocalDateTime roundEnd,
+                                    String roundName) {
+    }
+
     @Override
     public CompetitionType getType() {
         return CompetitionType.SINGLE_ELIMINATION;
@@ -34,9 +39,10 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
             long roundOffset = round - 1L;
             LocalDateTime roundStart = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(roundOffset));
             LocalDateTime roundEnd   = competition.getCompetitionStartDate().plus(roundDuration.multipliedBy(round));
+            EliminationRound eliminationRound = new EliminationRound(
+                round, nbRounds, matchesInRound, roundStart, roundEnd, getRoundName(round, nbRounds));
 
-            List<Trial> currentRoundTrials = buildRoundTrials(
-                    competition, participantIds, round, nbRounds, matchesInRound, roundStart, roundEnd);
+            List<Trial> currentRoundTrials = buildRoundTrials(competition, participantIds, eliminationRound);
 
             linkPreviousRound(previousRoundTrials, currentRoundTrials);
 
@@ -82,14 +88,12 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
     // --- Construction des épreuves d'un tour ---
 
     private List<Trial> buildRoundTrials(Competition competition, List<Integer> participantIds,
-                                         int round, int nbRounds, int matchesInRound,
-                                         LocalDateTime roundStart, LocalDateTime roundEnd) {
+                                         EliminationRound eliminationRound) {
         List<Trial> roundTrials = new ArrayList<>();
-        String roundName = getRoundName(round, nbRounds);
 
-        for (int match = 1; match <= matchesInRound; match++) {
-            Trial trial = buildTrial(competition, roundName, round, nbRounds, match, matchesInRound, roundStart, roundEnd);
-            if (round == 1) {
+        for (int match = 1; match <= eliminationRound.matchesInRound(); match++) {
+            Trial trial = buildTrial(competition, eliminationRound, match);
+            if (eliminationRound.round() == 1) {
                 assignParticipantsToFirstRound(trial, match, participantIds);
             }
             roundTrials.add(trial);
@@ -97,17 +101,16 @@ public class SingleEliminationStrategy implements TreeGenerationStrategy {
         return roundTrials;
     }
 
-    private Trial buildTrial(Competition competition, String roundName,
-                              int round, int nbRounds, int match, int matchesInRound,
-                              LocalDateTime roundStart, LocalDateTime roundEnd) {
+    private Trial buildTrial(Competition competition, EliminationRound eliminationRound, int match) {
         Trial trial = new Trial();
         trial.setCompetition(competition);
-        trial.setTrialName(roundName + " - Match " + match);
-        trial.setTrialStartDate(roundStart);
-        trial.setTrialEndDate(roundEnd);
-        trial.setTrialDescription("Tour " + round + "/" + nbRounds + " - Match " + match + "/" + matchesInRound);
+        trial.setTrialName(eliminationRound.roundName() + " - Match " + match);
+        trial.setTrialStartDate(eliminationRound.roundStart());
+        trial.setTrialEndDate(eliminationRound.roundEnd());
+        trial.setTrialDescription("Tour " + eliminationRound.round() + "/" + eliminationRound.nbRounds()
+                + " - Match " + match + "/" + eliminationRound.matchesInRound());
         trial.setTrialStatus(Status.PLANNED);
-        trial.setRoundNumber(round);
+        trial.setRoundNumber(eliminationRound.round());
         trial.setPosition(match);
         return trial;
     }

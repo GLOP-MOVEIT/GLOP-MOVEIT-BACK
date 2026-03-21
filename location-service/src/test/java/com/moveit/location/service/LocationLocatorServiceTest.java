@@ -7,6 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,6 +52,41 @@ class LocationLocatorServiceTest {
         LocateRequest r = new LocateRequest(requesterId, targetId);
         r.setTrialId(trialId);
         return r;
+    }
+
+    private LocateResponse locate(Integer requesterId, Integer targetId, Integer trialId, String authorizationHeader) {
+        return locationLocatorService.locate(req(requesterId, targetId, trialId), authorizationHeader);
+    }
+
+    private BulkLocateTrialResponse locateAllForTrial(Integer requesterId, Integer trialId, String authorizationHeader) {
+        BulkLocateTrialRequest request = new BulkLocateTrialRequest();
+        request.setRequesterId(requesterId);
+        request.setTrialId(trialId);
+        return locationLocatorService.locateAllForTrial(request, authorizationHeader);
+    }
+
+    private static Stream<Arguments> adminLocatableRoles() {
+        return Stream.of(
+                Arguments.of("ATHLETE", 2),
+                Arguments.of("REFEREE", 2),
+                Arguments.of("ADMIN", 2)
+        );
+    }
+
+    private static Stream<Arguments> spectatorForbiddenRoles() {
+        return Stream.of(
+                Arguments.of("ATHLETE", 2, null),
+                Arguments.of("REFEREE", 2, null),
+                Arguments.of("VOLUNTEER", 99, 10)
+        );
+    }
+
+    private static Stream<Arguments> authorizationHeaders() {
+        return Stream.of(
+                Arguments.of((String) null, false),
+                Arguments.of("   ", false),
+                Arguments.of(AUTH_HEADER, true)
+        );
     }
 
     private UserDto createUser(Integer id, String roleName, boolean acceptsLocationSharing) {
@@ -117,40 +156,18 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "ADMIN", false));
             mockUserFetch(2, createUser(2, "SPECTATOR", false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("accepté");
         }
 
-        @Test
-        @DisplayName("Admin peut localiser un athlète même sans consentement")
-        void adminCanLocateAthlete() {
+        @ParameterizedTest(name = "Admin peut localiser le rôle {0}")
+        @MethodSource("com.moveit.location.service.LocationLocatorServiceTest#adminLocatableRoles")
+        void adminCanLocateAllowedRoles(String targetRole, Integer targetId) {
             mockUserFetch(1, createUser(1, "ADMIN", false));
-            mockUserFetch(2, createUser(2, "ATHLETE", false));
+            mockUserFetch(targetId, createUser(targetId, targetRole, false));
 
-            LocateResponse response = locationLocatorService.locate(req(1, 2, null), AUTH_HEADER);
-
-            assertThat(response).isNotNull();
-        }
-
-        @Test
-        @DisplayName("Admin peut localiser un arbitre")
-        void adminCanLocateReferee() {
-            mockUserFetch(1, createUser(1, "ADMIN", false));
-            mockUserFetch(2, createUser(2, "REFEREE", false));
-
-            LocateResponse response = locationLocatorService.locate(req(1, 2, null), AUTH_HEADER);
-
-            assertThat(response).isNotNull();
-        }
-
-        @Test
-        @DisplayName("Admin peut localiser un autre admin")
-        void adminCanLocateAdmin() {
-            mockUserFetch(1, createUser(1, "ADMIN", false));
-            mockUserFetch(2, createUser(2, "ADMIN", false));
-
-            LocateResponse response = locationLocatorService.locate(req(1, 2, null), AUTH_HEADER);
+            LocateResponse response = locate(1, targetId, null, AUTH_HEADER);
 
             assertThat(response).isNotNull();
         }
@@ -184,7 +201,7 @@ class LocationLocatorServiceTest {
             t.setParticipantIds(List.of(1, 2, 3));
             mockTrialFetch(10, t);
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 99, 10), AUTH_HEADER))
+                assertThatThrownBy(() -> locate(1, 99, 10, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("même épreuve");
         }
@@ -195,7 +212,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "ADMIN", false));
             mockUserFetch(99, createUser(99, "VOLUNTEER", false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 99, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 99, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("trialId requis");
         }
@@ -222,40 +239,18 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "SPECTATOR", true));
             mockUserFetch(2, createUser(2, "SPECTATOR", false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("accepté");
         }
 
-        @Test
-        @DisplayName("Spectateur ne peut PAS localiser un athlète")
-        void spectatorCannotLocateAthlete() {
+        @ParameterizedTest(name = "Spectateur ne peut PAS localiser le rôle {0}")
+        @MethodSource("com.moveit.location.service.LocationLocatorServiceTest#spectatorForbiddenRoles")
+        void spectatorCannotLocateForbiddenRoles(String targetRole, Integer targetId, Integer trialId) {
             mockUserFetch(1, createUser(1, "SPECTATOR", true));
-            mockUserFetch(2, createUser(2, "ATHLETE", false));
+            mockUserFetch(targetId, createUser(targetId, targetRole, false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
-                    .isInstanceOf(UserServiceException.class)
-                    .hasMessageContaining("Non autorisé");
-        }
-
-        @Test
-        @DisplayName("Spectateur ne peut PAS localiser un arbitre")
-        void spectatorCannotLocateReferee() {
-            mockUserFetch(1, createUser(1, "SPECTATOR", true));
-            mockUserFetch(2, createUser(2, "REFEREE", false));
-
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
-                    .isInstanceOf(UserServiceException.class)
-                    .hasMessageContaining("Non autorisé");
-        }
-
-        @Test
-        @DisplayName("Spectateur ne peut PAS localiser un volontaire")
-        void spectatorCannotLocateVolunteer() {
-            mockUserFetch(1, createUser(1, "SPECTATOR", true));
-            mockUserFetch(99, createUser(99, "VOLUNTEER", false));
-
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 99, 10), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, targetId, trialId, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Non autorisé");
         }
@@ -293,7 +288,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "REFEREE", false));
             mockUserFetch(2, createUser(2, "SPECTATOR", false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("accepté");
         }
@@ -304,7 +299,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "REFEREE", false));
             mockUserFetch(2, createUser(2, "REFEREE", false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Non autorisé");
         }
@@ -315,7 +310,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "REFEREE", false));
             mockUserFetch(2, createUser(2, "ADMIN", false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Non autorisé");
         }
@@ -349,7 +344,7 @@ class LocationLocatorServiceTest {
             t.setParticipantIds(List.of(1, 2, 3));
             mockTrialFetch(10, t);
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 99, 10), AUTH_HEADER))
+                assertThatThrownBy(() -> locate(1, 99, 10, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("même épreuve");
         }
@@ -365,7 +360,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "ATHLETE", false));
             mockUserFetch(2, createUser(2, "ATHLETE", false));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Non autorisé");
         }
@@ -376,7 +371,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, createUser(1, "ATHLETE", false));
             mockUserFetch(2, createUser(2, "SPECTATOR", true));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Non autorisé");
         }
@@ -393,7 +388,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, requester);
             mockUserFetch(2, createUser(2, "SPECTATOR", true));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Impossible de vérifier");
         }
@@ -405,7 +400,7 @@ class LocationLocatorServiceTest {
             UserDto target = createUserWithNullRole(2);
             mockUserFetch(2, target);
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Impossible de vérifier");
         }
@@ -421,7 +416,7 @@ class LocationLocatorServiceTest {
             )).thenReturn(ResponseEntity.ok(null));
             mockUserFetch(2, createUser(2, "SPECTATOR", true));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Impossible de vérifier");
         }
@@ -437,7 +432,7 @@ class LocationLocatorServiceTest {
                     eq(UserDto.class)
             )).thenReturn(ResponseEntity.ok(null));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Impossible de vérifier");
         }
@@ -449,7 +444,7 @@ class LocationLocatorServiceTest {
             mockUserFetch(1, requester);
             mockUserFetch(2, createUser(2, "SPECTATOR", true));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Impossible de vérifier");
         }
@@ -458,57 +453,35 @@ class LocationLocatorServiceTest {
         @DisplayName("Doit lever une exception si le service utilisateur est injoignable")
         void shouldThrowWhenUserServiceUnreachable() {
             when(restTemplate.exchange(
-                    anyString(),
+                    eq(BASE_URL + "/users/1"),
                     eq(HttpMethod.GET),
                     any(HttpEntity.class),
                     eq(UserDto.class)
             )).thenThrow(new RuntimeException("Connection refused"));
 
-            assertThatThrownBy(() -> locationLocatorService.locate(req(1, 2, null), AUTH_HEADER))
+            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Impossible de récupérer");
         }
 
-        @Test
-        @DisplayName("Doit fonctionner sans header Authorization (null)")
-        void shouldWorkWithoutAuthorizationHeader() {
+        @ParameterizedTest(name = "Authorization header variant {0}")
+        @MethodSource("com.moveit.location.service.LocationLocatorServiceTest#authorizationHeaders")
+        void shouldHandleAuthorizationHeaderVariants(String authorizationHeader, boolean shouldForwardHeader) {
             mockUserFetch(1, createUser(1, "ADMIN", false));
             mockUserFetch(2, createUser(2, "ATHLETE", false));
 
-            LocateResponse response = locationLocatorService.locate(req(1, 2, null), null);
+            LocateResponse response = locate(1, 2, null, authorizationHeader);
 
             assertThat(response).isNotNull();
-        }
 
-        @Test
-        @DisplayName("Doit fonctionner avec un header Authorization vide (blank)")
-        void shouldWorkWithBlankAuthorizationHeader() {
-            mockUserFetch(1, createUser(1, "ADMIN", false));
-            mockUserFetch(2, createUser(2, "ATHLETE", false));
-
-            LocateResponse response = locationLocatorService.locate(req(1, 2, null), "   ");
-
-            assertThat(response).isNotNull();
-        }
-
-        @Test
-        @DisplayName("Doit transmettre le header Authorization quand il est présent")
-        void shouldForwardAuthorizationHeader() {
-            mockUserFetch(1, createUser(1, "ADMIN", false));
-            mockUserFetch(2, createUser(2, "ATHLETE", false));
-
-            LocateResponse response = locationLocatorService.locate(req(1, 2, null), AUTH_HEADER);
-
-            assertThat(response).isNotNull();
-            verify(restTemplate, times(2)).exchange(
-                    anyString(),
-                    eq(HttpMethod.GET),
-                    argThat(entity -> {
-                        String authValue = entity.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-                        return AUTH_HEADER.equals(authValue);
-                    }),
-                    eq(UserDto.class)
-            );
+            if (shouldForwardHeader) {
+                verify(restTemplate, times(2)).exchange(
+                        anyString(),
+                        eq(HttpMethod.GET),
+                        argThat(entity -> AUTH_HEADER.equals(entity.getHeaders().getFirst(HttpHeaders.AUTHORIZATION))),
+                        eq(UserDto.class)
+                );
+            }
         }
     }
 
@@ -597,11 +570,7 @@ class LocationLocatorServiceTest {
             t.setParticipantIds(List.of());
             mockTrialFetch(10, t);
 
-            BulkLocateTrialRequest r = new BulkLocateTrialRequest();
-            r.setRequesterId(1);
-            r.setTrialId(10);
-
-            assertThatThrownBy(() -> locationLocatorService.locateAllForTrial(r, AUTH_HEADER))
+                assertThatThrownBy(() -> locateAllForTrial(1, 10, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Non autorisé");
         }
@@ -611,11 +580,7 @@ class LocationLocatorServiceTest {
         void bulkLocateRequiresTrialId() {
             mockUserFetch(1, createUser(1, "REFEREE", false));
 
-            BulkLocateTrialRequest r = new BulkLocateTrialRequest();
-            r.setRequesterId(1);
-            r.setTrialId(null);
-
-            assertThatThrownBy(() -> locationLocatorService.locateAllForTrial(r, AUTH_HEADER))
+            assertThatThrownBy(() -> locateAllForTrial(1, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("trialId");
         }
