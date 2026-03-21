@@ -1,0 +1,15 @@
+meta {
+  name: GetSubscriptions
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{URL}}/subscriptions?userId=user123
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{TOKEN}}
+}
+

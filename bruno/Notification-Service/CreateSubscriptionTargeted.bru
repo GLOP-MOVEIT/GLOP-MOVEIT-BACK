@@ -1,0 +1,25 @@
+meta {
+  name: CreateSubscriptionTargeted
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{URL}}/subscriptions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{TOKEN}}
+}
+
+body:json {
+  {
+    "userId": "user123",
+    "notificationType": "RESULT",
+    "targetType": "COMPETITION",
+    "targetId": 42
+  }
+}
+

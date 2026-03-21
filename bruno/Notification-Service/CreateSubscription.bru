@@ -1,0 +1,25 @@
+meta {
+  name: CreateSubscription
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{URL}}/subscriptions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{TOKEN}}
+}
+
+body:json {
+  {
+    "userId": "user123",
+    "notificationType": "ALERT",
+    "targetType": "GLOBAL",
+    "targetId": null
+  }
+}
+
