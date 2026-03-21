@@ -8,8 +8,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,30 +63,6 @@ class LocationLocatorServiceTest {
         request.setRequesterId(requesterId);
         request.setTrialId(trialId);
         return locationLocatorService.locateAllForTrial(request, authorizationHeader);
-    }
-
-    private static Stream<Arguments> adminLocatableRoles() {
-        return Stream.of(
-                Arguments.of("ATHLETE", 2),
-                Arguments.of("REFEREE", 2),
-                Arguments.of("ADMIN", 2)
-        );
-    }
-
-    private static Stream<Arguments> spectatorForbiddenRoles() {
-        return Stream.of(
-                Arguments.of("ATHLETE", 2, null),
-                Arguments.of("REFEREE", 2, null),
-                Arguments.of("VOLUNTEER", 99, 10)
-        );
-    }
-
-    private static Stream<Arguments> authorizationHeaders() {
-        return Stream.of(
-                Arguments.of((String) null, false),
-                Arguments.of("   ", false),
-                Arguments.of(AUTH_HEADER, true)
-        );
     }
 
     private UserDto createUser(Integer id, String roleName, boolean acceptsLocationSharing) {
@@ -162,7 +138,11 @@ class LocationLocatorServiceTest {
         }
 
         @ParameterizedTest(name = "Admin peut localiser le rôle {0}")
-        @MethodSource("com.moveit.location.service.LocationLocatorServiceTest#adminLocatableRoles")
+        @CsvSource({
+            "ATHLETE,2",
+            "REFEREE,2",
+            "ADMIN,2"
+        })
         void adminCanLocateAllowedRoles(String targetRole, Integer targetId) {
             mockUserFetch(1, createUser(1, "ADMIN", false));
             mockUserFetch(targetId, createUser(targetId, targetRole, false));
@@ -245,12 +225,18 @@ class LocationLocatorServiceTest {
         }
 
         @ParameterizedTest(name = "Spectateur ne peut PAS localiser le rôle {0}")
-        @MethodSource("com.moveit.location.service.LocationLocatorServiceTest#spectatorForbiddenRoles")
+        @CsvSource({
+            "ATHLETE,2,-1",
+            "REFEREE,2,-1",
+            "VOLUNTEER,99,10"
+        })
         void spectatorCannotLocateForbiddenRoles(String targetRole, Integer targetId, Integer trialId) {
             mockUserFetch(1, createUser(1, "SPECTATOR", true));
             mockUserFetch(targetId, createUser(targetId, targetRole, false));
 
-            assertThatThrownBy(() -> locate(1, targetId, trialId, AUTH_HEADER))
+            Integer normalizedTrialId = (trialId != null && trialId < 0) ? null : trialId;
+
+            assertThatThrownBy(() -> locate(1, targetId, normalizedTrialId, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
                     .hasMessageContaining("Non autorisé");
         }
@@ -464,9 +450,10 @@ class LocationLocatorServiceTest {
                     .hasMessageContaining("Impossible de récupérer");
         }
 
-        @ParameterizedTest(name = "Authorization header variant {0}")
-        @MethodSource("com.moveit.location.service.LocationLocatorServiceTest#authorizationHeaders")
-        void shouldHandleAuthorizationHeaderVariants(String authorizationHeader, boolean shouldForwardHeader) {
+        @ParameterizedTest(name = "Authorization header absent ou vide")
+        @NullSource
+        @ValueSource(strings = {"   "})
+        void shouldHandleAuthorizationHeaderWithoutForwarding(String authorizationHeader) {
             mockUserFetch(1, createUser(1, "ADMIN", false));
             mockUserFetch(2, createUser(2, "ATHLETE", false));
 
@@ -474,14 +461,29 @@ class LocationLocatorServiceTest {
 
             assertThat(response).isNotNull();
 
-            if (shouldForwardHeader) {
-                verify(restTemplate, times(2)).exchange(
-                        anyString(),
-                        eq(HttpMethod.GET),
-                        argThat(entity -> AUTH_HEADER.equals(entity.getHeaders().getFirst(HttpHeaders.AUTHORIZATION))),
-                        eq(UserDto.class)
-                );
-            }
+            verify(restTemplate, never()).exchange(
+                    anyString(),
+                    eq(HttpMethod.GET),
+                    argThat(entity -> AUTH_HEADER.equals(entity.getHeaders().getFirst(HttpHeaders.AUTHORIZATION))),
+                    eq(UserDto.class)
+            );
+        }
+
+        @Test
+        @DisplayName("Doit transmettre le header Authorization quand il est présent")
+        void shouldForwardAuthorizationHeader() {
+            mockUserFetch(1, createUser(1, "ADMIN", false));
+            mockUserFetch(2, createUser(2, "ATHLETE", false));
+
+            LocateResponse response = locate(1, 2, null, AUTH_HEADER);
+
+            assertThat(response).isNotNull();
+            verify(restTemplate, times(2)).exchange(
+                    anyString(),
+                    eq(HttpMethod.GET),
+                    argThat(entity -> AUTH_HEADER.equals(entity.getHeaders().getFirst(HttpHeaders.AUTHORIZATION))),
+                    eq(UserDto.class)
+            );
         }
     }
 
