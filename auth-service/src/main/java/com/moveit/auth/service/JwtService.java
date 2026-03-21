@@ -1,5 +1,6 @@
 package com.moveit.auth.service;
 
+import com.moveit.auth.exception.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -93,7 +94,7 @@ public class JwtService {
         } catch (ExpiredJwtException e) {
             throw e;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new RuntimeException("Impossible de parser le token JWT", e);
+            throw new InvalidTokenException("Impossible de parser le token JWT", e);
         }
     }
 

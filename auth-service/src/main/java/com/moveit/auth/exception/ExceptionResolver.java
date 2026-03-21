@@ -23,6 +23,7 @@ public class ExceptionResolver extends ResponseEntityExceptionHandler {
             case AccessDeniedException e -> createProblemDetail(403, e.getMessage(), "You are not authorized to access this resource");
             case SignatureException e -> createProblemDetail(403, e.getMessage(), "The JWT signature is invalid");
             case ExpiredJwtException e -> createProblemDetail(403, e.getMessage(), "The JWT token has expired");
+            case InvalidTokenException e -> createProblemDetail(401, e.getMessage(), "The JWT token is invalid or malformed");
             case DataIntegrityViolationException e -> {
                 String message = e.getMessage();
                 if (message != null && message.contains("nickname")) {
