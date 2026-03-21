@@ -156,6 +156,28 @@ class TrialControllerTest {
     }
 
     @Test
+    void advanceQualifiedParticipants_shouldReturnUpdatedNextTrial() throws Exception {
+        Trial nextTrial = new Trial();
+        nextTrial.setTrialId(2);
+        nextTrial.setTrialName("Demi-finale - Match 1");
+        nextTrial.setTrialStartDate(LocalDateTime.now());
+        nextTrial.setTrialEndDate(LocalDateTime.now().plusHours(1));
+        nextTrial.setTrialStatus(Status.PLANNED);
+        nextTrial.setParticipantIds(List.of(30, 7, 8));
+
+        when(trialService.advanceParticipantsToNextTrial(1, List.of(7, 8))).thenReturn(nextTrial);
+
+        mockMvc.perform(post("/trials/1/advance-qualified")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(List.of(7, 8))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.trialId").value(2))
+                .andExpect(jsonPath("$.participantIds[0]").value(30))
+                .andExpect(jsonPath("$.participantIds[1]").value(7))
+                .andExpect(jsonPath("$.participantIds[2]").value(8));
+    }
+
+    @Test
     void deleteTrial_shouldReturnNoContent() throws Exception {
         doNothing().when(trialService).deleteTrial(1);
         mockMvc.perform(delete("/trials/1"))

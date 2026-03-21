@@ -8,6 +8,7 @@ import com.moveit.championship.dto.TeamResponseDTO;
 import com.moveit.championship.dto.TrialWithParticipantsDTO;
 import com.moveit.championship.dto.UserResponseDTO;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Status;
 import com.moveit.championship.entity.Trial;
@@ -264,5 +265,64 @@ class TrialServiceTest {
         assertThat(result.getParticipants().get(0).getId()).isEqualTo(7);
         assertThat(result.getParticipants().get(0).getName()).isEqualTo("Unknown");
         assertThat(result.getParticipants().get(1).getName()).isEqualTo("Bob Durand");
+    }
+
+    @Test
+    void advanceParticipantsToNextTrial_shouldAppendQualifiedParticipantsWithoutDuplicates() {
+        competition.setCompetitionType(CompetitionType.HEATS);
+        competition.setMaxPerHeat(4);
+
+        Trial nextTrial = new Trial();
+        nextTrial.setTrialId(2);
+        nextTrial.setCompetition(competition);
+        nextTrial.setParticipantIds(new ArrayList<>(List.of(30)));
+        trial.setNextTrial(nextTrial);
+
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        when(trialRepository.save(any(Trial.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Trial updated = trialService.advanceParticipantsToNextTrial(1, Arrays.asList(7, 8, 8, null));
+
+        assertThat(updated.getTrialId()).isEqualTo(2);
+        assertThat(updated.getParticipantIds()).containsExactly(30, 7, 8);
+    }
+
+    @Test
+    void advanceParticipantsToNextTrial_shouldThrowWhenNextTrialCapacityExceeded() {
+        Trial nextTrial = new Trial();
+        nextTrial.setTrialId(2);
+        nextTrial.setParticipantIds(new ArrayList<>(List.of(30)));
+        trial.setNextTrial(nextTrial);
+
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        List<Integer> qualifiedIds = List.of(7, 8);
+
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, qualifiedIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("ne peut pas depasser 2 participants");
+    }
+
+    @Test
+    void advanceParticipantsToNextTrial_shouldThrowWhenNoNextTrial() {
+        trial.setNextTrial(null);
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        List<Integer> qualifiedIds = List.of(7);
+
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, qualifiedIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Aucune manche suivante");
+    }
+
+    @Test
+    void advanceParticipantsToNextTrial_shouldThrowWhenQualifiedListIsEmpty() {
+        Trial nextTrial = new Trial();
+        nextTrial.setTrialId(2);
+        trial.setNextTrial(nextTrial);
+        when(trialRepository.findById(1)).thenReturn(Optional.of(trial));
+        List<Integer> qualifiedIds = List.of();
+
+        assertThatThrownBy(() -> trialService.advanceParticipantsToNextTrial(1, qualifiedIds))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("liste des qualifies est obligatoire");
     }
 }

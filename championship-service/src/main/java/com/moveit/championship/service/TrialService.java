@@ -3,6 +3,7 @@ package com.moveit.championship.service;
 import com.moveit.championship.client.UserClient;
 import com.moveit.championship.dto.*;
 import com.moveit.championship.entity.Competition;
+import com.moveit.championship.entity.CompetitionType;
 import com.moveit.championship.entity.ParticipantType;
 import com.moveit.championship.entity.Trial;
 import com.moveit.championship.exception.CompetitionNotFoundException;
@@ -135,6 +136,75 @@ public class TrialService {
                 "Conflit d'emploi du temps pour les participants " + conflictingParticipantIds
                         + " avec les épreuves " + conflictTrialIds
                         + " entre " + candidateStart + " et " + candidateEnd);
+    }
+
+    @Transactional
+    public Trial advanceParticipantsToNextTrial(Integer trialId, List<Integer> qualifiedParticipantIds) {
+        Trial currentTrial = trialRepository.findById(trialId)
+                .orElseThrow(() -> new TrialNotFoundException(trialId));
+
+        Trial nextTrial = currentTrial.getNextTrial();
+        if (nextTrial == null) {
+            throw new IllegalArgumentException("Aucune manche suivante pour le trial: " + trialId);
+        }
+
+        if (qualifiedParticipantIds == null || qualifiedParticipantIds.isEmpty()) {
+            throw new IllegalArgumentException("La liste des qualifies est obligatoire");
+        }
+
+        List<Integer> cleanedQualifiedIds = qualifiedParticipantIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (cleanedQualifiedIds.isEmpty()) {
+            throw new IllegalArgumentException("La liste des qualifies ne contient aucun participant valide");
+        }
+
+        List<Integer> nextParticipants = nextTrial.getParticipantIds() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(nextTrial.getParticipantIds());
+
+        int maxAllowedParticipants = resolveTrialCapacity(nextTrial, currentTrial);
+        if (nextParticipants.size() >= maxAllowedParticipants) {
+            throw new IllegalArgumentException("La manche suivante est deja pleine (max " + maxAllowedParticipants + " participants)");
+        }
+
+        List<Integer> idsToAdd = cleanedQualifiedIds.stream()
+                .filter(id -> !nextParticipants.contains(id))
+                .toList();
+
+        if (nextParticipants.size() + idsToAdd.size() > maxAllowedParticipants) {
+            throw new IllegalArgumentException("La manche suivante ne peut pas depasser " + maxAllowedParticipants + " participants");
+        }
+
+        int initialSize = nextParticipants.size();
+        for (Integer participantId : idsToAdd) {
+            nextParticipants.add(participantId);
+        }
+
+        if (nextParticipants.size() == initialSize) {
+            throw new IllegalArgumentException("Tous les participants qualifies sont deja presents dans la manche suivante");
+        }
+
+        nextTrial.setParticipantIds(nextParticipants);
+        return trialRepository.save(nextTrial);
+    }
+
+    private int resolveTrialCapacity(Trial nextTrial, Trial currentTrial) {
+        Competition competition = nextTrial.getCompetition() != null
+                ? nextTrial.getCompetition()
+                : currentTrial.getCompetition();
+
+        if (competition != null && CompetitionType.HEATS.equals(competition.getCompetitionType())) {
+            Integer maxPerHeat = competition.getMaxPerHeat();
+            if (maxPerHeat != null && maxPerHeat > 0) {
+                return maxPerHeat;
+            }
+        }
+
+        // Single elimination and round-robin matches are 1v1 by construction.
+        return 2;
     }
 
     @Transactional
