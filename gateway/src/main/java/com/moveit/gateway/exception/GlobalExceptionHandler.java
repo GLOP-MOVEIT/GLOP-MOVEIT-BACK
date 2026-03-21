@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
     private static final String PATH = "path";
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(AccessDeniedException ex) {
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException() {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put(TIMESTAMP, LocalDateTime.now());
         errorResponse.put(STATUS, HttpStatus.FORBIDDEN.value());
@@ -33,12 +33,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentialsException(BadCredentialsException ex) {
+    public ResponseEntity<Map<String, Object>> handleBadCredentialsException() {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put(TIMESTAMP, LocalDateTime.now());
         errorResponse.put(STATUS, HttpStatus.UNAUTHORIZED.value());
         errorResponse.put(ERROR, "Unauthorized");
         errorResponse.put(MESSAGE, "Authentification échouée : identifiants invalides");
+        errorResponse.put(PATH, "N/A");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidTokenException(InvalidTokenException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put(TIMESTAMP, LocalDateTime.now());
+        errorResponse.put(STATUS, HttpStatus.UNAUTHORIZED.value());
+        errorResponse.put(ERROR, "Unauthorized");
+        errorResponse.put(MESSAGE, "Token JWT invalide ou mal formé : " + ex.getMessage());
         errorResponse.put(PATH, "N/A");
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
