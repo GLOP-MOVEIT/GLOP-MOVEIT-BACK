@@ -23,7 +23,6 @@ import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class TrialServiceTest {
@@ -92,7 +91,7 @@ class TrialServiceTest {
                 new TeamResponseDTO(10, "Team A"),
                 new TeamResponseDTO(11, "Team B")
         ));
-        when(trialRepository.findByParticipantIds(eq(List.of(7, 10, 11)))).thenReturn(List.of(trial));
+        when(trialRepository.findByParticipantIds(List.of(7, 10, 11))).thenReturn(List.of(trial));
 
         List<Trial> trials = trialService.getTrialsByAthleteId(7);
 
@@ -103,7 +102,7 @@ class TrialServiceTest {
     @Test
     void getTrialsByAthleteId_shouldFallbackToAthleteOnly_whenTeamLookupFails() {
         when(userClient.getTeamsByAthleteId(7)).thenThrow(new RuntimeException("user-service down"));
-        when(trialRepository.findByParticipantIds(eq(List.of(7)))).thenReturn(List.of(trial));
+        when(trialRepository.findByParticipantIds(List.of(7))).thenReturn(List.of(trial));
 
         List<Trial> trials = trialService.getTrialsByAthleteId(7);
 
