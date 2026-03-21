@@ -32,7 +32,7 @@ public class GatewayConfiguration {
     @Value("${USER_SERVICE_URL:http://localhost:8086}")
     private String userServiceUrl;
 
-    @Value("${RESULT_SERVICE_URL:http://localhost:8087")
+    @Value("${RESULT_SERVICE_URL:http://localhost:8087}")
     private String resultServiceUrl;
 
     @Bean
