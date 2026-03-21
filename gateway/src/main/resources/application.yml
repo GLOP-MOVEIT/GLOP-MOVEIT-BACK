@@ -27,6 +27,8 @@ springdoc:
         url: /users/v3/api-docs
       - name: Volunteer Service
         url: /volunteer/v3/api-docs
+      - name: Result Service
+        url: /results/v3/api-docs
     operations-sorter: alpha
     tags-sorter: alpha
     display-request-duration: true
