@@ -1,13 +1,11 @@
 services:
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: moveit-auth-postgres
     environment:
       POSTGRES_DB: moveit_auth
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -23,8 +21,6 @@ services:
       context: .
       dockerfile: auth-service/Dockerfile
     container_name: moveit-auth-service
-    ports:
-      - "8082:8082"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_auth
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -103,8 +99,6 @@ services:
       context: .
       dockerfile: location-service/Dockerfile
     container_name: moveit-location-service
-    ports:
-      - "8084:8084"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_auth
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -155,8 +149,6 @@ services:
       context: .
       dockerfile: volunteer-service/Dockerfile
     container_name: moveit-volunteer-service
-    ports:
-      - "8085:8085"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_auth
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -222,8 +214,6 @@ services:
       context: .
       dockerfile: notification-service/Dockerfile
     container_name: moveit-notification-service
-    ports:
-      - "8088:8088"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_auth
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -247,8 +237,6 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
-    ports:
-      - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
@@ -260,8 +248,6 @@ services:
   loki:
     image: grafana/loki:latest
     container_name: loki
-    ports:
-      - "3100:3100"
     volumes:
       - ./monitoring/loki-config.yml:/etc/loki/loki-config.yaml
       - loki-data:/loki
