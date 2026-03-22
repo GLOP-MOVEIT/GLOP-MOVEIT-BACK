@@ -268,37 +268,19 @@ class LocationLocatorServiceTest {
             assertThat(response).isNotNull();
         }
 
-        @Test
-        @DisplayName("Arbitre ne peut PAS localiser un spectateur qui refuse le partage")
-        void refereeCannotLocateNonConsentingSpectator() {
+        @ParameterizedTest(name = "Arbitre ne peut PAS localiser un {0}")
+        @CsvSource({
+            "SPECTATOR, false, accepté",
+            "REFEREE,   false, Non autorisé",
+            "ADMIN,     false, Non autorisé"
+        })
+        void refereeCannotLocateForbiddenTargets(String targetRole, boolean acceptsSharing, String expectedMessage) {
             mockUserFetch(1, createUser(1, "REFEREE", false));
-            mockUserFetch(2, createUser(2, "SPECTATOR", false));
+            mockUserFetch(2, createUser(2, targetRole, acceptsSharing));
 
             assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
                     .isInstanceOf(UserServiceException.class)
-                    .hasMessageContaining("accepté");
-        }
-
-        @Test
-        @DisplayName("Arbitre ne peut PAS localiser un autre arbitre")
-        void refereeCannotLocateReferee() {
-            mockUserFetch(1, createUser(1, "REFEREE", false));
-            mockUserFetch(2, createUser(2, "REFEREE", false));
-
-            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
-                    .isInstanceOf(UserServiceException.class)
-                    .hasMessageContaining("Non autorisé");
-        }
-
-        @Test
-        @DisplayName("Arbitre ne peut PAS localiser un admin")
-        void refereeCannotLocateAdmin() {
-            mockUserFetch(1, createUser(1, "REFEREE", false));
-            mockUserFetch(2, createUser(2, "ADMIN", false));
-
-            assertThatThrownBy(() -> locate(1, 2, null, AUTH_HEADER))
-                    .isInstanceOf(UserServiceException.class)
-                    .hasMessageContaining("Non autorisé");
+                    .hasMessageContaining(expectedMessage);
         }
 
         @Test
