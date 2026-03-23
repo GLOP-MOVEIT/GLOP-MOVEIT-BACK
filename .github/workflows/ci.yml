@@ -71,14 +71,14 @@ jobs:
       - name: Run Bruno tests
         run: |
           cd bruno
-          echo "Listing all .bru files to verify test discovery:"
-          find . -name "*.bru"
-          bru run  \
-            --env ci \
-            --env-var JWT_TOKEN=$JWT_TOKEN \
-            --exclude-tags auth \
-            --reporter-junit ../test-results.xml \
-            --bail
+          for dir in Request-Service User-Service Volunteer-Service Team-Service Championship-Service Notification-Service Competition-Service Ticket-Service Role-Service Result-Service Trial-Service; do
+            echo "--- Running $dir ---"
+            bru run "$dir" -r \
+              --env ci \
+              --env-var JWT_TOKEN=$JWT_TOKEN \
+              --reporter-junit "../test-results-${dir}.xml" \
+              --bail
+          done
 
       - name: Publish test results
         uses: mikepenz/action-junit-report@v4
