@@ -1,4 +1,7 @@
 name: CI - GLOP-MOVEIT-BACK
+permissions:
+  checks: write
+  contents: read
 on:
   push:
     branches: ["*"]
@@ -66,7 +69,10 @@ jobs:
 
       - name: Run Bruno tests
         run: |
-          cd bruno && bru run . \
+          cd bruno
+          echo "Listing all .bru files to verify test discovery:"
+          find . -name "*.bru"
+          bru run . \
             --env ci \
             --env-var jwt_token="$JWT_TOKEN" \
             --exclude-tags auth \
