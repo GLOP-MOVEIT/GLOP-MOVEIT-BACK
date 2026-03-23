@@ -71,13 +71,12 @@ jobs:
       - name: Run Bruno tests
         run: |
           cd bruno
-          echo "Token length: ${#JWT_TOKEN}"  # debug: vérifier que le token existe
           for dir in Request-Service User-Service Volunteer-Service Team-Service Championship-Service Notification-Service Competition-Service Ticket-Service Role-Service Result-Service Trial-Service; do
             echo "--- Running $dir ---"
             bru run "$dir" -r \
               --env ci \
-              --env-var "JWT_TOKEN=$JWT_TOKEN" \
-              --reporter-junit "../test-results-${dir}.xml" \
+              --env-var JWT_TOKEN=$JWT_TOKEN \
+              --reporter-junit "../test-results-${dir}.xml" 
           done
 
       - name: Publish test results
