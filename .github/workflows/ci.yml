@@ -1,7 +1,5 @@
 name: CI - GLOP-MOVEIT-BACK
-permissions:
-  checks: write
-  contents: read
+
 on:
   push:
     branches: ["*"]
@@ -24,6 +22,9 @@ jobs:
         run: mvn verify
 
   integration-tests:
+    permissions:
+      checks: write
+      contents: read
     runs-on: ubuntu-latest
     needs: unit-tests
     steps:
