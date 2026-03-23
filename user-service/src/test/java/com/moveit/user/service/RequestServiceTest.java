@@ -1,6 +1,6 @@
 package com.moveit.user.service;
 
-import com.moveit.user.dto.CoverLetter;
+import com.moveit.user.dto.CoverLetterDocument;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
@@ -242,8 +242,8 @@ class RequestServiceTest {
         when(requestRepository.save(any(RequestEntity.class))).thenReturn(volunteerRequestEntity);
         when(requestMapper.toDto(volunteerRequestEntity)).thenReturn(volunteerRequest);
 
-        CoverLetter coverLetter = new CoverLetter("My motivation");
-        Request result = requestService.createVolunteerRequest(1, coverLetter);
+        CoverLetterDocument coverLetterDocument = new CoverLetterDocument("My motivation");
+        Request result = requestService.createVolunteerRequest(1, coverLetterDocument);
 
         assertThat(result).isNotNull();
         assertThat(result.getRequestId()).isEqualTo(2);
@@ -266,11 +266,11 @@ class RequestServiceTest {
     @Test
     void createVolunteerRequest_ShouldThrowException_WhenUserNotSpectator() {
         testUser.setRole(athleteRole);
-        CoverLetter coverLetter = new CoverLetter("My motivation");
+        CoverLetterDocument coverLetterDocument = new CoverLetterDocument("My motivation");
 
         when(userService.getUserEntityById(1)).thenReturn(testUser);
 
-        assertThatThrownBy(() -> requestService.createVolunteerRequest(1, coverLetter))
+        assertThatThrownBy(() -> requestService.createVolunteerRequest(1, coverLetterDocument))
                 .isInstanceOf(UserNotASpectatorException.class)
                 .hasMessage("User with id 1 is not a spectator");
 
@@ -280,12 +280,12 @@ class RequestServiceTest {
 
     @Test
     void createVolunteerRequest_ShouldThrowException_WhenPendingRequestAlreadyExists() {
-        CoverLetter coverLetter = new CoverLetter("My motivation");
+        CoverLetterDocument coverLetterDocument = new CoverLetterDocument("My motivation");
 
         when(userService.getUserEntityById(1)).thenReturn(testUser);
         when(requestRepository.existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING)).thenReturn(true);
 
-        assertThatThrownBy(() -> requestService.createVolunteerRequest(1, coverLetter))
+        assertThatThrownBy(() -> requestService.createVolunteerRequest(1, coverLetterDocument))
                 .isInstanceOf(PendingRequestAlreadyExistsException.class)
                 .hasMessage("User with id 1 already has a pending promotion request");
 

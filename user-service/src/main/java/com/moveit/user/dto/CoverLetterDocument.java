@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CoverLetter {
+public class CoverLetterDocument {
 
     private String coverLetter;
 }

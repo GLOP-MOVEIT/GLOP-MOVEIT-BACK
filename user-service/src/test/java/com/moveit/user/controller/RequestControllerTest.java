@@ -1,7 +1,7 @@
 package com.moveit.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moveit.user.dto.CoverLetter;
+import com.moveit.user.dto.CoverLetterDocument;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
@@ -172,13 +172,13 @@ class RequestControllerTest {
         volunteerRequest.setUser(user);
         volunteerRequest.setRole(volunteerRole);
 
-        CoverLetter coverLetter = new CoverLetter("My motivation");
+        CoverLetterDocument coverLetterDocument = new CoverLetterDocument("My motivation");
 
-        when(requestService.createVolunteerRequest(eq(1), any(CoverLetter.class))).thenReturn(volunteerRequest);
+        when(requestService.createVolunteerRequest(eq(1), any(CoverLetterDocument.class))).thenReturn(volunteerRequest);
 
         mockMvc.perform(post("/requests/volunteer/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(coverLetter)))
+                        .content(objectMapper.writeValueAsString(coverLetterDocument)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value(2))
                 .andExpect(jsonPath("$.requestStatus").value("PENDING"))
@@ -186,22 +186,22 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$.user.firstName").value("John"))
                 .andExpect(jsonPath("$.role.name").value("VOLUNTEER"));
 
-        verify(requestService).createVolunteerRequest(eq(1), any(CoverLetter.class));
+        verify(requestService).createVolunteerRequest(eq(1), any(CoverLetterDocument.class));
     }
 
     @Test
     void requestToVolunteer_ShouldReturnConflict_WhenPendingRequestAlreadyExists() throws Exception {
-        CoverLetter coverLetter = new CoverLetter("My motivation");
+        CoverLetterDocument coverLetterDocument = new CoverLetterDocument("My motivation");
 
-        when(requestService.createVolunteerRequest(eq(1), any(CoverLetter.class)))
+        when(requestService.createVolunteerRequest(eq(1), any(CoverLetterDocument.class)))
                 .thenThrow(new PendingRequestAlreadyExistsException("User with id 1 already has a pending promotion request"));
 
         mockMvc.perform(post("/requests/volunteer/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(coverLetter)))
+                        .content(objectMapper.writeValueAsString(coverLetterDocument)))
                 .andExpect(status().isConflict());
 
-        verify(requestService).createVolunteerRequest(eq(1), any(CoverLetter.class));
+        verify(requestService).createVolunteerRequest(eq(1), any(CoverLetterDocument.class));
     }
 
     @Test
