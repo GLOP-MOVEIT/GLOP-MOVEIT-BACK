@@ -17,6 +17,11 @@ jobs:
           cache: maven
       - name: Build
         run: mvn clean package -DskipTests
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: target/*.jar
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -36,13 +41,11 @@ jobs:
     needs: unit-tests
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Download jar
+        uses: actions/download-artifact@v4
         with:
-          java-version: '25'
-          distribution: 'temurin'
-          cache: maven
-      - name: Build jar
-        run: mvn clean package -DskipTests
+          name: app-jar
+          path: target/
       - name: Start application
         run: java -jar target/*.jar &
       - name: Wait for app
