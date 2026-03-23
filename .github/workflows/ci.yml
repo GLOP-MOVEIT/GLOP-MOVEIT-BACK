@@ -25,6 +25,9 @@ jobs:
         with:
           name: app-jar
           path: target/*.jar
+      
+      - name: Find JAR location
+        run: find . -name "*.jar" -not -path "*/repository/*" 2>/dev/null
 
   integration-tests:
     runs-on: ubuntu-latest
