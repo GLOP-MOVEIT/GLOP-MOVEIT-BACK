@@ -1,3 +1,7 @@
+test {
+  expect response.status == 201 || response.status == 200
+  expect response.body.id != null
+}
 meta {
   name: CreateCompetitionHeats
   type: http
