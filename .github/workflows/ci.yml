@@ -28,11 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build services
-        run: docker compose build
-
       - name: Start services
-        run: docker compose up -d
+        run: docker compose up -d --build
 
       - name: Wait for gateway
         run: |
