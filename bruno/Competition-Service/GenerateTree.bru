@@ -17,6 +17,6 @@ body:json {
 auth:bearer {
   token: {{JWT_TOKEN}}
 }
-test {
+tests {
   expect response.status == 200 || response.status == 201
 }

@@ -23,7 +23,7 @@ body:json {
     "endDate": "2024-12-31T00:00:00"
   }
 }
-test {
+tests {
   expect response.status == 201 || response.status == 200
   expect response.body != null
 }

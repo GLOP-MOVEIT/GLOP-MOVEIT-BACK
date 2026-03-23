@@ -31,7 +31,7 @@ body:json {
     }
   }
 }
-test {
+tests {
   expect response.status == 201 || response.status == 200
   expect response.body != null
 }
