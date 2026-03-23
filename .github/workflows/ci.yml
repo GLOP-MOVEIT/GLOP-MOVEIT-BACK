@@ -69,6 +69,13 @@ jobs:
           fi
           echo "::add-mask::$TOKEN"
           echo "JWT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+      
+      - name: Get user ID (Bruno)
+        run: |
+          cd bruno
+          bru run Auth-Service/Me.bru --env ci --env-var "JWT_TOKEN=$JWT_TOKEN" --reporter-json me-result.json
+          USER_ID=$(jq -r '.[0].results[0].response.data.id' me-result.json)
+          echo "USER_ID=$USER_ID" >> "$GITHUB_ENV"
 
       - name: Run Bruno tests
         run: |
@@ -78,6 +85,7 @@ jobs:
             bru run "$dir" -r \
               --env ci \
               --env-var JWT_TOKEN=$JWT_TOKEN \
+              --env-var "USER_ID=$USER_ID" \
               --reporter-junit "../test-results-${dir}.xml" 
           done
 

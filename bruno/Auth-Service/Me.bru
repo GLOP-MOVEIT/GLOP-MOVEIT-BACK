@@ -11,12 +11,18 @@ get {
 }
 
 auth:bearer {
-  token: token
+  token: {{JWT_TOKEN}}
 }
 
 body:json {
   {
     "email": "test@test.fr",
     "password": "password"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setVar("USER_ID", res.body.id);
   }
 }
