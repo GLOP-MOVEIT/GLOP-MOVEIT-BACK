@@ -48,13 +48,13 @@ jobs:
 
       - name: Create test user (Bruno)
         run: |
-          cd bruno/Auth-Service
-          bru run Signup.bru --env ci --bail || true
+          cd bruno
+          bru run Auth-Service/Signup.bru --env ci --bail || true
 
       - name: Get JWT token (Bruno)
         run: |
-          cd bruno/Auth-Service
-          bru run Login.bru --env ci --reporter-json login-result.json --bail
+          cd bruno
+          bru run Auth-Service/Login.bru --env ci --reporter-json login-result.json --bail
           TOKEN=$(jq -r '.results[0].response.body.token // .results[0].response.body.jwt // .results[0].response.body.accessToken // .results[0].response.body.data.token' login-result.json)
           if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
             echo "Failed to retrieve JWT token from Bruno. Response was:"
