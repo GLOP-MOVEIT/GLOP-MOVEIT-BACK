@@ -78,7 +78,6 @@ jobs:
               --env ci \
               --env-var JWT_TOKEN=$JWT_TOKEN \
               --reporter-junit "../test-results-${dir}.xml" \
-              --bail
           done
 
       - name: Publish test results
