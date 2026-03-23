@@ -1,9 +1,9 @@
 name: CI - GLOP-MOVEIT-BACK
 on:
   push:
-    branches: [ "*" ]
+    branches: ["*"]
   pull_request:
-    branches: [ "*" ]
+    branches: ["*"]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -27,49 +27,82 @@ jobs:
     needs: unit-tests
     steps:
       - uses: actions/checkout@v4
+
       - name: Build services
         run: docker compose build
+
       - name: Start services
         run: docker compose up -d
+
       - name: Wait for gateway
         run: |
           for i in {1..30}; do
             if curl -fsS "http://localhost:8080/actuator/health" >/dev/null 2>&1; then
+              echo "Gateway is ready"
               exit 0
             fi
+            echo "Attempt $i/30 - waiting..."
             sleep 5
           done
           echo "Gateway did not become ready in time"
           docker compose logs
           exit 1
+
       - name: Install Bruno CLI
         run: npm install --ignore-scripts -g @usebruno/cli
-      - name: Ensure Bruno CI environment
-        run: |
-          if [ ! -f "bruno/environments/ci.bru" ]; then
-            cp bruno/environments/Local.bru bruno/environments/ci.bru
-          fi
+
       - name: Create test user
         run: |
-          curl -sS -X POST "http://localhost:8080/auth/register" \
+          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
+            -X POST "http://localhost:8080/auth/register" \
             -H "Content-Type: application/json" \
-            -d '{"nickname":"testci","password":"password"}'
-
-      - name: Get JWT token
-        run: |
-          TOKEN=$(curl -sS -X POST "http://localhost:8080/auth/login" \
-            -H "Content-Type: application/json" \
-            -d '{"nickname":"testci","password":"password"}' \
-            | jq -r '.token // .jwt // .accessToken // .data.token')
-
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Failed to retrieve JWT token from /auth/login"
+            -d '{"nickname":"testci","password":"password"}')
+          # 200 ou 409 (already exists) sont acceptables
+          if [[ "$HTTP_CODE" != "2"* && "$HTTP_CODE" != "409" ]]; then
+            echo "Register failed with HTTP $HTTP_CODE"
             exit 1
           fi
 
+      - name: Get JWT token
+        run: |
+          RESPONSE=$(curl -sS -X POST "http://localhost:8080/auth/login" \
+            -H "Content-Type: application/json" \
+            -d '{"nickname":"testci","password":"password"}')
+
+          TOKEN=$(echo "$RESPONSE" | jq -r '.token // .jwt // .accessToken // .data.token')
+
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Failed to retrieve JWT token. Response was:"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          # Masquer le token dans les logs GitHub Actions
+          echo "::add-mask::$TOKEN"
           echo "JWT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
       - name: Run Bruno tests
-        run: cd bruno && bru run . --env ci --env-var JWT_TOKEN="$JWT_TOKEN"
+        run: |
+          cd bruno && bru run . \
+            --env ci \
+            --env-var jwt_token="$JWT_TOKEN" \
+            --reporter-junit ../test-results.xml \
+            --bail
+
+      - name: Publish test results
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: test-results.xml
+          fail_on_failure: true
+
+      - name: Upload test report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bruno-test-results
+          path: test-results.xml
+
       - name: Stop services
         if: always()
         run: docker compose down -v
