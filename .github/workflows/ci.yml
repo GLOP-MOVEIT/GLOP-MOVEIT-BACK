@@ -46,30 +46,23 @@ jobs:
       - name: Install Bruno CLI
         run: npm install --ignore-scripts -g @usebruno/cli
 
-      - name: Create test user
+      - name: Create test user (Bruno)
         run: |
-          HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
-            -X POST "http://localhost:8080/auth/signup" \
-            -H "Content-Type: application/json" \
-            -d '{"nickname":"testci","password":"password"}')
-          if [[ "$HTTP_CODE" != "2"* && "$HTTP_CODE" != "409" ]]; then
-            echo "Register failed with HTTP $HTTP_CODE"
-            exit 1
-          fi
+          cd bruno/Auth-Service
+          bru run Signup.bru --env ci --bail || true
 
-      - name: Get JWT token
+      - name: Get JWT token (Bruno)
         run: |
-          RESPONSE=$(curl -sS -X POST "http://localhost:8080/auth/login" \
-            -H "Content-Type: application/json" \
-            -d '{"nickname":"testci","password":"password"}')
-
-          TOKEN=$(echo "$RESPONSE" | jq -r '.token // .jwt // .accessToken // .data.token')
-
+          cd bruno/Auth-Service
+          bru run Login.bru --env ci --reporter-json login-result.json --bail
+          TOKEN=$(jq -r '.results[0].response.body.token // .results[0].response.body.jwt // .results[0].response.body.accessToken // .results[0].response.body.data.token' login-result.json)
           if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Failed to retrieve JWT token. Response was:"
-            echo "$RESPONSE"
+            echo "Failed to retrieve JWT token from Bruno. Response was:"
+            cat login-result.json
             exit 1
           fi
+          echo "::add-mask::$TOKEN"
+          echo "JWT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
 
       - name: Run Bruno tests
         run: |
