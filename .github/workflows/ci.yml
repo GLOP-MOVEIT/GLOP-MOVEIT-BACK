@@ -48,6 +48,6 @@ jobs:
       - name: Wait for app
         run: sleep 15
       - name: Install Bruno CLI
-        run: npm install -g @usebruno/cli
+        run: npm install --ignore-scripts -g @usebruno/cli
       - name: Run Bruno tests
         run: cd bruno && bru run . --env ci
