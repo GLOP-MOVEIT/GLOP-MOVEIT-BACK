@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build services
-        run: docker compose build --quiet
+        run: docker compose build
       - name: Start services
         run: docker compose up -d
       - name: Wait for gateway
@@ -49,11 +49,17 @@ jobs:
           if [ ! -f "bruno/environments/ci.bru" ]; then
             cp bruno/environments/Local.bru bruno/environments/ci.bru
           fi
+      - name: Create test user
+        run: |
+          curl -sS -X POST "http://localhost:8080/auth/register" \
+            -H "Content-Type: application/json" \
+            -d '{"nickname":"testci","password":"password"}'
+
       - name: Get JWT token
         run: |
           TOKEN=$(curl -sS -X POST "http://localhost:8080/auth/login" \
             -H "Content-Type: application/json" \
-            -d '{"nickname":"Julien","password":"password"}' \
+            -d '{"nickname":"testci","password":"password"}' \
             | jq -r '.token // .jwt // .accessToken // .data.token')
 
           if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
