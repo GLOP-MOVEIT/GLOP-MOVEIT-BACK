@@ -4,6 +4,7 @@ import com.moveit.user.dto.CoverLetter;
 import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
+import com.moveit.user.dto.User;
 import com.moveit.user.entity.RequestEntity;
 import com.moveit.user.entity.RoleEntity;
 import com.moveit.user.entity.UserEntity;
@@ -90,6 +91,11 @@ class RequestServiceTest {
         testRequest = new Request();
         testRequest.setRequestId(1);
         testRequest.setRequestStatus(RequestStatus.PENDING);
+        User user = new User();
+        user.setUserId(1);
+        user.setFirstName("John");
+        user.setSurname("Doe");
+        testRequest.setUser(user);
     }
 
     @Test
@@ -106,6 +112,8 @@ class RequestServiceTest {
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().getFirst().getRequestId()).isEqualTo(1);
+        assertThat(result.getContent().getFirst().getUser()).isNotNull();
+        assertThat(result.getContent().getFirst().getUser().getUserId()).isEqualTo(1);
 
         verify(requestRepository).findAll(pageable);
         verify(requestMapper).toDto(testRequestEntity);
@@ -138,6 +146,8 @@ class RequestServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getRequestId()).isEqualTo(1);
         assertThat(result.getRequestStatus()).isEqualTo(RequestStatus.PENDING);
+        assertThat(result.getUser()).isNotNull();
+        assertThat(result.getUser().getUserId()).isEqualTo(1);
 
         verify(requestRepository).findById(1);
         verify(requestMapper).toDto(testRequestEntity);
@@ -221,6 +231,10 @@ class RequestServiceTest {
         Request volunteerRequest = new Request();
         volunteerRequest.setRequestId(2);
         volunteerRequest.setRequestStatus(RequestStatus.PENDING);
+        User user = new User();
+        user.setUserId(1);
+        user.setFirstName("John");
+        volunteerRequest.setUser(user);
 
         when(userService.getUserEntityById(1)).thenReturn(testUser);
         when(requestRepository.existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING)).thenReturn(false);

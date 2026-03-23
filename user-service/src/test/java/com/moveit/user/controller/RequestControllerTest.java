@@ -6,6 +6,7 @@ import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
 import com.moveit.user.dto.Role;
+import com.moveit.user.dto.User;
 import com.moveit.user.exception.GlobalExceptionHandler;
 import com.moveit.user.exception.PendingRequestAlreadyExistsException;
 import com.moveit.user.exception.RequestNotFoundException;
@@ -56,9 +57,15 @@ class RequestControllerTest {
                 .build();
 
         Role role = new Role("ATHLETE");
+        User user = new User();
+        user.setUserId(1);
+        user.setFirstName("John");
+        user.setSurname("Doe");
+        user.setEmail("john.doe@example.com");
         testRequest = new Request();
         testRequest.setRequestId(1);
         testRequest.setRequestStatus(RequestStatus.PENDING);
+        testRequest.setUser(user);
         testRequest.setRole(role);
 
         rejectRequest = new RejectRequest("Invalid documentation");
@@ -78,6 +85,8 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].requestId").value(1))
                 .andExpect(jsonPath("$.content[0].requestStatus").value("PENDING"))
+                .andExpect(jsonPath("$.content[0].user.userId").value(1))
+                .andExpect(jsonPath("$.content[0].user.firstName").value("John"))
                 .andExpect(jsonPath("$.content[0].role.name").value("ATHLETE"))
                 .andExpect(jsonPath("$.totalElements").value(1));
 
@@ -110,6 +119,8 @@ class RequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value(1))
                 .andExpect(jsonPath("$.requestStatus").value("PENDING"))
+                .andExpect(jsonPath("$.user.userId").value(1))
+                .andExpect(jsonPath("$.user.firstName").value("John"))
                 .andExpect(jsonPath("$.role.name").value("ATHLETE"));
 
         verify(requestService).getRequestById(1);
@@ -153,8 +164,12 @@ class RequestControllerTest {
     void requestToVolunteer_ShouldCreateVolunteerRequest() throws Exception {
         Role volunteerRole = new Role("VOLUNTEER");
         Request volunteerRequest = new Request();
+        User user = new User();
+        user.setUserId(1);
+        user.setFirstName("John");
         volunteerRequest.setRequestId(2);
         volunteerRequest.setRequestStatus(RequestStatus.PENDING);
+        volunteerRequest.setUser(user);
         volunteerRequest.setRole(volunteerRole);
 
         CoverLetter coverLetter = new CoverLetter("My motivation");
@@ -167,6 +182,8 @@ class RequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value(2))
                 .andExpect(jsonPath("$.requestStatus").value("PENDING"))
+                .andExpect(jsonPath("$.user.userId").value(1))
+                .andExpect(jsonPath("$.user.firstName").value("John"))
                 .andExpect(jsonPath("$.role.name").value("VOLUNTEER"));
 
         verify(requestService).createVolunteerRequest(eq(1), any(CoverLetter.class));
