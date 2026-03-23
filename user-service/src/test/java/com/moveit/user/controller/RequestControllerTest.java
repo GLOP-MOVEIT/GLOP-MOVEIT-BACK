@@ -6,7 +6,9 @@ import com.moveit.user.dto.RejectRequest;
 import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
 import com.moveit.user.dto.Role;
+import com.moveit.user.dto.User;
 import com.moveit.user.exception.GlobalExceptionHandler;
+import com.moveit.user.exception.PendingRequestAlreadyExistsException;
 import com.moveit.user.exception.RequestNotFoundException;
 import com.moveit.user.service.RequestService;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,9 +57,15 @@ class RequestControllerTest {
                 .build();
 
         Role role = new Role("ATHLETE");
+        User user = new User();
+        user.setUserId(1);
+        user.setFirstName("John");
+        user.setSurname("Doe");
+        user.setEmail("john.doe@example.com");
         testRequest = new Request();
         testRequest.setRequestId(1);
         testRequest.setRequestStatus(RequestStatus.PENDING);
+        testRequest.setUser(user);
         testRequest.setRole(role);
 
         rejectRequest = new RejectRequest("Invalid documentation");
@@ -77,6 +85,8 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].requestId").value(1))
                 .andExpect(jsonPath("$.content[0].requestStatus").value("PENDING"))
+                .andExpect(jsonPath("$.content[0].user.userId").value(1))
+                .andExpect(jsonPath("$.content[0].user.firstName").value("John"))
                 .andExpect(jsonPath("$.content[0].role.name").value("ATHLETE"))
                 .andExpect(jsonPath("$.totalElements").value(1));
 
@@ -109,6 +119,8 @@ class RequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value(1))
                 .andExpect(jsonPath("$.requestStatus").value("PENDING"))
+                .andExpect(jsonPath("$.user.userId").value(1))
+                .andExpect(jsonPath("$.user.firstName").value("John"))
                 .andExpect(jsonPath("$.role.name").value("ATHLETE"));
 
         verify(requestService).getRequestById(1);
@@ -138,11 +150,26 @@ class RequestControllerTest {
     }
 
     @Test
+    void requestToAthlete_ShouldReturnConflict_WhenPendingRequestAlreadyExists() throws Exception {
+        when(requestService.createAthleteRequest(1))
+                .thenThrow(new PendingRequestAlreadyExistsException("User with id 1 already has a pending promotion request"));
+
+        mockMvc.perform(post("/requests/athlete/1"))
+                .andExpect(status().isConflict());
+
+        verify(requestService).createAthleteRequest(1);
+    }
+
+    @Test
     void requestToVolunteer_ShouldCreateVolunteerRequest() throws Exception {
         Role volunteerRole = new Role("VOLUNTEER");
         Request volunteerRequest = new Request();
+        User user = new User();
+        user.setUserId(1);
+        user.setFirstName("John");
         volunteerRequest.setRequestId(2);
         volunteerRequest.setRequestStatus(RequestStatus.PENDING);
+        volunteerRequest.setUser(user);
         volunteerRequest.setRole(volunteerRole);
 
         CoverLetter coverLetter = new CoverLetter("My motivation");
@@ -155,7 +182,24 @@ class RequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value(2))
                 .andExpect(jsonPath("$.requestStatus").value("PENDING"))
+                .andExpect(jsonPath("$.user.userId").value(1))
+                .andExpect(jsonPath("$.user.firstName").value("John"))
                 .andExpect(jsonPath("$.role.name").value("VOLUNTEER"));
+
+        verify(requestService).createVolunteerRequest(eq(1), any(CoverLetter.class));
+    }
+
+    @Test
+    void requestToVolunteer_ShouldReturnConflict_WhenPendingRequestAlreadyExists() throws Exception {
+        CoverLetter coverLetter = new CoverLetter("My motivation");
+
+        when(requestService.createVolunteerRequest(eq(1), any(CoverLetter.class)))
+                .thenThrow(new PendingRequestAlreadyExistsException("User with id 1 already has a pending promotion request"));
+
+        mockMvc.perform(post("/requests/volunteer/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(coverLetter)))
+                .andExpect(status().isConflict());
 
         verify(requestService).createVolunteerRequest(eq(1), any(CoverLetter.class));
     }
@@ -185,7 +229,7 @@ class RequestControllerTest {
     void rejectRequest_ShouldRejectRequest_WhenRequestExists() throws Exception {
         doNothing().when(requestService).rejectRequest(eq(1), any(RejectRequest.class));
 
-        mockMvc.perform(get("/requests/reject/1")
+        mockMvc.perform(post("/requests/reject/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rejectRequest)))
                 .andExpect(status().isOk());
@@ -198,7 +242,7 @@ class RequestControllerTest {
         doThrow(new RequestNotFoundException("Request with id 999 not found"))
                 .when(requestService).rejectRequest(eq(999), any(RejectRequest.class));
 
-        mockMvc.perform(get("/requests/reject/999")
+        mockMvc.perform(post("/requests/reject/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rejectRequest)))
                 .andExpect(status().isNotFound());

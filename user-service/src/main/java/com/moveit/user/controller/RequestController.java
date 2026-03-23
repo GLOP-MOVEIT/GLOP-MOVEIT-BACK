@@ -64,7 +64,7 @@ public class RequestController {
     })
     @PostMapping("/volunteer/{userId}")
     public Request requestToVolunteer(@PathVariable Integer userId, @RequestBody CoverLetter coverLetter) {
-        return this.requestService.createVolunteerRequest(userId,  coverLetter);
+        return this.requestService.createVolunteerRequest(userId, coverLetter);
     }
 
     @Operation(summary = "Promouvoir un utilisateur au rôle d'arbitre")
@@ -95,7 +95,7 @@ public class RequestController {
             @ApiResponse(responseCode = "404", description = "Demande de promotion non trouvée", content = @Content()),
             @ApiResponse(responseCode = "500", description = "Erreur interne du serveur", content = @Content())
     })
-    @GetMapping("/reject/{id}")
+    @PostMapping("/reject/{id}")
     public void rejectRequest(@PathVariable Integer id, @RequestBody @Valid RejectRequest rejectRequest) {
         this.requestService.rejectRequest(id, rejectRequest);
     }

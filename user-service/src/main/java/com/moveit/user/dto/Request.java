@@ -12,6 +12,7 @@ public class Request {
     private Integer requestId;
     private RequestStatus requestStatus;
     private String requestRejectionReason;
+    private User user;
     private Role role;
     private String coverLetter;
 }
