@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Start services
-        run: docker compose up -d --build --quiet-pull
+        run: docker compose up -d --build --quiet-pull --wait --wait-timeout 300
 
       - name: Wait for gateway
         run: |
