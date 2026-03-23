@@ -1,6 +1,3 @@
-test {
-  expect response.status == 200 || response.status == 404
-}
 meta {
   name: Reject request
   type: http
@@ -25,4 +22,8 @@ body:json {
   {
     "requestRejectionReason": "On ne veut pas de toi."
   }
+}
+
+test {
+  expect response.status == 200 || response.status == 404
 }

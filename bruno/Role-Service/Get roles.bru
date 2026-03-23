@@ -1,6 +1,3 @@
-test {
-  expect response.status == 200
-}
 meta {
   name: Get roles
   type: http
@@ -15,4 +12,8 @@ get {
 
 auth:bearer {
   token: {{JWT_TOKEN}}
+}
+
+test {
+  expect response.status == 200
 }

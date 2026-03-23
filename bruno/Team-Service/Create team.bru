@@ -1,7 +1,3 @@
-test {
-  expect response.status == 201 || response.status == 200
-  expect response.body.id != null
-}
 meta {
   name: Create team
   type: http
@@ -22,4 +18,9 @@ body:json {
   {
     "name": "Team Alpha"
   }
+}
+
+test {
+  expect response.status == 201 || response.status == 200
+  expect response.body.id != null
 }

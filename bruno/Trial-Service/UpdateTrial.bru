@@ -1,6 +1,3 @@
-test {
-  expect response.status == 200 || response.status == 204
-}
 meta {
   name: UpdateTrial
   type: http
@@ -28,4 +25,8 @@ body:json {
     "roundNumber": 1,
     "position": 1
   }
+}
+
+test {
+  expect response.status == 200 || response.status == 204
 }

@@ -1,6 +1,3 @@
-test {
-  expect response.status == 200
-}
 meta {
   name: GetSubscriptions
   type: http
@@ -16,3 +13,6 @@ auth:bearer {
   token: {{JWT_TOKEN}}
 }
 
+test {
+  expect response.status == 200
+}

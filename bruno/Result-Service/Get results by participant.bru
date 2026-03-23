@@ -1,6 +1,3 @@
-test {
-  expect response.status == 200 || response.status == 404
-}
 meta {
   name: Get results by participant
   type: http
@@ -19,4 +16,8 @@ params:path {
 
 auth:bearer {
   token: {{JWT_TOKEN}}
+}
+
+test {
+  expect response.status == 200 || response.status == 404
 }
