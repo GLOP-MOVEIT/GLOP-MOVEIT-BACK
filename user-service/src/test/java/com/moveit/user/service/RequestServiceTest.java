@@ -7,6 +7,7 @@ import com.moveit.user.dto.RequestStatus;
 import com.moveit.user.entity.RequestEntity;
 import com.moveit.user.entity.RoleEntity;
 import com.moveit.user.entity.UserEntity;
+import com.moveit.user.exception.PendingRequestAlreadyExistsException;
 import com.moveit.user.exception.RequestNotFoundException;
 import com.moveit.user.exception.UserNotASpectatorException;
 import com.moveit.user.mapper.RequestMapper;
@@ -157,6 +158,7 @@ class RequestServiceTest {
     @Test
     void createAthleteRequest_ShouldCreateRequestWithAthleteRole() {
         when(userService.getUserEntityById(1)).thenReturn(testUser);
+        when(requestRepository.existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING)).thenReturn(false);
         when(roleService.getRoleEntityByName("ATHLETE")).thenReturn(athleteRole);
         when(requestRepository.save(any(RequestEntity.class))).thenReturn(testRequestEntity);
         when(requestMapper.toDto(testRequestEntity)).thenReturn(testRequest);
@@ -175,6 +177,7 @@ class RequestServiceTest {
         assertThat(savedEntity.getRole()).isEqualTo(athleteRole);
 
         verify(userService).getUserEntityById(1);
+        verify(requestRepository).existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING);
         verify(roleService).getRoleEntityByName("ATHLETE");
         verify(requestMapper).toDto(testRequestEntity);
     }
@@ -193,6 +196,20 @@ class RequestServiceTest {
     }
 
     @Test
+    void createAthleteRequest_ShouldThrowException_WhenPendingRequestAlreadyExists() {
+        when(userService.getUserEntityById(1)).thenReturn(testUser);
+        when(requestRepository.existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING)).thenReturn(true);
+
+        assertThatThrownBy(() -> requestService.createAthleteRequest(1))
+                .isInstanceOf(PendingRequestAlreadyExistsException.class)
+                .hasMessage("User with id 1 already has a pending promotion request");
+
+        verify(userService).getUserEntityById(1);
+        verify(requestRepository).existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING);
+        verify(requestRepository, never()).save(any());
+    }
+
+    @Test
     void createVolunteerRequest_ShouldCreateRequestWithVolunteerRole() {
         RequestEntity volunteerRequestEntity = new RequestEntity();
         volunteerRequestEntity.setRequestId(2);
@@ -206,6 +223,7 @@ class RequestServiceTest {
         volunteerRequest.setRequestStatus(RequestStatus.PENDING);
 
         when(userService.getUserEntityById(1)).thenReturn(testUser);
+        when(requestRepository.existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING)).thenReturn(false);
         when(roleService.getRoleEntityByName("VOLUNTEER")).thenReturn(volunteerRole);
         when(requestRepository.save(any(RequestEntity.class))).thenReturn(volunteerRequestEntity);
         when(requestMapper.toDto(volunteerRequestEntity)).thenReturn(volunteerRequest);
@@ -226,6 +244,7 @@ class RequestServiceTest {
         assertThat(savedEntity.getCoverLetter()).isEqualTo("My motivation");
 
         verify(userService).getUserEntityById(1);
+        verify(requestRepository).existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING);
         verify(roleService).getRoleEntityByName("VOLUNTEER");
         verify(requestMapper).toDto(volunteerRequestEntity);
     }
@@ -242,6 +261,22 @@ class RequestServiceTest {
                 .hasMessage("User with id 1 is not a spectator");
 
         verify(userService).getUserEntityById(1);
+        verify(requestRepository, never()).save(any());
+    }
+
+    @Test
+    void createVolunteerRequest_ShouldThrowException_WhenPendingRequestAlreadyExists() {
+        CoverLetter coverLetter = new CoverLetter("My motivation");
+
+        when(userService.getUserEntityById(1)).thenReturn(testUser);
+        when(requestRepository.existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING)).thenReturn(true);
+
+        assertThatThrownBy(() -> requestService.createVolunteerRequest(1, coverLetter))
+                .isInstanceOf(PendingRequestAlreadyExistsException.class)
+                .hasMessage("User with id 1 already has a pending promotion request");
+
+        verify(userService).getUserEntityById(1);
+        verify(requestRepository).existsByUserUserIdAndRequestStatus(1, RequestStatus.PENDING);
         verify(requestRepository, never()).save(any());
     }
 

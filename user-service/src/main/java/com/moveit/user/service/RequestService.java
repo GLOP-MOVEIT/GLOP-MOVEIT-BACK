@@ -6,6 +6,7 @@ import com.moveit.user.dto.Request;
 import com.moveit.user.dto.RequestStatus;
 import com.moveit.user.entity.RequestEntity;
 import com.moveit.user.entity.UserEntity;
+import com.moveit.user.exception.PendingRequestAlreadyExistsException;
 import com.moveit.user.exception.RequestNotFoundException;
 import com.moveit.user.exception.UserNotASpectatorException;
 import com.moveit.user.mapper.RequestMapper;
@@ -40,6 +41,7 @@ public class RequestService {
 
     public Request createAthleteRequest(Integer userId) {
         var user = this.verifyUserIsASpectator(userId);
+        this.ensureNoPendingRequest(userId);
         RequestEntity entity = new RequestEntity();
         entity.setRequestStatus(RequestStatus.PENDING);
         entity.setUser(user);
@@ -49,6 +51,7 @@ public class RequestService {
 
     public Request createVolunteerRequest(Integer userId, CoverLetter coverLetter) {
         var user = this.verifyUserIsASpectator(userId);
+        this.ensureNoPendingRequest(userId);
         RequestEntity entity = new RequestEntity();
         entity.setRequestStatus(RequestStatus.PENDING);
         entity.setUser(user);
@@ -92,5 +95,13 @@ public class RequestService {
             throw new UserNotASpectatorException("User with id " + userId + " is not a spectator");
         }
         return user;
+    }
+
+    private void ensureNoPendingRequest(Integer userId) {
+        if (this.requestRepository.existsByUserUserIdAndRequestStatus(userId, RequestStatus.PENDING)) {
+            throw new PendingRequestAlreadyExistsException(
+                    "User with id " + userId + " already has a pending promotion request"
+            );
+        }
     }
 }

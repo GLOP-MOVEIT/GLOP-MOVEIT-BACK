@@ -26,6 +26,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return createProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(), "The requested request does not exist");
     }
 
+    @ExceptionHandler(PendingRequestAlreadyExistsException.class)
+    public ProblemDetail handlePendingRequestAlreadyExistsException(PendingRequestAlreadyExistsException ex) {
+        return createProblemDetail(HttpStatus.CONFLICT.value(), ex.getMessage(), "The user already has a pending promotion request");
+    }
+
     @ExceptionHandler(TicketNotFoundException.class)
     public ProblemDetail handleTicketNotFoundException(TicketNotFoundException ex) {
         return createProblemDetail(HttpStatus.NOT_FOUND.value(), ex.getMessage(), "The requested ticket does not exist");
