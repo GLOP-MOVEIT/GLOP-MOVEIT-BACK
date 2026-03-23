@@ -55,7 +55,7 @@ jobs:
         run: |
           cd bruno
           bru run Auth-Service/Login.bru --env ci --reporter-json login-result.json --bail
-          TOKEN=$(jq -r '.results[0].response.body.token // .results[0].response.body.jwt // .results[0].response.body.accessToken // .results[0].response.body.data.token' login-result.json)
+          TOKEN=$(jq -r '.[0].response.body.token' login-result.json)
           if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
             echo "Failed to retrieve JWT token from Bruno. Response was:"
             cat login-result.json
