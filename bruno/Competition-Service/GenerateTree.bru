@@ -18,5 +18,5 @@ auth:bearer {
   token: {{JWT_TOKEN}}
 }
 tests {
-  expect response.status == 200 || response.status == 201
+  expect(res.status).to.be.oneOf([200, 201]);
 }

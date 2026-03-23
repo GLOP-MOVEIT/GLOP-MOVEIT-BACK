@@ -14,5 +14,5 @@ auth:bearer {
 }
 
 tests {
-  expect response.status == 200 || response.status == 404
+  expect(res.status).to.be.oneOf([200, 404]);
 }

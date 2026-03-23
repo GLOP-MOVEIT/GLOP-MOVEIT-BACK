@@ -33,6 +33,6 @@ body:json {
   }
 }
 
-test {
-  expect response.status == 200 || response.status == 204
+tests {
+  expect(res.status).to.be.oneOf([200, 204]);
 }

@@ -25,6 +25,6 @@ body:json {
   }
 }
 
-test {
-  expect response.status == 200 || response.status == 404
+tests {
+  expect(res.status).to.be.oneOf([200, 404]);
 }

@@ -23,5 +23,5 @@ body:json {
 }
 
 tests {
-  expect response.status == 200 || response.status == 204
+  expect(res.status).to.be.oneOf([200, 204]);
 }
