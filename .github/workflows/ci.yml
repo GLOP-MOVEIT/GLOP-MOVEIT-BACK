@@ -50,4 +50,4 @@ jobs:
       - name: Install Bruno CLI
         run: npm install -g @usebruno/cli
       - name: Run Bruno tests
-        run: bru run bruno/ --env ci
+        run: cd bruno && bru run . --env ci
