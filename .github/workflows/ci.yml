@@ -71,6 +71,7 @@ jobs:
       - name: Run Bruno tests
         run: |
           cd bruno
+          echo "Token length: ${#JWT_TOKEN}"  # debug: vérifier que le token existe
           for dir in Request-Service User-Service Volunteer-Service Team-Service Championship-Service Notification-Service Competition-Service Ticket-Service Role-Service Result-Service Trial-Service; do
             echo "--- Running $dir ---"
             bru run "$dir" -r \
@@ -84,7 +85,7 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          report_paths: test-results.xml
+          report_paths: "test-results-*.xml"
           fail_on_failure: true
 
       - name: Upload test report artifact
@@ -92,7 +93,7 @@ jobs:
         if: always()
         with:
           name: bruno-test-results
-          path: test-results.xml
+          path: test-results-*.xml
 
       - name: Stop services
         if: always()
