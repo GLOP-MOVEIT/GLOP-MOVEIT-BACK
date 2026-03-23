@@ -17,11 +17,6 @@ jobs:
           cache: maven
       - name: Build
         run: mvn clean package -DskipTests
-      - name: Upload jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: target/*.jar
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -41,17 +36,26 @@ jobs:
     needs: unit-tests
     steps:
       - uses: actions/checkout@v4
-      - name: Download jar
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-          path: target/
-      - name: Start application
-        run: java -jar target/*.jar &
-      - name: Wait for app
-        run: sleep 15
+      - name: Start services
+        run: docker compose up -d --build
+      - name: Wait for gateway
+        run: |
+          for i in {1..30}; do
+            if curl -fsS "http://localhost:8080/actuator/health" >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Gateway did not become ready in time"
+          docker compose logs
+          exit 1
       - name: Install Bruno CLI
         run: npm install --ignore-scripts -g @usebruno/cli
+      - name: Ensure Bruno CI environment
+        run: |
+          if [ ! -f "bruno/environments/ci.bru" ]; then
+            cp bruno/environments/Local.bru bruno/environments/ci.bru
+          fi
       - name: Get JWT token
         run: |
           TOKEN=$(curl -sS -X POST "http://localhost:8080/auth/login" \
@@ -67,3 +71,6 @@ jobs:
           echo "JWT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
       - name: Run Bruno tests
         run: cd bruno && bru run . --env ci --env-var JWT_TOKEN="$JWT_TOKEN"
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
