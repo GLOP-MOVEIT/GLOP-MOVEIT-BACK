@@ -6,12 +6,12 @@ meta {
 
 post {
   url: {{URL}}/requests/athlete/:userId
-  body: none
+  body: json
   auth: bearer
 }
 
 params:path {
-  userId: 
+  userId: {{USER_ID}}
 }
 
 auth:bearer {
