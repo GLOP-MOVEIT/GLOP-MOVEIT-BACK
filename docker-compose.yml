@@ -21,6 +21,7 @@ services:
       context: .
       dockerfile: auth-service/Dockerfile
     container_name: moveit-auth-service
+    restart: on-failure:3
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/moveit_auth
       - SPRING_DATASOURCE_USERNAME=postgres
