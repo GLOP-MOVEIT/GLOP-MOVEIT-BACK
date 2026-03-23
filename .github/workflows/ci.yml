@@ -76,7 +76,7 @@ jobs:
             echo "--- Running $dir ---"
             bru run "$dir" -r \
               --env ci \
-              --env-var JWT_TOKEN=$JWT_TOKEN \
+              --env-var "JWT_TOKEN=$JWT_TOKEN" \
               --reporter-junit "../test-results-${dir}.xml" \
           done
 
