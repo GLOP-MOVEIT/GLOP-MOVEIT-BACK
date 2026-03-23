@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Start services
-        run: docker compose up -d --build --quiet-pull --progress=plain
+        run: docker compose up -d --build --quiet-pull
 
       - name: Wait for gateway
         run: |
