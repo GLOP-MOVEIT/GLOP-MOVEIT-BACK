@@ -48,7 +48,7 @@ jobs:
           exit 1
 
       - name: Install Bruno CLI
-        run: npm install --ignore-scripts -g @usebruno/cli
+        run: npm install --ignore-scripts -g @usebruno/cli@1.38.1
 
       - name: Create test user (Bruno)
         run: |
