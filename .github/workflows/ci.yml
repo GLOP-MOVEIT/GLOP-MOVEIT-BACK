@@ -52,5 +52,18 @@ jobs:
         run: sleep 15
       - name: Install Bruno CLI
         run: npm install --ignore-scripts -g @usebruno/cli
+      - name: Get JWT token
+        run: |
+          TOKEN=$(curl -sS -X POST "http://localhost:8080/auth/login" \
+            -H "Content-Type: application/json" \
+            -d '{"nickname":"Julien","password":"password"}' \
+            | jq -r '.token // .jwt // .accessToken // .data.token')
+
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Failed to retrieve JWT token from /auth/login"
+            exit 1
+          fi
+
+          echo "JWT_TOKEN=$TOKEN" >> "$GITHUB_ENV"
       - name: Run Bruno tests
-        run: cd bruno && bru run . --env ci
+        run: cd bruno && bru run . --env ci --env-var JWT_TOKEN="$JWT_TOKEN"
