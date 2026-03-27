@@ -1,6 +1,7 @@
 package com.moveit.user.service;
 
 import com.moveit.user.dto.Ticket;
+import com.moveit.user.dto.TicketVerificationResponse;
 import com.moveit.user.entity.TicketEntity;
 import com.moveit.user.entity.UserEntity;
 import com.moveit.user.exception.TicketNotFoundException;
@@ -63,6 +64,7 @@ class TicketServiceTest {
         testTicketEntity.setTicketNumber("TKT-12345");
         testTicketEntity.setSeatInformation("Section A, Row 5, Seat 10");
         testTicketEntity.setEventDate(Instant.parse("2026-03-15T18:00:00Z"));
+        testTicketEntity.setValidationToken("token-123");
         testTicketEntity.setUser(testUser);
 
         testTicket = new Ticket();
@@ -70,6 +72,7 @@ class TicketServiceTest {
         testTicket.setTicketNumber("TKT-12345");
         testTicket.setSeatInformation("Section A, Row 5, Seat 10");
         testTicket.setEventDate(Instant.parse("2026-03-15T18:00:00Z"));
+        testTicket.setValidationToken("token-123");
     }
 
     @Test
@@ -154,6 +157,7 @@ class TicketServiceTest {
         savedTicketEntity.setTicketNumber("TKT-67890");
         savedTicketEntity.setSeatInformation("Section B, Row 3, Seat 7");
         savedTicketEntity.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
+        savedTicketEntity.setValidationToken("generated-token");
         savedTicketEntity.setUser(testUser);
 
         Ticket savedTicket = new Ticket();
@@ -161,6 +165,7 @@ class TicketServiceTest {
         savedTicket.setTicketNumber("TKT-67890");
         savedTicket.setSeatInformation("Section B, Row 3, Seat 7");
         savedTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
+        savedTicket.setValidationToken("generated-token");
 
         when(userService.getUserEntityById(1)).thenReturn(testUser);
         when(ticketMapper.toEntity(newTicket)).thenReturn(newTicketEntity);
@@ -225,20 +230,24 @@ class TicketServiceTest {
         TicketEntity savedEntity1 = new TicketEntity();
         savedEntity1.setId(3);
         savedEntity1.setTicketNumber("TKT-00001");
+        savedEntity1.setValidationToken("token-1");
         savedEntity1.setUser(testUser);
 
         TicketEntity savedEntity2 = new TicketEntity();
         savedEntity2.setId(4);
         savedEntity2.setTicketNumber("TKT-00002");
+        savedEntity2.setValidationToken("token-2");
         savedEntity2.setUser(testUser);
 
         Ticket saved1 = new Ticket();
         saved1.setId(3);
         saved1.setTicketNumber("TKT-00001");
+        saved1.setValidationToken("token-1");
 
         Ticket saved2 = new Ticket();
         saved2.setId(4);
         saved2.setTicketNumber("TKT-00002");
+        saved2.setValidationToken("token-2");
 
         when(userService.getUserEntityById(1)).thenReturn(testUser);
         when(ticketMapper.toEntity(ticket1)).thenReturn(ticketEntity1);
@@ -257,5 +266,30 @@ class TicketServiceTest {
         verify(userService, times(2)).getUserEntityById(1);
         verify(ticketRepository, times(2)).save(any(TicketEntity.class));
     }
-}
 
+    @Test
+    void verifyTicket_ShouldReturnVerificationResponse_WhenTokenExists() {
+        when(ticketRepository.findByValidationToken("token-123")).thenReturn(Optional.of(testTicketEntity));
+
+        TicketVerificationResponse result = ticketService.verifyTicket("token-123");
+
+        assertThat(result.isValid()).isTrue();
+        assertThat(result.getTicketId()).isEqualTo(1);
+        assertThat(result.getTicketNumber()).isEqualTo("TKT-12345");
+        assertThat(result.getSeatInformation()).isEqualTo("Section A, Row 5, Seat 10");
+        assertThat(result.getEventDate()).isEqualTo(Instant.parse("2026-03-15T18:00:00Z"));
+
+        verify(ticketRepository).findByValidationToken("token-123");
+    }
+
+    @Test
+    void verifyTicket_ShouldThrowTicketNotFoundException_WhenTokenDoesNotExist() {
+        when(ticketRepository.findByValidationToken("missing-token")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> ticketService.verifyTicket("missing-token"))
+                .isInstanceOf(TicketNotFoundException.class)
+                .hasMessage("Ticket with validation token missing-token not found");
+
+        verify(ticketRepository).findByValidationToken("missing-token");
+    }
+}

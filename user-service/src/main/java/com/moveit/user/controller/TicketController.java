@@ -1,6 +1,7 @@
 package com.moveit.user.controller;
 
 import com.moveit.user.dto.Ticket;
+import com.moveit.user.dto.TicketVerificationResponse;
 import com.moveit.user.service.TicketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,6 +42,17 @@ public class TicketController {
     @GetMapping("/{ticketId}/")
     public Ticket getTicket(@PathVariable Integer ticketId) {
         return this.ticketService.getTicketById(ticketId);
+    }
+
+    @Operation(summary = "Vérifier un ticket via son token de validation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ticket vérifié avec succès", content = @Content(schema = @Schema(implementation = TicketVerificationResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Ticket introuvable"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    @GetMapping("/verify/{validationToken}")
+    public TicketVerificationResponse verifyTicket(@PathVariable String validationToken) {
+        return this.ticketService.verifyTicket(validationToken);
     }
 
     @Operation(summary = "Créer un nouveau ticket pour un utilisateur")

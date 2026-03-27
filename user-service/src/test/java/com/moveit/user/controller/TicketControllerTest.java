@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.moveit.user.dto.Ticket;
+import com.moveit.user.dto.TicketVerificationResponse;
 import com.moveit.user.exception.GlobalExceptionHandler;
 import com.moveit.user.exception.TicketNotFoundException;
 import com.moveit.user.exception.UserNotFoundException;
@@ -61,6 +62,7 @@ class TicketControllerTest {
         testTicket.setTicketNumber("TKT-12345");
         testTicket.setSeatInformation("Section A, Row 5, Seat 10");
         testTicket.setEventDate(Instant.parse("2026-03-15T18:00:00Z"));
+        testTicket.setValidationToken("token-123");
     }
 
     @Test
@@ -111,7 +113,8 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.ticketNumber").value("TKT-12345"))
                 .andExpect(jsonPath("$.seatInformation").value("Section A, Row 5, Seat 10"))
-                .andExpect(jsonPath("$.eventDate").value("2026-03-15T18:00:00Z"));
+                .andExpect(jsonPath("$.eventDate").value("2026-03-15T18:00:00Z"))
+                .andExpect(jsonPath("$.validationToken").value("token-123"));
 
         verify(ticketService).getTicketById(1);
     }
@@ -138,6 +141,7 @@ class TicketControllerTest {
         createdTicket.setTicketNumber("TKT-67890");
         createdTicket.setSeatInformation("Section B, Row 3, Seat 7");
         createdTicket.setEventDate(Instant.parse("2026-04-20T19:30:00Z"));
+        createdTicket.setValidationToken("generated-token");
 
         when(ticketService.createTicket(eq(1), any(Ticket.class))).thenReturn(createdTicket);
 
@@ -148,7 +152,8 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.id").value(2))
                 .andExpect(jsonPath("$.ticketNumber").value("TKT-67890"))
                 .andExpect(jsonPath("$.seatInformation").value("Section B, Row 3, Seat 7"))
-                .andExpect(jsonPath("$.eventDate").value("2026-04-20T19:30:00Z"));
+                .andExpect(jsonPath("$.eventDate").value("2026-04-20T19:30:00Z"))
+                .andExpect(jsonPath("$.validationToken").value("generated-token"));
 
         verify(ticketService).createTicket(eq(1), any(Ticket.class));
     }
@@ -169,5 +174,39 @@ class TicketControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(ticketService).createTicket(eq(999), any(Ticket.class));
+    }
+
+    @Test
+    void verifyTicket_ShouldReturnVerificationResponse_WhenTokenExists() throws Exception {
+        TicketVerificationResponse response = new TicketVerificationResponse(
+                1,
+                "TKT-12345",
+                "Section A, Row 5, Seat 10",
+                Instant.parse("2026-03-15T18:00:00Z"),
+                true
+        );
+
+        when(ticketService.verifyTicket("token-123")).thenReturn(response);
+
+        mockMvc.perform(get("/tickets/verify/token-123"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ticketId").value(1))
+                .andExpect(jsonPath("$.ticketNumber").value("TKT-12345"))
+                .andExpect(jsonPath("$.seatInformation").value("Section A, Row 5, Seat 10"))
+                .andExpect(jsonPath("$.eventDate").value("2026-03-15T18:00:00Z"))
+                .andExpect(jsonPath("$.valid").value(true));
+
+        verify(ticketService).verifyTicket("token-123");
+    }
+
+    @Test
+    void verifyTicket_ShouldReturnNotFound_WhenTokenDoesNotExist() throws Exception {
+        when(ticketService.verifyTicket("missing-token"))
+                .thenThrow(new TicketNotFoundException("Ticket with validation token missing-token not found"));
+
+        mockMvc.perform(get("/tickets/verify/missing-token"))
+                .andExpect(status().isNotFound());
+
+        verify(ticketService).verifyTicket("missing-token");
     }
 }

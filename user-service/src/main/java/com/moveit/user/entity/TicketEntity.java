@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 @Entity
+@Table(name = "ticket", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_ticket_validation_token", columnNames = "validation_token")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +23,9 @@ public class TicketEntity {
     private String ticketNumber;
     private String seatInformation;
     private Instant eventDate;
+
+    @Column(name = "validation_token", nullable = false, unique = true, length = 64)
+    private String validationToken;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

@@ -17,6 +17,6 @@ public class Ticket {
     private String ticketNumber;
     @NotBlank(message = "Seat information is required")
     private String seatInformation;
-    @NotBlank(message = "Event date is required")
     private Instant eventDate;
+    private String validationToken;
 }
