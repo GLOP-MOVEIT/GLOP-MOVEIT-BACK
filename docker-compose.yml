@@ -273,6 +273,7 @@ services:
 
 networks:
   moveit-network:
+    name: moveit-network
     driver: bridge
 
 volumes:
