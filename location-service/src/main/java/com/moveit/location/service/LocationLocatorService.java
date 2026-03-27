@@ -25,7 +25,7 @@ public class LocationLocatorService {
     @Value("${USER_SERVICE_URL:http://user-service:8086}")
     private String userServiceBaseUrl;
 
-    @Value("${CHAMPIONSHIP_SERVICE_URL:http://championship-service:8082}")
+    @Value("${CHAMPIONSHIP_SERVICE_URL:http://championship-service:8083}")
     private String championshipServiceBaseUrl;
 
     public LocateResponse locate(LocateRequest request, String authorization) {
