@@ -68,7 +68,7 @@ class TicketControllerTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Ticket> ticketPage = new PageImpl<>(List.of(testTicket), pageable, 1);
 
-        when(ticketService.getTickets(any(Pageable.class))).thenReturn(ticketPage);
+        when(ticketService.getTickets(eq(1), any(Pageable.class))).thenReturn(ticketPage);
 
         mockMvc.perform(get("/tickets/1")
                         .param("page", "0")
@@ -81,7 +81,7 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.content[0].eventDate").value("2026-03-15T18:00:00Z"))
                 .andExpect(jsonPath("$.totalElements").value(1));
 
-        verify(ticketService).getTickets(any(Pageable.class));
+        verify(ticketService).getTickets(eq(1), any(Pageable.class));
     }
 
     @Test
@@ -89,7 +89,7 @@ class TicketControllerTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Ticket> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-        when(ticketService.getTickets(any(Pageable.class))).thenReturn(emptyPage);
+        when(ticketService.getTickets(eq(1), any(Pageable.class))).thenReturn(emptyPage);
 
         mockMvc.perform(get("/tickets/1")
                         .param("page", "0")
@@ -99,7 +99,7 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.content").isEmpty())
                 .andExpect(jsonPath("$.totalElements").value(0));
 
-        verify(ticketService).getTickets(any(Pageable.class));
+        verify(ticketService).getTickets(eq(1), any(Pageable.class));
     }
 
     @Test

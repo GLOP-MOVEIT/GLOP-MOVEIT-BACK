@@ -77,10 +77,10 @@ class TicketServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<TicketEntity> ticketEntityPage = new PageImpl<>(List.of(testTicketEntity), pageable, 1);
 
-        when(ticketRepository.findAll(pageable)).thenReturn(ticketEntityPage);
+        when(ticketRepository.findByUserUserId(1, pageable)).thenReturn(ticketEntityPage);
         when(ticketMapper.toDto(testTicketEntity)).thenReturn(testTicket);
 
-        Page<Ticket> result = ticketService.getTickets(pageable);
+        Page<Ticket> result = ticketService.getTickets(1, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
@@ -88,7 +88,7 @@ class TicketServiceTest {
         assertThat(result.getContent().getFirst().getId()).isEqualTo(1);
         assertThat(result.getContent().getFirst().getTicketNumber()).isEqualTo("TKT-12345");
 
-        verify(ticketRepository).findAll(pageable);
+        verify(ticketRepository).findByUserUserId(1, pageable);
         verify(ticketMapper).toDto(testTicketEntity);
     }
 
@@ -97,15 +97,15 @@ class TicketServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<TicketEntity> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-        when(ticketRepository.findAll(pageable)).thenReturn(emptyPage);
+        when(ticketRepository.findByUserUserId(1, pageable)).thenReturn(emptyPage);
 
-        Page<Ticket> result = ticketService.getTickets(pageable);
+        Page<Ticket> result = ticketService.getTickets(1, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isZero();
 
-        verify(ticketRepository).findAll(pageable);
+        verify(ticketRepository).findByUserUserId(1, pageable);
         verify(ticketMapper, never()).toDto(any());
     }
 

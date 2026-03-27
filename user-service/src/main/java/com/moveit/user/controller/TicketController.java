@@ -29,7 +29,7 @@ public class TicketController {
     })
     @GetMapping("/{userId}")
     public Page<Ticket> getTickets(@PathVariable Integer userId, Pageable pageable) {
-        return this.ticketService.getTickets(pageable);
+        return this.ticketService.getTickets(userId, pageable);
     }
 
     @Operation(summary = "Récupérer un ticket par ID pour un utilisateur")

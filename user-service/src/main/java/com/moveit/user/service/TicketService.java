@@ -19,8 +19,8 @@ public class TicketService {
     private final UserService userService;
     private final TicketMapper ticketMapper;
 
-    public Page<Ticket> getTickets(Pageable pageable) {
-        return this.ticketRepository.findAll(pageable)
+    public Page<Ticket> getTickets(Integer userId, Pageable pageable) {
+        return this.ticketRepository.findByUserUserId(userId, pageable)
                 .map(this.ticketMapper::toDto);
     }
 
